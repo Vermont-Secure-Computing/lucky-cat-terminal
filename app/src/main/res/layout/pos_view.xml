@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#EEE8F1">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@android:color/transparent"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/logo"
+            android:contentDescription="Logo"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/headerText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="My POS Application"
+            android:textSize="20sp"
+            android:textColor="#000000" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginTop="16dp"
+        android:padding="16dp"
+        android:background="#490282">
+
+        <TextView
+            android:id="@+id/aboveText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="Input Amount"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="2dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Spinner
+                android:id="@+id/currencySpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:spinnerMode="dropdown" />
+
+            <TextView
+                android:id="@+id/itemPriceInput"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="0.00"
+                android:textSize="24sp"
+                android:textColor="#FFFFFF"
+                android:paddingStart="8dp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:columnCount="4"
+        android:rowCount="6">
+
+        <Button android:id="@+id/btn1" style="@style/CalcButton" android:text="1" android:layout_columnWeight="1" />
+        <Button android:id="@+id/btn2" style="@style/CalcButton" android:text="2" android:layout_columnWeight="1" />
+        <Button android:id="@+id/btn3" style="@style/CalcButton" android:text="3" android:layout_columnWeight="1" />
+        <Button android:id="@+id/btnDel" style="@style/CalcButton" android:text="DEL" android:layout_columnWeight="1" />
+
+        <Button android:id="@+id/btn4" style="@style/CalcButton" android:text="4" android:layout_columnWeight="1" />
+        <Button android:id="@+id/btn5" style="@style/CalcButton" android:text="5" android:layout_columnWeight="1" />
+        <Button android:id="@+id/btn6" style="@style/CalcButton" android:text="6" android:layout_columnWeight="1" />
+        <Button android:id="@+id/btnClear" style="@style/CalcButton" android:text="Clr" android:layout_columnWeight="1" />
+
+        <Button android:id="@+id/btn7" style="@style/CalcButton" android:text="7" android:layout_columnWeight="1" />
+        <Button android:id="@+id/btn8" style="@style/CalcButton" android:text="8" android:layout_columnWeight="1" />
+        <Button android:id="@+id/btn9" style="@style/CalcButton" android:text="9" android:layout_columnWeight="1" />
+
+        <Button
+            android:id="@+id/btnEnter"
+            style="@style/CalcButton"
+            android:text="↵"
+            android:textSize="30sp"
+            android:layout_rowSpan="2"
+            android:layout_height="0dp"
+            android:layout_gravity="fill_vertical"
+            android:layout_width="0dp"
+            android:layout_columnWeight="1" />
+
+        <Button android:id="@+id/btn00" style="@style/CalcButton" android:text="00" android:layout_columnWeight="1" />
+        <Button android:id="@+id/btn0" style="@style/CalcButton" android:text="0" android:layout_columnWeight="1" />
+        <Button android:id="@+id/btnDot" style="@style/CalcButton" android:text="." android:layout_columnWeight="1" />
+
+    </GridLayout>
+
+</LinearLayout>

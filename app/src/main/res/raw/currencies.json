@@ -1,0 +1,12 @@
+[
+  {"code": "USD", "symbol": "$"},
+  {"code": "EUR", "symbol": "€"},
+  {"code": "JPY", "symbol": "¥"},
+  {"code": "GBP", "symbol": "£"},
+  {"code": "AUD", "symbol": "A$"},
+  {"code": "CAD", "symbol": "C$"},
+  {"code": "CHF", "symbol": "CHF"},
+  {"code": "CNY", "symbol": "¥"},
+  {"code": "SEK", "symbol": "kr"},
+  {"code": "NZD", "symbol": "NZ$"}
+]

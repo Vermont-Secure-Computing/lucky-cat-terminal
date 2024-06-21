@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.home)
+        setContentView(POSView(this))
 
 //        textView1 = findViewById(R.id.textView1)
 //        textView2 = findViewById(R.id.textView2)
