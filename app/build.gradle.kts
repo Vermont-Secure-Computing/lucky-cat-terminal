@@ -46,6 +46,8 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.card.view)
     implementation(libs.grid.layout)
+    implementation(libs.zxing)
+    implementation(libs.zxing.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

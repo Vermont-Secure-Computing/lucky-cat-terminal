@@ -8,5 +8,13 @@
   {"code": "CHF", "symbol": "CHF"},
   {"code": "CNY", "symbol": "¥"},
   {"code": "SEK", "symbol": "kr"},
-  {"code": "NZD", "symbol": "NZ$"}
+  {"code": "NZD", "symbol": "NZ$"},
+  {"code": "BTC", "symbol": "₿"},
+  {"code": "LTC", "symbol": "Ł"},
+  {"code": "DASH", "symbol": "Ð"},
+  {"code": "DOGE", "symbol": "Ð"},
+  {"code": "ETH", "symbol": "Ξ"},
+  {"code": "USDT", "symbol": "₮"},
+  {"code": "XMR", "symbol": "ɱ"},
+  {"code":  "LOG", "symbol": "木"}
 ]

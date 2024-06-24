@@ -19,6 +19,7 @@ class POSView @JvmOverloads constructor(
     private lateinit var currencySpinner: Spinner
     private var currentInput = ""
     private var currentCurrencySymbol = "$"
+    private var currentCurrencyCode = ""
 
     init {
         LayoutInflater.from(context).inflate(R.layout.pos_view, this, true)
@@ -42,7 +43,8 @@ class POSView @JvmOverloads constructor(
     }
 
     private fun loadCurrencies() {
-        val currencies = mutableListOf<String>()
+        val currencySymbols = mutableListOf<String>()
+        val currencyCodes = mutableListOf<String>()
         try {
             val inputStream: InputStream = resources.openRawResource(R.raw.currencies)
             val json = inputStream.bufferedReader().use { it.readText() }
@@ -51,20 +53,22 @@ class POSView @JvmOverloads constructor(
             for (i in 0 until jsonArray.length()) {
                 val jsonObject = jsonArray.getJSONObject(i)
                 val currencySymbol = jsonObject.getString("symbol")
-                currencies.add(currencySymbol)
+                val currencyCode = jsonObject.getString("code")
+                currencySymbols.add(currencySymbol)
+                currencyCodes.add(currencyCode)
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
 
-        val adapter = ArrayAdapter(context, R.layout.spinner_item_selected, currencies)
+        val adapter = ArrayAdapter(context, R.layout.spinner_item_selected, currencySymbols)
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         currencySpinner.adapter = adapter
 
         currencySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedCurrency = currencies[position]
-                currentCurrencySymbol = selectedCurrency
+                currentCurrencySymbol = currencySymbols[position]
+                currentCurrencyCode = currencyCodes[position]
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
@@ -93,10 +97,11 @@ class POSView @JvmOverloads constructor(
     }
 
     private fun appendToInput(value: String) {
+        val decimalPlaces = if (currentCurrencyCode in listOf("BTC", "LTC", "DASH", "DOGE", "ETH", "USDT", "XMR", "LOG")) 6 else 2
         if (currentInput.contains(".")) {
             val parts = currentInput.split(".")
-            if (parts.size > 1 && parts[1].length >= 2) {
-                // Already has 2 decimal places, do nothing
+            if (parts.size > 1 && parts[1].length >= decimalPlaces) {
+                // Already has the maximum decimal places, do nothing
                 return
             }
         }
@@ -108,15 +113,16 @@ class POSView @JvmOverloads constructor(
     }
 
     private fun confirmPrice() {
+        val decimalPlaces = if (currentCurrencyCode in listOf("BTC", "LTC", "DASH", "DOGE", "ETH", "USDT", "XMR", "LOG")) 6 else 2
         if (currentInput.isNotEmpty()) {
             if (!currentInput.contains(".")) {
-                currentInput += ".00"
+                currentInput += "." + "0".repeat(decimalPlaces)
             } else {
                 val parts = currentInput.split(".")
                 if (parts.size == 1 || parts[1].isEmpty()) {
-                    currentInput += "00"
-                } else if (parts[1].length == 1) {
-                    currentInput += "0"
+                    currentInput += "0".repeat(decimalPlaces)
+                } else if (parts[1].length < decimalPlaces) {
+                    currentInput += "0".repeat(decimalPlaces - parts[1].length)
                 }
             }
 

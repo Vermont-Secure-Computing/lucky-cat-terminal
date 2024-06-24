@@ -22,6 +22,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".PriceConfirmActivity" />
+        <activity android:name=".CryptoOptionActivity" />
+        <activity android:name=".GenerateQRActivity" />
     </application>
 
 </manifest>

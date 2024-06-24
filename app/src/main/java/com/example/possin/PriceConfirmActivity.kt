@@ -1,6 +1,8 @@
 package com.example.possin
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
@@ -13,5 +15,12 @@ class PriceConfirmActivity : AppCompatActivity() {
         val price = intent.getStringExtra("PRICE") ?: "0.00"
         val priceTextView: TextView = findViewById(R.id.priceTextView)
         priceTextView.text = price
+
+        val btnConfirm: Button = findViewById(R.id.btnConfirm)
+        btnConfirm.setOnClickListener {
+            val intent = Intent(this, CryptoOptionActivity::class.java)
+            intent.putExtra("PRICE", price)
+            startActivity(intent)
+        }
     }
 }

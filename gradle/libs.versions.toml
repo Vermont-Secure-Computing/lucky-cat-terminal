@@ -13,6 +13,8 @@ bitcoinj = "0.15.10"
 guava = "30.1.1-android"
 card-view = "1.0.0"
 grid-layout = "1.0.0"
+zxing = "3.4.1"
+zxing-android = "4.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -27,6 +29,8 @@ bitcoinj = { group = "org.bitcoinj", name = "bitcoinj-core", version.ref = "bitc
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 card-view = { group = "androidx.cardview", name = "cardview", version.ref = "card-view"}
 grid-layout = { group = "androidx.gridlayout", name = "gridlayout", version.ref = "grid-layout"}
+zxing = { group = "com.google.zxing", name = "core", version.ref = "zxing"}
+zxing-android = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxing-android"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
