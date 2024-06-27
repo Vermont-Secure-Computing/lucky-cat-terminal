@@ -15,6 +15,11 @@ card-view = "1.0.0"
 grid-layout = "1.0.0"
 zxing = "3.4.1"
 zxing-android = "4.2.0"
+retrofit = "2.9.0"
+retrofit2 = "2.9.0"
+okhttp = "4.9.3"
+okhttp3 = "4.9.3"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -31,6 +36,10 @@ card-view = { group = "androidx.cardview", name = "cardview", version.ref = "car
 grid-layout = { group = "androidx.gridlayout", name = "gridlayout", version.ref = "grid-layout"}
 zxing = { group = "com.google.zxing", name = "core", version.ref = "zxing"}
 zxing-android = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxing-android"}
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit"}
+retrofit2 = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit2"}
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp"}
+okhttp3 = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp3"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

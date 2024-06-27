@@ -41,44 +41,44 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun generateBitcoinAddress(): String {
-        try {
-            // Replace with your xpub
-            val xPub = "xpub661MyMwAqRbcGFHkiswngcM4zmSu78tnSd5Mp1Kvc5DoQwtkfxuM6gqpcYADkRUSMmmu6p3sU9UGMKNRHXepDf7mwFFzGWDgd95X35cGuNz"
-
-            // Initialize Bitcoin Manage
-            val bitcoinManager = BitcoinManager(xPub)
-
-
-            // Derive the key at the specified index
-            val index = 1 // Change the index as needed for different addresses
-            val address = bitcoinManager.getAddress(index)
-
-            // Print or use the derived address
-            return address
-        } catch (e: Exception) {
-            return "Something went wrong"
-        }
-    }
-
-    private fun generateLitecoinAddress(): String {
-        try {
-            // Replace with your xpub
-            val xPub = "xpub661MyMwAqRbcGFHkiswngcM4zmSu78tnSd5Mp1Kvc5DoQwtkfxuM6gqpcYADkRUSMmmu6p3sU9UGMKNRHXepDf7mwFFzGWDgd95X35cGuNz"
-
-            // Initialize Bitcoin Manage
-            val litecoinManager = LitecoinManager(xPub)
-
-
-            // Derive the key at the specified index
-            val index = 1 // Change the index as needed for different addresses
-            val address = litecoinManager.getAddress(index)
-
-            // Print or use the derived address
-            return address
-        } catch (e: Exception) {
-            return "Something went wrong"
-        }
-    }
+//    private fun generateBitcoinAddress(): String {
+//        try {
+//            // Replace with your xpub
+//            val xPub = "xpub661MyMwAqRbcGFHkiswngcM4zmSu78tnSd5Mp1Kvc5DoQwtkfxuM6gqpcYADkRUSMmmu6p3sU9UGMKNRHXepDf7mwFFzGWDgd95X35cGuNz"
+//
+//            // Initialize Bitcoin Manage
+//            val bitcoinManager = BitcoinManager(xPub)
+//
+//
+//            // Derive the key at the specified index
+//            val index = 1 // Change the index as needed for different addresses
+//            val address = bitcoinManager.getAddress(index)
+//
+//            // Print or use the derived address
+//            return address
+//        } catch (e: Exception) {
+//            return "Something went wrong"
+//        }
+//    }
+//
+//    private fun generateLitecoinAddress(): String {
+//        try {
+//            // Replace with your xpub
+//            val xPub = "xpub661MyMwAqRbcGFHkiswngcM4zmSu78tnSd5Mp1Kvc5DoQwtkfxuM6gqpcYADkRUSMmmu6p3sU9UGMKNRHXepDf7mwFFzGWDgd95X35cGuNz"
+//
+//            // Initialize Bitcoin Manage
+//            val litecoinManager = LitecoinManager(xPub)
+//
+//
+//            // Derive the key at the specified index
+//            val index = 1 // Change the index as needed for different addresses
+//            val address = litecoinManager.getAddress(index)
+//
+//            // Print or use the derived address
+//            return address
+//        } catch (e: Exception) {
+//            return "Something went wrong"
+//        }
+//    }
 
 }

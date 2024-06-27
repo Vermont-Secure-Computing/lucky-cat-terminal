@@ -13,6 +13,7 @@ class PriceConfirmActivity : AppCompatActivity() {
         setContentView(R.layout.price_confirm)
 
         val price = intent.getStringExtra("PRICE") ?: "0.00"
+        val currencyCode = intent.getStringExtra("CURRENCY_CODE") ?: "USD"
         val priceTextView: TextView = findViewById(R.id.priceTextView)
         priceTextView.text = price
 
@@ -20,6 +21,7 @@ class PriceConfirmActivity : AppCompatActivity() {
         btnConfirm.setOnClickListener {
             val intent = Intent(this, CryptoOptionActivity::class.java)
             intent.putExtra("PRICE", price)
+            intent.putExtra("CURRENCY_CODE", currencyCode)
             startActivity(intent)
         }
     }

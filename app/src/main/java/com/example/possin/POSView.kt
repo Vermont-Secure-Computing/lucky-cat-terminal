@@ -128,6 +128,7 @@ class POSView @JvmOverloads constructor(
 
             val intent = Intent(context, PriceConfirmActivity::class.java)
             intent.putExtra("PRICE", "$currentCurrencySymbol$currentInput")
+            intent.putExtra("CURRENCY_CODE", currentCurrencyCode)
             context.startActivity(intent)
         }
     }
