@@ -8,6 +8,9 @@ import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.crypto.HDKeyDerivation
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.script.Script
+import org.bitcoinj.script.ScriptBuilder
+import org.bitcoinj.crypto.ChildNumber
+import org.bitcoinj.core.SegwitAddress
 
 class BitcoinManager(private val context: Context, private val xPub: String) {
 
@@ -32,9 +35,18 @@ class BitcoinManager(private val context: Context, private val xPub: String) {
 
     private fun deriveAddress(index: Int): String {
         Log.d("BTC", "Bitcoin address index $index")
-        val receivingKey = HDKeyDerivation.deriveChildKey(accountKey, index)
-        val address = Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH)
-        return address.toString()
+        val receivingKey = deriveKey(accountKey, index)
+
+        // Create a P2WPKH (Pay to Witness Public Key Hash) address
+        val segwitAddress = SegwitAddress.fromKey(params, receivingKey)
+        Log.d("ADDRESS", segwitAddress.toString())
+        return segwitAddress.toString()
+    }
+
+    private fun deriveKey(masterKey: DeterministicKey, index: Int): DeterministicKey {
+        // Use non-hardened derivation path m/0/index
+        val changeKey = HDKeyDerivation.deriveChildKey(masterKey, ChildNumber(0, false))
+        return HDKeyDerivation.deriveChildKey(changeKey, index)
     }
 
     private fun getLastIndex(): Int {

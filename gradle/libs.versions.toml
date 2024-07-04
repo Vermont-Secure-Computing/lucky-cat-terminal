@@ -19,6 +19,12 @@ retrofit = "2.9.0"
 retrofit2 = "2.9.0"
 okhttp = "4.9.3"
 okhttp3 = "4.9.3"
+foundationAndroid = "1.6.8"
+thermalPrinter = "3.3.0"
+dogecoinj = "v0.15.9"
+web3j = "4.8.9-android"
+novecoincrypto = "0.0.2"
+bouncycastle = "1.68"
 
 
 [libraries]
@@ -40,6 +46,12 @@ retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = 
 retrofit2 = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit2"}
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp"}
 okhttp3 = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp3"}
+androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroid" }
+thermalPrinter = { group = "com.github.dantsu", name = "ESCPOS-ThermalPrinter-Android", version.ref = "thermalPrinter"}
+dogecoinj = { group = "com.github.dogecoin", name = "libdohj", version.ref = "dogecoinj"}
+web3j = { group = "org.web3j", name = "core", version.ref = "web3j" }
+novecoincrypto = { group = "com.github.NovaCrypto", name = "BIP44", version.ref = "novecoincrypto"}
+bouncycastle = { group = "org.bouncycastle", name = "bcprov-jdk15to18", version.ref = "bouncycastle"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

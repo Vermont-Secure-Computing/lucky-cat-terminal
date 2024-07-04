@@ -2,47 +2,12 @@ package com.example.possin
 
 import android.content.Context
 import org.bitcoinj.core.Address
-import org.bitcoinj.core.NetworkParameters
-import org.bitcoinj.params.MainNetParams
-import org.bitcoinj.crypto.HDKeyDerivation
 import org.bitcoinj.crypto.DeterministicKey
+import org.bitcoinj.crypto.HDKeyDerivation
 import org.bitcoinj.script.Script
-
-class DogecoinMainNetParams : MainNetParams() {
-    init {
-        id = "org.dogecoin.production"
-        packetMagic = 0xc0c0c0c0
-        addressHeader = 30
-        p2shHeader = 22
-//        acceptableAddressCodes = intArrayOf(addressHeader, p2shHeader)
-        port = 22556
-        dumpedPrivateKeyHeader = 158
-    }
-
-    override fun getId(): String {
-        return id
-    }
-
-    override fun getPacketMagic(): Long {
-        return packetMagic
-    }
-
-    override fun getAddressHeader(): Int {
-        return addressHeader
-    }
-
-    override fun getP2SHHeader(): Int {
-        return p2shHeader
-    }
-
-    override fun getDumpedPrivateKeyHeader(): Int {
-        return dumpedPrivateKeyHeader
-    }
-
-    override fun getPaymentProtocolId(): String {
-        return PAYMENT_PROTOCOL_ID_MAINNET
-    }
-}
+import org.libdohj.params.DogecoinMainNetParams
+import org.bitcoinj.crypto.ChildNumber
+import android.util.Log
 
 class DogecoinManager(private val context: Context, private val xPub: String) {
 
@@ -51,9 +16,14 @@ class DogecoinManager(private val context: Context, private val xPub: String) {
         private const val LAST_INDEX_KEY = "lastIndex"
     }
 
-    private val params: NetworkParameters = DogecoinMainNetParams()
+    private val params = DogecoinMainNetParams.get()
+
     // Create a DeterministicKey from the xPub
-    private val accountKey = DeterministicKey.deserializeB58(null, xPub, params)
+    private val accountKey: DeterministicKey
+
+    init {
+        accountKey = DeterministicKey.deserializeB58(null, xPub, params)
+    }
 
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -65,8 +35,9 @@ class DogecoinManager(private val context: Context, private val xPub: String) {
     }
 
     private fun deriveAddress(index: Int): String {
-        val receivingKey = HDKeyDerivation.deriveChildKey(accountKey, index)
-        val address = Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH)
+        // Use derivation path m (directly using the master key without further derivation)
+        val address = Address.fromKey(params, accountKey, Script.ScriptType.P2PKH)
+        Log.d("ADDRESS", address.toString())
         return address.toString()
     }
 

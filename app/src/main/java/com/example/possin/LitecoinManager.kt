@@ -8,6 +8,9 @@ import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.crypto.HDKeyDerivation
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.script.Script
+import org.bitcoinj.crypto.ChildNumber
+import org.bitcoinj.core.Bech32
+import org.bitcoinj.core.SegwitAddress
 
 class LitecoinMainNetParams : MainNetParams() {
     init {
@@ -16,6 +19,7 @@ class LitecoinMainNetParams : MainNetParams() {
         addressHeader = 48
         p2shHeader = 50
         dumpedPrivateKeyHeader = 176
+        segwitAddressHrp = "ltc"
     }
 
     override fun getId(): String {
@@ -36,6 +40,10 @@ class LitecoinMainNetParams : MainNetParams() {
 
     override fun getDumpedPrivateKeyHeader(): Int {
         return dumpedPrivateKeyHeader
+    }
+
+    override fun getSegwitAddressHrp(): String {
+        return segwitAddressHrp
     }
 }
 
@@ -60,10 +68,20 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
 
     private fun deriveAddress(index: Int): String {
         Log.d("LTC", "Litecoin address index $index")
-        val receivingKey = HDKeyDerivation.deriveChildKey(accountKey, index)
-        val address = Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH)
-        return address.toString()
+        val receivingKey = deriveKey(accountKey, index)
+
+        // Create a P2WPKH (Pay to Witness Public Key Hash) address with correct HRP for Litecoin
+        val segwitAddress = SegwitAddress.fromKey(params, receivingKey)
+        Log.d("ADDRESS", segwitAddress.toString())
+        return segwitAddress.toString()
     }
+
+    private fun deriveKey(masterKey: DeterministicKey, index: Int): DeterministicKey {
+        // Use non-hardened derivation path m/0/index
+        val changeKey = HDKeyDerivation.deriveChildKey(masterKey, ChildNumber(0, false))
+        return HDKeyDerivation.deriveChildKey(changeKey, index)
+    }
+
 
     private fun getLastIndex(): Int {
         return sharedPreferences.getInt(LAST_INDEX_KEY, 0)

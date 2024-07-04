@@ -21,6 +21,91 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center" />
 
+
+    <TextView
+        android:id="@+id/balanceTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Balance"
+        android:visibility="gone"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/txidTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Transaction ID"
+        android:visibility="gone"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/feesTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fees"
+        android:visibility="gone"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/confirmationsTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Confirmations: 0"
+        android:visibility="gone"
+        android:layout_marginTop="8dp" />
+
+    <!-- Confirmation blocks -->
+    <LinearLayout
+        android:id="@+id/confirmationsLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:visibility="gone">
+
+        <View
+            android:id="@+id/block1"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="2dp"
+            android:background="#E0E0E0"/>
+
+        <View
+            android:id="@+id/block2"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="2dp"
+            android:background="#E0E0E0"/>
+
+        <View
+            android:id="@+id/block3"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="2dp"
+            android:background="#E0E0E0"/>
+
+        <View
+            android:id="@+id/block4"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="2dp"
+            android:background="#E0E0E0"/>
+
+        <View
+            android:id="@+id/block5"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="2dp"
+            android:background="#E0E0E0"/>
+
+        <View
+            android:id="@+id/block6"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="2dp"
+            android:background="#E0E0E0"/>
+    </LinearLayout>
+
     <TextView
         android:id="@+id/timerTextView"
         android:layout_width="wrap_content"
@@ -29,5 +114,14 @@
         android:textColor="#000000"
         android:layout_gravity="center"
         android:layout_marginTop="16dp" />
+
+    <!-- Print Button -->
+    <Button
+        android:id="@+id/printButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Print Receipt"
+        android:layout_marginTop="16dp"
+        android:visibility="gone" />
 
 </LinearLayout>

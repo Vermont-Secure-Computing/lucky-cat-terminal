@@ -10,9 +10,14 @@ import org.json.JSONObject
 class CustomWebSocketListener(
     private val address: String,
     private val amount: String,
-    private val chain: String
+    private val chain: String,
+    private val checkBalance: String,
+    private val callback: PaymentStatusCallback
 ) : WebSocketListener() {
 
+    interface PaymentStatusCallback {
+        fun onPaymentStatusPaid(balance: Long, txid: String, fees: Long, confirmations: Int, chain: String)
+    }
     override fun onOpen(webSocket: WebSocket, response: Response) {
         super.onOpen(webSocket, response)
         Log.d("WebSocket", "Connected to WebSocket server")
@@ -22,6 +27,7 @@ class CustomWebSocketListener(
             put("address", address)
             put("amount", amount)
             put("chain", chain)
+            put("type", checkBalance)
         }
 
         // Send the JSON object as a string
@@ -29,9 +35,16 @@ class CustomWebSocketListener(
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
-        super.onMessage(webSocket, text)
         Log.d("WebSocket", "Received message: $text")
         // Handle the received message
+        val jsonObject = JSONObject(text)
+        if (jsonObject.getString("status") == "paid") {
+            val balance = jsonObject.getLong("balance")
+            val txid = jsonObject.getString("txid")
+            val fees = jsonObject.getLong("fees")
+            val confirmations = jsonObject.getInt("confirmations")
+            callback.onPaymentStatusPaid(balance, txid, fees, confirmations, chain)
+        }
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
