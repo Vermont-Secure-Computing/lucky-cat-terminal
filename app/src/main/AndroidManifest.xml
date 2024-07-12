@@ -19,6 +19,12 @@
         android:theme="@style/Theme.Possin"
         tools:targetApi="31">
         <activity
+            android:name=".HomeActivity"
+            android:exported="true"/>
+        <activity
+            android:name=".POSActivity"
+            android:exported="true"/>
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -30,6 +36,8 @@
         <activity android:name=".PriceConfirmActivity" />
         <activity android:name=".CryptoOptionActivity" />
         <activity android:name=".GenerateQRActivity" />
+        <activity android:name=".ViewAllActivity" />
+        <activity android:name=".ViewAllDetailActivity" />
     </application>
 
 </manifest>

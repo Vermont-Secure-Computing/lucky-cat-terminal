@@ -15,8 +15,8 @@ import org.bitcoinj.core.SegwitAddress
 class BitcoinManager(private val context: Context, private val xPub: String) {
 
     companion object {
-        private const val PREFS_NAME = "BitcoinManagerPrefs"
-        private const val LAST_INDEX_KEY = "lastIndex"
+        const val PREFS_NAME = "BitcoinManagerPrefs"
+        const val LAST_INDEX_KEY = "lastIndex"
     }
 
     // Initialize network parameters for MainNet
@@ -26,11 +26,17 @@ class BitcoinManager(private val context: Context, private val xPub: String) {
 
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun getAddress(): String {
+    fun getAddress(): Pair<String, Int> {
         val lastIndex = getLastIndex()
-        val newIndex = lastIndex + 1
-        saveLastIndex(newIndex)
-        return deriveAddress(newIndex)
+        val newIndex = if (lastIndex == -1) 0 else lastIndex + 1
+        return Pair(deriveAddress(newIndex), newIndex)
+    }
+
+    fun saveLastIndex(index: Int) {
+        with(sharedPreferences.edit()) {
+            putInt(LAST_INDEX_KEY, index)
+            apply()
+        }
     }
 
     private fun deriveAddress(index: Int): String {
@@ -38,9 +44,11 @@ class BitcoinManager(private val context: Context, private val xPub: String) {
         val receivingKey = deriveKey(accountKey, index)
 
         // Create a P2WPKH (Pay to Witness Public Key Hash) address
-        val segwitAddress = SegwitAddress.fromKey(params, receivingKey)
-        Log.d("ADDRESS", segwitAddress.toString())
-        return segwitAddress.toString()
+//        val segwitAddress = SegwitAddress.fromKey(params, receivingKey)
+        val address = Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH)
+//        Log.d("ADDRESS", segwitAddress.toString())
+        Log.d("ADDRESS", address.toString())
+        return address.toString()
     }
 
     private fun deriveKey(masterKey: DeterministicKey, index: Int): DeterministicKey {
@@ -50,10 +58,9 @@ class BitcoinManager(private val context: Context, private val xPub: String) {
     }
 
     private fun getLastIndex(): Int {
-        return sharedPreferences.getInt(LAST_INDEX_KEY, 0)
-    }
-
-    private fun saveLastIndex(index: Int) {
-        sharedPreferences.edit().putInt(LAST_INDEX_KEY, index).apply()
+        if (!sharedPreferences.contains(LAST_INDEX_KEY)) {
+            return -1
+        }
+        return sharedPreferences.getInt(LAST_INDEX_KEY, -1)
     }
 }

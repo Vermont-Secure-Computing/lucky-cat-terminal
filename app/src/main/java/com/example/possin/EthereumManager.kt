@@ -13,17 +13,23 @@ import org.web3j.utils.Numeric
 class EthereumManager(private val context: Context, private val xPub: String) {
 
     companion object {
-        private const val PREFS_NAME = "EthereumManagerPrefs"
-        private const val LAST_INDEX_KEY = "lastIndex"
+        const val PREFS_NAME = "EthereumManagerPrefs"
+        const val LAST_INDEX_KEY = "lastIndex"
     }
 
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun getAddress(): String {
+    fun getAddress(): Pair<String, Int> {
         val lastIndex = getLastIndex()
         val newIndex = if (lastIndex == -1) 0 else lastIndex + 1
-        saveLastIndex(newIndex)
-        return deriveAddress(newIndex)
+        return Pair(deriveAddress(newIndex), newIndex)
+    }
+
+    fun saveLastIndex(index: Int) {
+        with(sharedPreferences.edit()) {
+            putInt(LAST_INDEX_KEY, index)
+            apply()
+        }
     }
 
     private fun deriveAddress(index: Int): String {
@@ -62,10 +68,4 @@ class EthereumManager(private val context: Context, private val xPub: String) {
         return sharedPreferences.getInt(LAST_INDEX_KEY, -1)
     }
 
-    private fun saveLastIndex(index: Int) {
-        with(sharedPreferences.edit()) {
-            putInt(LAST_INDEX_KEY, index)
-            apply()
-        }
-    }
 }

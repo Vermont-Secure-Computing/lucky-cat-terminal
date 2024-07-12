@@ -13,11 +13,13 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
+import android.media.MediaPlayer
 import android.print.PrintManager
 import android.os.Bundle
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -25,11 +27,14 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.LinearLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AppCompatActivity
 import com.example.possin.websocket.CustomWebSocketListener
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
+import com.example.possin.database.AppDatabase
+import com.example.possin.model.Transaction
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
@@ -38,6 +43,13 @@ import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnection
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
+import java.math.BigDecimal
+import java.math.RoundingMode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentStatusCallback {
 
@@ -57,18 +69,33 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     private lateinit var handler: Handler
     private lateinit var chain: String
     private lateinit var txid: String
+    private lateinit var message: String
+
+
+    private lateinit var db: AppDatabase
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.generate_qr)
+
+        db = AppDatabase.getDatabase(this)
 
         val address = intent.getStringExtra("ADDRESS") ?: "No address provided"
         val price = intent.getStringExtra("PRICE") ?: "No price provided"
         val logoResId = intent.getIntExtra("LOGO_RES_ID", R.drawable.bitcoin_logo)
         val currency = intent.getStringExtra("CURRENCY") ?: "BTC"
+        val addressIndex = intent.getIntExtra("ADDRESS_INDEX", -1)
+        val feeStatus = intent.getStringExtra("FEE_STATUS") ?: ""
+        val status = intent.getStringExtra("STATUS") ?: ""
+        val managerType = intent.getStringExtra("MANAGER_TYPE") ?: "Bitcoin"
+        val deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+
+        message = intent.getStringExtra("MESSAGE") ?: ""
+
 
         val uri = when (currency) {
             "LTC" -> "litecoin:$address?amount=$price"
@@ -93,7 +120,10 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         confirmationsTextView = findViewById(R.id.confirmationsTextView)
         confirmationsLayout = findViewById(R.id.confirmationsLayout)
         printButton = findViewById(R.id.printButton)
-        printButton.setOnClickListener { printReceipt() }
+        printButton.setOnClickListener {
+            printReceipt(deviceId)
+            saveTransaction(chain = chain)
+        }
 
         confirmationBlocks = listOf(
             findViewById(R.id.block1),
@@ -109,10 +139,23 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         requestBluetoothPermissions()
 
         // Start the 30-minute countdown timer
-        startTimer(10 * 60 * 1000) // 1 minute in milliseconds
+        startTimer(10 * 60 * 1000) // 10 minutes in milliseconds
 
         // Initialize WebSocket connection
-        initializeWebSocket(address, price, currency)
+        initializeWebSocket(address, price, currency, addressIndex, managerType)
+
+        if (status == "paid") {
+            saveLastIndex(addressIndex, managerType)
+        }
+
+        lifecycleScope.launch {
+            db.transactionDao().getAllTransactions().collect { transactions ->
+                // Handle collected transactions
+                transactions.forEach {
+                    Log.d("GenerateQRActivity", "Transaction: $it")
+                }
+            }
+        }
     }
 
     private fun requestBluetoothPermissions() {
@@ -151,7 +194,6 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             }
         }
     }
-
 
     private fun startTimer(milliseconds: Long) {
         countDownTimer = object : CountDownTimer(milliseconds, 1000) {
@@ -202,16 +244,14 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         return combined
     }
 
-    private fun initializeWebSocket(address: String, amount: String, chain: String) {
+    private fun initializeWebSocket(address: String, amount: String, chain: String, addressIndex: Int, managerType: String) {
         client = OkHttpClient()
 
         val request = Request.Builder()
-//            .url("ws://10.0.2.2:3200/ws") // Replace with your WebSocket server URL
-//            .url("ws://localhost:3200/ws") // Replace with your WebSocket server URL
             .url("ws://198.7.125.183/ws")
             .build()
 
-        val listener = CustomWebSocketListener("address", "amount", chain, "checkBalance", this)
+        val listener = CustomWebSocketListener("bc1q4p2qwpf9c7pvw77u5p2dfve3fj2hjgg0wjmjadz24gwalugq20xs40lu7v", "2.42546454", chain, "checkBalance", this, addressIndex, managerType)
 
         webSocket = client.newWebSocket(request, listener)
 
@@ -228,23 +268,29 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         countDownTimer.cancel()
     }
 
-    override fun onPaymentStatusPaid(balance: Long, txid: String, fees: Long, confirmations: Int, chain: String) {
+    override fun onPaymentStatusPaid(status: String, balance: Long, txid: String, fees: Long, confirmations: Int, feeStatus: String, chain: String, addressIndex: Int, managerType: String) {
         runOnUiThread {
             if (::qrCodeImageView.isInitialized) {
                 qrCodeImageView.setImageBitmap(null)
                 closeWebSocket()
 
                 // Update the TextViews with the received data
-                balanceTextView.text = "Balance: $balance"
+                balanceTextView.text = "Amount: ${String.format("%.8f", balance.toDouble() / 100000000)}"
                 balanceTextView.visibility = TextView.VISIBLE
                 txidTextView.text = "Transaction ID: $txid"
                 txidTextView.visibility = TextView.VISIBLE
-                feesTextView.text = "Fees: $fees"
+                feesTextView.text = "Fees: ${String.format("%.8f", fees.toDouble() / 100000000)}"
                 feesTextView.visibility = TextView.VISIBLE
-                confirmationsTextView.text = "Confirmations: 0"
+                confirmationsTextView.text = "$confirmations"
                 confirmationsTextView.visibility = TextView.VISIBLE
                 confirmationsLayout.visibility = View.VISIBLE
 
+                // Save the last index if the status is "paid"
+                if (status == "paid") {
+                    val mediaPlayer = MediaPlayer.create(this@GenerateQRActivity, R.raw.coins_received)
+                    mediaPlayer.start()
+                    saveLastIndex(addressIndex, managerType)
+                }
 
                 // Store txid and chain for repeated API calls
                 this.txid = txid
@@ -253,11 +299,43 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 // Start repeated API calls
                 startRepeatedApiCalls()
 
+                if (feeStatus == "Fee is okay" || confirmations > 0) {
+                    saveTransaction(balance, txid, fees, confirmations, chain, message)
+                }
+
                 // Show the print button if there is at least one confirmation
                 if (confirmations > 0) {
                     printButton.visibility = View.VISIBLE
                 }
             }
+        }
+    }
+
+    private fun saveLastIndex(addressIndex: Int, managerType: String) {
+        val sharedPreferences = getSharedPreferences(getPrefsName(managerType), Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putInt(getLastIndexKey(managerType), addressIndex)
+            apply()
+        }
+    }
+
+    private fun getPrefsName(managerType: String): String {
+        return when (managerType) {
+            "Bitcoin" -> BitcoinManager.PREFS_NAME
+            "Litecoin" -> LitecoinManager.PREFS_NAME
+            "Ethereum" -> EthereumManager.PREFS_NAME
+            "Dogecoin" -> DogecoinManager.PREFS_NAME
+            else -> BitcoinManager.PREFS_NAME
+        }
+    }
+
+    private fun getLastIndexKey(managerType: String): String {
+        return when (managerType) {
+            "Bitcoin" -> BitcoinManager.LAST_INDEX_KEY
+            "Litecoin" -> LitecoinManager.LAST_INDEX_KEY
+            "Ethereum" -> EthereumManager.LAST_INDEX_KEY
+            "Dogecoin" -> DogecoinManager.LAST_INDEX_KEY
+            else -> BitcoinManager.LAST_INDEX_KEY
         }
     }
 
@@ -271,8 +349,6 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     }
 
     private fun getConfirmations(chain: String, txid: String) {
-//        val url = "http://10.0.2.2:3200/terminal/tx_confirmations/$chain/$txid"
-//        val url = "http://localhost:3200/terminal/tx_confirmations/$chain/$txid"
         val url = "http://198.7.125.183/terminal/tx_confirmations/$chain/$txid"
         val request = Request.Builder().url(url).build()
 
@@ -301,7 +377,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         })
     }
 
-    private fun printReceipt() {
+    private fun printReceipt(deviceId: String) {
         val bluetoothConnection = BluetoothPrintersConnections.selectFirstPaired()
         if (bluetoothConnection == null) {
             Toast.makeText(this, "No paired Bluetooth printer found", Toast.LENGTH_SHORT).show()
@@ -312,14 +388,19 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             printer.printFormattedText(
                 "[C]<u><font size='big'>RECEIPT</font></u>\n" +
                         "[L]\n" +
+                        "[C]-------------------------------\n" +
+                        "[L]\n" +
+                        "[L]<b>Transaction Details</b>\n" +
+                        "[L]\n" +
                         "[L]Balance: ${balanceTextView.text}\n" +
                         "[L]Transaction ID: ${txidTextView.text}\n" +
                         "[L]Fees: ${feesTextView.text}\n" +
                         "[L]Confirmations: ${confirmationsTextView.text}\n" +
+                        "[L]Chain: $chain\n" +
+                        "[L]Device ID: $deviceId\n" +
                         "[L]\n" +
                         "[C]-------------------------------\n" +
-                        "[L]\n" +
-                        "[C]<qrcode size='20'>${txidTextView.text}</qrcode>\n"
+                        "[C]Thank you for your payment!\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -327,14 +408,31 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         }
     }
 
-    private fun getReceiptContent(): String {
-        return """
-            Receipt
-            ---------
-            Balance: ${balanceTextView.text}
-            Transaction ID: ${txidTextView.text}
-            Fees: ${feesTextView.text}
-            Confirmations: ${confirmationsTextView.text}
-        """.trimIndent()
+    private fun formatPrice(price: BigDecimal, decimalPlaces: Int): String {
+        return price.setScale(decimalPlaces, RoundingMode.HALF_UP).toPlainString()
+    }
+
+    private fun saveTransaction(balance: Long? = null, txid: String? = null, fees: Long? = null, confirmations: Int = 0, chain: String, message: String? = null) {
+        val currentBalance = balance ?: balanceTextView.text.toString().replace("Balance: ", "").toLong()
+        val currentTxid = txid ?: txidTextView.text.toString().replace("Transaction ID: ", "")
+        val currentFees = fees ?: feesTextView.text.toString().replace("Fees: ", "").toLong()
+        val currentConfirmations = confirmationsTextView.text.toString().replace("Confirmations: ", "").toInt()
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+
+        val transaction = Transaction(
+            balance = currentBalance,
+            txid = currentTxid,
+            fees = currentFees,
+            confirmations = currentConfirmations,
+            date = currentDate,
+            time = currentTime,
+            chain = chain,
+            message = message  // Include the message here
+        )
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            db.transactionDao().insert(transaction)
+        }
     }
 }

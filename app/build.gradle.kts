@@ -1,6 +1,11 @@
+//import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.kotlin.kapt)
+//    alias(libs.plugins.shadow)
 }
 
 android {
@@ -15,6 +20,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
     }
 
     buildTypes {
@@ -39,20 +45,20 @@ dependencies {
     implementation(libs.bouncycastle)
 
     implementation(libs.web3j) {
-        exclude( group = "org.bouncycastle", module = "bcprov-jdk15to18")
-        exclude( group = "org.bouncycastle", module = "bcprov-jdk18on")
+        exclude(group = "org.bouncycastle", module = "bcprov-jdk15to18")
+        exclude(group = "org.bouncycastle", module = "bcprov-jdk18on")
     }
 
     implementation(libs.bitcoinj) {
-        exclude( group = "org.bouncycastle", module = "bcprov-jdk15to18")
-        exclude( group = "org.bouncycastle", module = "bcprov-jdk18on")
+        exclude(group = "org.bouncycastle", module = "bcprov-jdk15to18")
+        exclude(group = "org.bouncycastle", module = "bcprov-jdk18on")
     }
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-//    implementation(libs.bitcoinj)
+
     implementation(libs.guava)
     implementation(libs.card.view)
     implementation(libs.grid.layout)
@@ -64,11 +70,36 @@ dependencies {
     implementation(libs.okhttp3)
     implementation(libs.androidx.foundation.android)
     implementation(libs.thermalPrinter)
-    implementation(libs.dogecoinj)
-//    implementation(libs.web3j)
-    implementation(libs.novecoincrypto)
+
+    implementation(libs.room.runtime)
+    kapt(libs.room.compiler)
+    implementation(libs.room.ktx)
+    implementation(libs.room.testing)
+    implementation(libs.lifecycle.livedata.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // others
+    //    implementation(libs.web3j)
+    //    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+//    implementation(libs.kotlinStdlib)
+//    implementation(libs.trust.wallet)
 }
+//
+//tasks.register<ShadowJar>("shadowJar") {
+//    archiveClassifier.set("all")
+//
+//    // Include the JAR file explicitly
+//    from(fileTree("libs") { include("woodcoinj-core-0.14.2.jar") })
+//
+//    // Relocate org.bitcoinj classes in woodcoinj-core to avoid conflicts
+//    relocate("org.bitcoinj", "org.woodcoinj.shaded.bitcoinj")
+//}
+//
+//tasks.withType<ShadowJar> {
+//    mergeServiceFiles()
+//    manifest {
+//        attributes["Main-Class"] = "com.example.possin.MainActivity" // Adjust the main class if necessary
+//    }
+//}
 

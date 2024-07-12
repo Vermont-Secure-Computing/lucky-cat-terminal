@@ -25,6 +25,14 @@ dogecoinj = "v0.15.9"
 web3j = "4.8.9-android"
 novecoincrypto = "0.0.2"
 bouncycastle = "1.68"
+room-runtime = "2.6.1"
+room-compiler = "2.6.1"
+room-ktx = "2.6.1"
+lifecycle-livedata-ktx = "2.3.1"
+kotlin-parcelize = "2.0.20-Beta2"
+#trust-wallet = "feafc275fc"
+#shadow = "7.1.2"
+
 
 
 [libraries]
@@ -52,8 +60,18 @@ dogecoinj = { group = "com.github.dogecoin", name = "libdohj", version.ref = "do
 web3j = { group = "org.web3j", name = "core", version.ref = "web3j" }
 novecoincrypto = { group = "com.github.NovaCrypto", name = "BIP44", version.ref = "novecoincrypto"}
 bouncycastle = { group = "org.bouncycastle", name = "bcprov-jdk15to18", version.ref = "bouncycastle"}
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room-runtime"}
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room-compiler"}
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room-ktx"}
+room-testing = {group = "androidx.room", name = "room-testing", version.ref = "room-ktx"}
+lifecycle-livedata-ktx = {group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycle-livedata-ktx"}
+#kotlinStdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+#trust-wallet = {group = "com.github.trustwallet", name = "wallet-core", version.ref = "trust-wallet"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin-parcelize" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+#shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 
