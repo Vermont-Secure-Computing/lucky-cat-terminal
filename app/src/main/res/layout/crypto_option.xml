@@ -15,6 +15,16 @@
         android:padding="8dp"
         android:background="@android:color/transparent">
 
+        <TextView
+            android:id="@+id/backText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Back"
+            android:textSize="20sp"
+            android:textColor="#0000FF"
+            android:clickable="true"
+            android:layout_marginEnd="8dp" />
+
         <ImageView
             android:id="@+id/logo"
             android:layout_width="wrap_content"
@@ -44,79 +54,13 @@
         android:layout_marginBottom="16dp"
         android:layout_marginTop="16dp" />
 
-    <GridLayout
+    <LinearLayout
+        android:id="@+id/buttonContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:columnCount="2"
-        android:rowCount="4"
+        android:orientation="vertical"
         android:padding="16dp"
-        android:alignmentMode="alignMargins"
-        android:columnOrderPreserved="false">
-
-        <Button
-            android:id="@+id/btnBTC"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_columnWeight="1"
-            android:text="BTC" />
-
-        <Button
-            android:id="@+id/btnLTC"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_columnWeight="1"
-            android:text="LTC" />
-
-        <Button
-            android:id="@+id/btnDASH"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_columnWeight="1"
-            android:text="DASH" />
-
-        <Button
-            android:id="@+id/btnDOGE"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_columnWeight="1"
-            android:text="DOGE" />
-
-        <Button
-            android:id="@+id/btnETH"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_columnWeight="1"
-            android:text="ETH" />
-
-        <Button
-            android:id="@+id/btnXMR"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_columnWeight="1"
-            android:text="XMR" />
-
-        <Button
-            android:id="@+id/btnUSDT"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_columnWeight="1"
-            android:text="USDT" />
-
-        <Button
-            android:id="@+id/btnLOG"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_columnWeight="1"
-            android:text="LOG" />
-
-    </GridLayout>
+        android:background="@android:color/transparent">
+    </LinearLayout>
 
 </LinearLayout>

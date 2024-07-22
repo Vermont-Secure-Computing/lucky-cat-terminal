@@ -21,7 +21,7 @@ class ViewAllTransactionAdapter(private val transactions: List<Transaction>) :
         fun bind(transaction: Transaction) {
             chainTextView.text = transaction.chain
             dateTextView.text = transaction.date
-            balanceTextView.text = "Amount: ${transaction.balance}"
+            balanceTextView.text = "Amount: ${String.format("%.8f", transaction.balance.toDouble() / 100000000)}"
 
             itemView.setOnClickListener {
                 val intent = Intent(itemView.context, ViewAllDetailActivity::class.java).apply {

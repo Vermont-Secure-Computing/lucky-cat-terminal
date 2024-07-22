@@ -2,6 +2,7 @@ package com.example.possin
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -11,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.cardview.widget.CardView
 import com.example.possin.adapter.TransactionAdapter
 import com.example.possin.viewmodel.TransactionViewModel
 import java.io.File
@@ -20,6 +22,7 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var merchantPropertiesFile: File
     private val transactionViewModel: TransactionViewModel by viewModels()
+    private lateinit var transactionsCardView: CardView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,21 +31,23 @@ class HomeActivity : AppCompatActivity() {
         merchantPropertiesFile = File(filesDir, "merchant.properties")
 
         val headerNameTextView = findViewById<TextView>(R.id.header_name)
+        transactionsCardView = findViewById(R.id.transactionsCardView)
+        val seeAllTextView = findViewById<TextView>(R.id.seeAllTextView)
 
-        if (merchantPropertiesFile.exists()) {
-            val properties = Properties().apply {
-                load(merchantPropertiesFile.inputStream())
-            }
-
-            val merchantName = properties.getProperty("merchant_name", "")
-            if (merchantName.isNotEmpty()) {
-                headerNameTextView.text = "Good morning, $merchantName!"
-            } else {
-                headerNameTextView.text = "Good morning!"
-            }
-        } else {
-            headerNameTextView.text = "Good morning!"
-        }
+//        if (merchantPropertiesFile.exists()) {
+//            val properties = Properties().apply {
+//                load(merchantPropertiesFile.inputStream())
+//            }
+//
+//            val merchantName = properties.getProperty("merchant_name", "")
+//            if (merchantName.isNotEmpty()) {
+//                headerNameTextView.text = "Good morning, $merchantName!"
+//            } else {
+//                headerNameTextView.text = "Good morning!"
+//            }
+//        } else {
+//            headerNameTextView.text = "Good morning!"
+//        }
 
         // Set up buttons
         setupButtons()
@@ -63,10 +68,22 @@ class HomeActivity : AppCompatActivity() {
 
         transactionViewModel.allTransactions.observe(this, Observer { transactions ->
             transactions?.let {
-                val adapter = TransactionAdapter(this, it)
-                transactionsRecyclerView.adapter = adapter
+                if (it.isEmpty()) {
+                    transactionsCardView.visibility = View.GONE
+                } else {
+                    transactionsCardView.visibility = View.VISIBLE
+                    val adapter = TransactionAdapter(this, it)
+                    transactionsRecyclerView.adapter = adapter
+                }
             }
         })
+
+        seeAllTextView.setOnClickListener {
+            // Handle the "See all" click event here
+            // Navigate to ViewAllActivity
+            val intent = Intent(this, ViewAllActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun setupButtons() {

@@ -1,6 +1,7 @@
 package com.example.possin
 
 import android.content.Context
+import android.util.Log
 import org.bitcoinj.core.Address
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.params.AbstractBitcoinNetParams
@@ -9,7 +10,6 @@ import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.params.Networks
 import org.bitcoinj.crypto.ChildNumber
 import org.bitcoinj.script.Script
-import android.util.Log
 
 class DogecoinMainNetParams : AbstractBitcoinNetParams() {
     init {
@@ -54,10 +54,32 @@ class DogecoinManager(private val context: Context, private val xPub: String) {
     companion object {
         const val PREFS_NAME = "DogecoinManagerPrefs"
         const val LAST_INDEX_KEY = "lastIndex"
+
+        fun isValidXpub(xPub: String): Boolean {
+            return try {
+                val params: NetworkParameters = DogecoinMainNetParams.get()
+                if (xPub.length < 111) return false
+                DeterministicKey.deserializeB58(null, xPub, params)
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+        fun isValidAddress(address: String): Boolean {
+            return try {
+                val params: NetworkParameters = DogecoinMainNetParams.get()
+                if (address.length !in 26..35) return false
+                Address.fromString(params, address)
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
     }
 
     private val params: NetworkParameters = DogecoinMainNetParams.get()
-    private val accountKey: DeterministicKey = DeterministicKey.deserializeB58(null, xPub, params)
+    private val accountKey = if (isValidXpub(xPub)) DeterministicKey.deserializeB58(null, xPub, params) else null
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     init {
@@ -80,19 +102,9 @@ class DogecoinManager(private val context: Context, private val xPub: String) {
 
     private fun deriveAddress(index: Int): String {
         Log.d("DOGE", "Dogecoin address index $index")
-
-        // Decode the xpub key
-//        val parentKey = DeterministicKey.deserializeB58(null, xPub, params)
-//
-//        // Derive the child key at m/index electrum
-//        val childKey = HDKeyDerivation.deriveChildKey(parentKey, ChildNumber(index, false))
-//
-//        // Get the address from the child key
-//        val address = Address.fromKey(params, childKey, Script.ScriptType.P2PKH)
-        val receivingKey = deriveKey(accountKey, index)
+        val receivingKey = deriveKey(accountKey!!, index)
 
         // Create a P2WPKH (Pay to Witness Public Key Hash) address
-//        val segwitAddress = SegwitAddress.fromKey(params, receivingKey)
         val address = Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH)
         Log.d("ADDRESS", address.toString())
         return address.toString()
@@ -109,5 +121,9 @@ class DogecoinManager(private val context: Context, private val xPub: String) {
             return -1
         }
         return sharedPreferences.getInt(LAST_INDEX_KEY, -1)
+    }
+
+    fun getXpub(): String {
+        return xPub
     }
 }

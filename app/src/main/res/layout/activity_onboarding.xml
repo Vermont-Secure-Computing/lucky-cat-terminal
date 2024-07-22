@@ -31,6 +31,18 @@
         android:text="Dogecoin" />
 
     <CheckBox
+        android:id="@+id/checkbox_dash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dash" />
+
+    <CheckBox
+        android:id="@+id/checkbox_usdt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="USDT-Tron" />
+
+    <CheckBox
         android:id="@+id/checkbox_woodcoin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

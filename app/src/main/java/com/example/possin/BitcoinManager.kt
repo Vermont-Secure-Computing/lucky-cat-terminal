@@ -17,12 +17,35 @@ class BitcoinManager(private val context: Context, private val xPub: String) {
     companion object {
         const val PREFS_NAME = "BitcoinManagerPrefs"
         const val LAST_INDEX_KEY = "lastIndex"
+
+        // Static validation methods
+        fun isValidXpub(xPub: String): Boolean {
+            return try {
+                val params: NetworkParameters = MainNetParams.get()
+                if (xPub.length < 111) return false
+                DeterministicKey.deserializeB58(null, xPub, params)
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+        fun isValidAddress(address: String): Boolean {
+            return try {
+                val params: NetworkParameters = MainNetParams.get()
+                if (address.length !in 26..35) return false
+                Address.fromString(params, address)
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
     }
 
     // Initialize network parameters for MainNet
     private val params: NetworkParameters = MainNetParams.get()
     // Create a DeterministicKey from the xPub
-    private val accountKey = DeterministicKey.deserializeB58(null, xPub, params)
+    private val accountKey = if (isValidXpub(xPub)) DeterministicKey.deserializeB58(null, xPub, params) else null
 
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -41,12 +64,10 @@ class BitcoinManager(private val context: Context, private val xPub: String) {
 
     private fun deriveAddress(index: Int): String {
         Log.d("BTC", "Bitcoin address index $index")
-        val receivingKey = deriveKey(accountKey, index)
+        val receivingKey = deriveKey(accountKey!!, index)
 
         // Create a P2WPKH (Pay to Witness Public Key Hash) address
-//        val segwitAddress = SegwitAddress.fromKey(params, receivingKey)
         val address = Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH)
-//        Log.d("ADDRESS", segwitAddress.toString())
         Log.d("ADDRESS", address.toString())
         return address.toString()
     }
@@ -62,5 +83,9 @@ class BitcoinManager(private val context: Context, private val xPub: String) {
             return -1
         }
         return sharedPreferences.getInt(LAST_INDEX_KEY, -1)
+    }
+
+    fun getXpub(): String {
+        return xPub
     }
 }

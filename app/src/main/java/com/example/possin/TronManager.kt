@@ -2,19 +2,20 @@ package com.example.possin
 
 import android.content.Context
 import android.util.Log
+import com.example.possin.utils.TronAddressValidator
 import org.bitcoinj.crypto.ChildNumber
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.crypto.HDKeyDerivation
 import org.bitcoinj.params.MainNetParams
 import org.web3j.crypto.Hash
-import org.web3j.crypto.Keys
-import org.web3j.utils.Numeric
 
-class EthereumManager(private val context: Context, private val xPub: String) {
+class TronManager(private val context: Context, private val xPub: String) {
 
     companion object {
-        const val PREFS_NAME = "EthereumManagerPrefs"
+        const val PREFS_NAME = "TronManagerPrefs"
         const val LAST_INDEX_KEY = "lastIndex"
+
+        private val tronAddressValidator = TronAddressValidator()
 
         fun isValidXpub(xPub: String): Boolean {
             return try {
@@ -27,13 +28,14 @@ class EthereumManager(private val context: Context, private val xPub: String) {
         }
 
         fun isValidAddress(address: String): Boolean {
-            return try {
-                if (address.length != 42 || !address.startsWith("0x")) return false
-                val checksumAddress = Keys.toChecksumAddress(address)
-                checksumAddress == address
-            } catch (e: Exception) {
-                false
+            Log.e("TRON", "Validating address: $address")
+
+            if (address.length != 34 || !address.startsWith("T")) {
+                Log.e("TRON", "Invalid length or prefix")
+                return false
             }
+
+            return tronAddressValidator.validate(address)
         }
     }
 
@@ -54,7 +56,7 @@ class EthereumManager(private val context: Context, private val xPub: String) {
     }
 
     private fun deriveAddress(index: Int): String {
-        Log.d("ETH", "Ethereum address index $index")
+        Log.d("TRX", "Tron address index $index")
 
         // Deserialize the xPub key using MainNetParams
         val xpubKey = accountKey ?: throw IllegalStateException("Invalid xPub key")
@@ -75,11 +77,13 @@ class EthereumManager(private val context: Context, private val xPub: String) {
         // Perform Keccak-256 hashing on the public key bytes without the prefix
         val hash = Hash.sha3(publicKeyBytes.copyOfRange(1, publicKeyBytes.size))
 
-        // Extract the last 20 bytes of the hash to form the Ethereum address
+        // Extract the last 20 bytes of the hash to form the Tron address
         val addressBytes = hash.copyOfRange(hash.size - 20, hash.size)
-        val address = Numeric.toHexString(addressBytes)
-        Log.d("ADDRESS", address)
-        return address
+        val addressWithPrefix = byteArrayOf(0x41.toByte()) + addressBytes
+
+        val base58Address = Base58.encodeChecked(addressWithPrefix)
+        Log.d("ADDRESS", base58Address)
+        return base58Address
     }
 
     private fun getLastIndex(): Int {

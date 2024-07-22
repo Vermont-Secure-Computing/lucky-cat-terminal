@@ -4,14 +4,12 @@ import android.content.Context
 import android.util.Log
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.NetworkParameters
-import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.params.AbstractBitcoinNetParams
+import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.crypto.HDKeyDerivation
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.script.Script
 import org.bitcoinj.crypto.ChildNumber
-import org.bitcoinj.core.Bech32
-import org.bitcoinj.core.SegwitAddress
 import org.bitcoinj.params.Networks
 
 class LitecoinMainNetParams : AbstractBitcoinNetParams() {
@@ -34,31 +32,6 @@ class LitecoinMainNetParams : AbstractBitcoinNetParams() {
             "dnsseed.litecoinpool.org"
         )
     }
-
-
-//    override fun getId(): String {
-//        return id
-//    }
-//
-//    override fun getPacketMagic(): Long {
-//        return packetMagic
-//    }
-//
-//    override fun getAddressHeader(): Int {
-//        return addressHeader
-//    }
-//
-//    override fun getP2SHHeader(): Int {
-//        return p2shHeader
-//    }
-//
-//    override fun getDumpedPrivateKeyHeader(): Int {
-//        return dumpedPrivateKeyHeader
-//    }
-//
-//    override fun getSegwitAddressHrp(): String {
-//        return segwitAddressHrp
-//    }
 
     override fun getPaymentProtocolId(): String {
         return "main"
@@ -84,14 +57,36 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
     companion object {
         const val PREFS_NAME = "LitecoinManagerPrefs"
         const val LAST_INDEX_KEY = "lastIndex"
+
+        fun isValidXpub(xPub: String): Boolean {
+            return try {
+                val params: NetworkParameters = LitecoinMainNetParams.get()
+                if (xPub.length < 111) return false
+                DeterministicKey.deserializeB58(null, xPub, params)
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+        fun isValidAddress(address: String): Boolean {
+            return try {
+                val params: NetworkParameters = LitecoinMainNetParams.get()
+                if (address.length !in 26..35) return false
+                Address.fromString(params, address)
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
     }
 
-    private val params: NetworkParameters = LitecoinMainNetParams()
-    private val accountKey = DeterministicKey.deserializeB58(null, xPub, params)
+    private val params: NetworkParameters = LitecoinMainNetParams.get()
+    private val accountKey = if (isValidXpub(xPub)) DeterministicKey.deserializeB58(null, xPub, params) else null
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     init {
-        // Register Dogecoin parameters
+        // Register Litecoin parameters
         Networks.register(params)
     }
 
@@ -110,13 +105,11 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
 
     private fun deriveAddress(index: Int): String {
         Log.d("LTC", "Litecoin address index $index")
-        val receivingKey = deriveKey(accountKey, index)
+        val receivingKey = deriveKey(accountKey!!, index)
 
         // Create a P2WPKH (Pay to Witness Public Key Hash) address with correct HRP for Litecoin
         val address = Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH)
-//        Log.d("ADDRESS", segwitAddress.toString())
         Log.d("ADDRESS", address.toString())
-//        Log.d("ADDRESS", segwitAddress.toString())
         return address.toString()
     }
 
@@ -126,7 +119,6 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
         return HDKeyDerivation.deriveChildKey(changeKey, index)
     }
 
-
     private fun getLastIndex(): Int {
         if (!sharedPreferences.contains(LAST_INDEX_KEY)) {
             return -1
@@ -134,4 +126,7 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
         return sharedPreferences.getInt(LAST_INDEX_KEY, -1)
     }
 
+    fun getXpub(): String {
+        return xPub
+    }
 }

@@ -1,9 +1,14 @@
 package com.example.possin
 
 import android.os.Bundle
+import android.provider.Settings
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.dantsu.escposprinter.EscPosPrinter
+import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.example.possin.database.AppDatabase
 import com.example.possin.model.Transaction
 import kotlinx.coroutines.Dispatchers
@@ -11,6 +16,8 @@ import kotlinx.coroutines.launch
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ViewAllDetailActivity : AppCompatActivity() {
 
@@ -26,6 +33,9 @@ class ViewAllDetailActivity : AppCompatActivity() {
     private lateinit var transaction: Transaction
     private lateinit var client: OkHttpClient
     private lateinit var db: AppDatabase
+
+    private lateinit var chain: String
+    private lateinit var deviceId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,8 +59,20 @@ class ViewAllDetailActivity : AppCompatActivity() {
         db = AppDatabase.getDatabase(this)
         client = OkHttpClient()
 
-        // Call getConfirmations only once
-        getConfirmations(transaction.chain, transaction.txid)
+        // Get the device ID
+        deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+
+        // Set up back button
+        val backButton = findViewById<Button>(R.id.backButton)
+        backButton.setOnClickListener {
+            finish()
+        }
+
+        // Set up print button
+        val printButton = findViewById<Button>(R.id.printButton)
+        printButton.setOnClickListener {
+            showReceiptDialog()
+        }
     }
 
     private fun updateUI(transaction: Transaction) {
@@ -64,38 +86,57 @@ class ViewAllDetailActivity : AppCompatActivity() {
         messageTextView.text = transaction.message ?: "No message"
     }
 
-    private fun getConfirmations(chain: String, txid: String) {
-        val url = "http://198.7.125.183/terminal/tx_confirmations/$chain/$txid"
-        val request = Request.Builder().url(url).build()
+    private fun showReceiptDialog() {
+        val receiptDialog = ReceiptDialogFragment()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
+        // Pass data to the dialog fragment
+        val args = Bundle()
+        args.putString("receiptTitle", "RECEIPT")
+        args.putString("receiptDetails", "Transaction Details")
+        args.putString("receiptBalance", "Balance: ${balanceTextView.text}")
+        args.putString("receiptTxID", "TxID: ${txidTextView.text}")
+        args.putString("receiptFees", "Fees: ${feesTextView.text}")
+        args.putString("receiptConfirmations", "Confirmations: ${confirmationsTextView.text}")
+        args.putString("receiptChain", "Chain: ${chainTextView.text}")
+        args.putString("receiptDeviceID", "Device ID: $deviceId")
+        receiptDialog.arguments = args
 
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    val responseData = response.body?.string()
-                    responseData?.let {
-                        val jsonObject = JSONObject(it)
-                        val confirmations = jsonObject.getInt("confirmations")
-
-                        runOnUiThread {
-                            confirmationsTextView.text = "Confirmations: $confirmations"
-
-                            // Update the transaction in the database
-                            updateTransactionConfirmations(confirmations)
-                        }
-                    }
-                }
-            }
-        })
+        receiptDialog.show(supportFragmentManager, "ReceiptDialog")
     }
 
-    private fun updateTransactionConfirmations(confirmations: Int) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val updatedTransaction = transaction.copy(confirmations = confirmations)
-            db.transactionDao().update(updatedTransaction)
+    fun performPrint() {
+        val bluetoothConnection = BluetoothPrintersConnections.selectFirstPaired()
+        if (bluetoothConnection == null) {
+            Toast.makeText(this, "No paired Bluetooth printer found", Toast.LENGTH_SHORT).show()
+            return
+        }
+        try {
+            val printer = EscPosPrinter(bluetoothConnection, 203, 48f, 32)
+            for (i in 1..2) {
+                val copyType = if (i == 1) "Customer Copy" else "Owner's Copy"
+                printer.printFormattedText(
+                    "[C]<u><font size='big'>RECEIPT</font></u>\n" +
+                            "[L]\n" +
+                            "[C]-------------------------------\n" +
+                            "[L]\n" +
+                            "[L]<b>Transaction Details</b>\n" +
+                            "[L]\n" +
+                            "[L]${balanceTextView.text}\n" +
+                            "[L]${txidTextView.text}\n" +
+                            "[L]${feesTextView.text}\n" +
+                            "[L]${confirmationsTextView.text}\n" +
+                            "[L]Chain: ${chainTextView.text}\n" +
+                            "[L]Device ID: $deviceId\n" +
+                            "[L]\n" +
+                            "[C]-------------------------------\n" +
+                            "[C]$copyType\n" +
+                            "[L]\n" +
+                            "[C]Thank you for your payment!\n"
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Handle printing errors
         }
     }
 }

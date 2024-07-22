@@ -1,9 +1,12 @@
 package com.example.possin
 
 import android.Manifest
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
 import androidx.core.content.ContextCompat
 import androidx.core.app.ActivityCompat
 import android.content.pm.PackageManager
@@ -71,7 +74,6 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     private lateinit var txid: String
     private lateinit var message: String
 
-
     private lateinit var db: AppDatabase
 
     companion object {
@@ -96,15 +98,22 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
         message = intent.getStringExtra("MESSAGE") ?: ""
 
+        val formattedPrice = if (currency == "USDT-TRON") {
+            BigDecimal(price).setScale(6, RoundingMode.HALF_UP).toPlainString()
+        } else {
+            price
+        }
 
         val uri = when (currency) {
-            "LTC" -> "litecoin:$address?amount=$price"
-            "DOGE" -> "dogecoin:$address?amount=$price"
-            else -> "bitcoin:$address?amount=$price"
+            "LTC" -> "litecoin:$address?amount=$formattedPrice"
+            "DOGE" -> "dogecoin:$address?amount=$formattedPrice"
+            "ETH" -> "ethereum:$address?amount=$formattedPrice"
+            "USDT-TRON" -> "tron:$address?amount=$formattedPrice"
+            else -> "bitcoin:$address?amount=$formattedPrice"
         }
 
         val addressTextView: TextView = findViewById(R.id.addressTextView)
-        addressTextView.text = "Address: $address\nAmount: $price $currency"
+        addressTextView.text = "Address: $address\nAmount: $formattedPrice $currency"
 
         qrCodeImageView = findViewById(R.id.qrCodeImageView)
         val qrCodeBitmap = generateQRCodeWithLogo(uri, logoResId)
@@ -121,8 +130,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         confirmationsLayout = findViewById(R.id.confirmationsLayout)
         printButton = findViewById(R.id.printButton)
         printButton.setOnClickListener {
-            printReceipt(deviceId)
-            saveTransaction(chain = chain)
+            showReceiptDialog(deviceId)
         }
 
         confirmationBlocks = listOf(
@@ -142,7 +150,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         startTimer(10 * 60 * 1000) // 10 minutes in milliseconds
 
         // Initialize WebSocket connection
-        initializeWebSocket(address, price, currency, addressIndex, managerType)
+        initializeWebSocket(address, formattedPrice, currency, addressIndex, managerType)
 
         if (status == "paid") {
             saveLastIndex(addressIndex, managerType)
@@ -155,6 +163,12 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                     Log.d("GenerateQRActivity", "Transaction: $it")
                 }
             }
+        }
+
+        // Handle cancel click
+        val cancelText: TextView = findViewById(R.id.cancelText)
+        cancelText.setOnClickListener {
+            showCancelDialog()
         }
     }
 
@@ -231,18 +245,19 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         return overlayBitmap(qrCodeBitmap, logo, overlaySize)
     }
 
-    private fun overlayBitmap(qrBitmap: Bitmap, logo: Bitmap, overlaySize: Int): Bitmap {
-        val combined = Bitmap.createBitmap(qrBitmap.width, qrBitmap.height, qrBitmap.config)
+    private fun overlayBitmap(qrCodeBitmap: Bitmap, logo: Bitmap, overlaySize: Int): Bitmap {
+        val combined = Bitmap.createBitmap(qrCodeBitmap.width, qrCodeBitmap.height, qrCodeBitmap.config)
         val canvas = Canvas(combined)
-        canvas.drawBitmap(qrBitmap, 0f, 0f, null)
+        canvas.drawBitmap(qrCodeBitmap, 0f, 0f, null)
 
-        val left = (qrBitmap.width - overlaySize) / 2
-        val top = (qrBitmap.height - overlaySize) / 2
+        val left = (qrCodeBitmap.width - overlaySize) / 2
+        val top = (qrCodeBitmap.height - overlaySize) / 2
         val rect = Rect(left, top, left + overlaySize, top + overlaySize)
         canvas.drawBitmap(logo, null, rect, null)
 
         return combined
     }
+
 
     private fun initializeWebSocket(address: String, amount: String, chain: String, addressIndex: Int, managerType: String) {
         client = OkHttpClient()
@@ -251,7 +266,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             .url("ws://198.7.125.183/ws")
             .build()
 
-        val listener = CustomWebSocketListener("bc1q4p2qwpf9c7pvw77u5p2dfve3fj2hjgg0wjmjadz24gwalugq20xs40lu7v", "2.42546454", chain, "checkBalance", this, addressIndex, managerType)
+        val listener = CustomWebSocketListener("ltc1qp4zm5e0a2s36cw5h5gfr64lzverrxvzn0ef9kg", "0.19469647", chain, "checkBalance", this, addressIndex, managerType)
 
         webSocket = client.newWebSocket(request, listener)
 
@@ -275,7 +290,12 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 closeWebSocket()
 
                 // Update the TextViews with the received data
-                balanceTextView.text = "Amount: ${String.format("%.8f", balance.toDouble() / 100000000)}"
+                val formattedBalance = if (chain == "USDT-TRON") {
+                    String.format("%.6f", balance.toDouble() / 1000000)
+                } else {
+                    String.format("%.8f", balance.toDouble() / 100000000)
+                }
+                balanceTextView.text = "Amount: $formattedBalance"
                 balanceTextView.visibility = TextView.VISIBLE
                 txidTextView.text = "Transaction ID: $txid"
                 txidTextView.visibility = TextView.VISIBLE
@@ -325,6 +345,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             "Litecoin" -> LitecoinManager.PREFS_NAME
             "Ethereum" -> EthereumManager.PREFS_NAME
             "Dogecoin" -> DogecoinManager.PREFS_NAME
+            "USDT-Tron" -> TronManager.PREFS_NAME
             else -> BitcoinManager.PREFS_NAME
         }
     }
@@ -335,6 +356,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             "Litecoin" -> LitecoinManager.LAST_INDEX_KEY
             "Ethereum" -> EthereumManager.LAST_INDEX_KEY
             "Dogecoin" -> DogecoinManager.LAST_INDEX_KEY
+            "USDT-Tron" -> TronManager.LAST_INDEX_KEY
             else -> BitcoinManager.LAST_INDEX_KEY
         }
     }
@@ -377,39 +399,22 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         })
     }
 
-    private fun printReceipt(deviceId: String) {
-        val bluetoothConnection = BluetoothPrintersConnections.selectFirstPaired()
-        if (bluetoothConnection == null) {
-            Toast.makeText(this, "No paired Bluetooth printer found", Toast.LENGTH_SHORT).show()
-            return
-        }
-        try {
-            val printer = EscPosPrinter(bluetoothConnection, 203, 48f, 32)
-            printer.printFormattedText(
-                "[C]<u><font size='big'>RECEIPT</font></u>\n" +
-                        "[L]\n" +
-                        "[C]-------------------------------\n" +
-                        "[L]\n" +
-                        "[L]<b>Transaction Details</b>\n" +
-                        "[L]\n" +
-                        "[L]Balance: ${balanceTextView.text}\n" +
-                        "[L]Transaction ID: ${txidTextView.text}\n" +
-                        "[L]Fees: ${feesTextView.text}\n" +
-                        "[L]Confirmations: ${confirmationsTextView.text}\n" +
-                        "[L]Chain: $chain\n" +
-                        "[L]Device ID: $deviceId\n" +
-                        "[L]\n" +
-                        "[C]-------------------------------\n" +
-                        "[C]Thank you for your payment!\n"
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Handle printing errors
-        }
-    }
+    private fun showReceiptDialog(deviceId: String) {
+        val receiptDialog = ReceiptDialogFragment()
 
-    private fun formatPrice(price: BigDecimal, decimalPlaces: Int): String {
-        return price.setScale(decimalPlaces, RoundingMode.HALF_UP).toPlainString()
+        // Pass data to the dialog fragment
+        val args = Bundle()
+        args.putString("receiptTitle", "RECEIPT")
+        args.putString("receiptDetails", "Transaction Details")
+        args.putString("receiptBalance", "Balance: ${balanceTextView.text}")
+        args.putString("receiptTxID", "TxID: ${txidTextView.text}")
+        args.putString("receiptFees", "Fees: ${feesTextView.text}")
+        args.putString("receiptConfirmations", "Confirmations: ${confirmationsTextView.text}")
+        args.putString("receiptChain", "Chain: ${chain}")
+        args.putString("receiptDeviceID", "Device ID: $deviceId")
+        receiptDialog.arguments = args
+
+        receiptDialog.show(supportFragmentManager, "ReceiptDialog")
     }
 
     private fun saveTransaction(balance: Long? = null, txid: String? = null, fees: Long? = null, confirmations: Int = 0, chain: String, message: String? = null) {
@@ -434,5 +439,30 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         lifecycleScope.launch(Dispatchers.IO) {
             db.transactionDao().insert(transaction)
         }
+    }
+
+    private fun showCancelDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.cancel_dialog, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.btnCancel).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.btnOkay).setOnClickListener {
+            dialog.dismiss()
+            navigateToHome()
+        }
+
+        dialog.show()
+    }
+
+    private fun navigateToHome() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+        finish()
     }
 }

@@ -79,6 +79,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.google.truth)
     // others
     //    implementation(libs.web3j)
     //    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))

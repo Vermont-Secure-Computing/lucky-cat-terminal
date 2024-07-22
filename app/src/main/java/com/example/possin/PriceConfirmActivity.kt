@@ -28,5 +28,10 @@ class PriceConfirmActivity : AppCompatActivity() {
             intent.putExtra("MESSAGE", messageEditText.text.toString())
             startActivity(intent)
         }
+
+        val backText: TextView = findViewById(R.id.backText)
+        backText.setOnClickListener {
+            finish() // Navigate back to the previous activity
+        }
     }
 }

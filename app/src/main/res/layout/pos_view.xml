@@ -33,7 +33,18 @@
             android:layout_height="wrap_content"
             android:text="My POS Application"
             android:textSize="20sp"
-            android:textColor="#000000" />
+            android:textColor="#000000"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/homeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Home"
+            android:textSize="20sp"
+            android:textColor="#0000FF"
+            android:clickable="true"
+            android:layout_marginEnd="8dp" />
 
     </LinearLayout>
 
@@ -129,6 +140,5 @@
         <Button android:id="@+id/btnDot" style="@style/CalcButton" android:text="." android:layout_columnWeight="1" />
 
     </GridLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

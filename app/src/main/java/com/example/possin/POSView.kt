@@ -31,6 +31,11 @@ class POSView @JvmOverloads constructor(
         itemPriceInput = findViewById(R.id.itemPriceInput)
         currencySpinner = findViewById(R.id.currencySpinner)
 
+        val homeText: TextView = findViewById(R.id.homeText)
+        homeText.setOnClickListener {
+            context.startActivity(Intent(context, HomeActivity::class.java))
+        }
+
         val buttons = listOf(
             R.id.btn0, R.id.btn00, R.id.btnDot, R.id.btn1, R.id.btn2, R.id.btn3,
             R.id.btn4, R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9,

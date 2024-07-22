@@ -6,23 +6,53 @@
     android:padding="16dp">
 
     <EditText
-        android:id="@+id/edittext_merchant_name"
+        android:id="@+id/edittext_business_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter your name" />
+        android:hint="Enter your business name" />
+
+    <EditText
+        android:id="@+id/edittext_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter your address" />
+
+    <EditText
+        android:id="@+id/edittext_city"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter your city" />
+
+    <EditText
+        android:id="@+id/edittext_state"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter your state (optional)" />
+
+    <EditText
+        android:id="@+id/edittext_zip_code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter your zip code" />
+
+    <EditText
+        android:id="@+id/edittext_country"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter your country" />
 
     <EditText
         android:id="@+id/edittext_merchant_phone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter your phone number"
+        android:hint="Enter your phone number (optional)"
         android:inputType="phone" />
 
     <EditText
         android:id="@+id/edittext_merchant_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter your email"
+        android:hint="Enter your email (optional)"
         android:inputType="textEmailAddress" />
 
     <Button

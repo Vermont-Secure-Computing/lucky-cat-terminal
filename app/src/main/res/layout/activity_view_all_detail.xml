@@ -3,76 +3,150 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
     android:background="#EEE8F1">
 
-    <TextView
-        android:id="@+id/chainTextView"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Chain"
-        android:textSize="16sp"
-        android:textColor="#000"
-        android:padding="8dp"/>
+        android:background="@android:color/transparent"
+        android:padding="16dp"
+        android:layout_marginBottom="30dp">
 
-    <TextView
-        android:id="@+id/dateTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Date"
-        android:textSize="16sp"
-        android:textColor="#000"
-        android:padding="8dp"/>
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/logo"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"/>
 
-    <TextView
-        android:id="@+id/balanceTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Balance"
-        android:textSize="16sp"
-        android:textColor="#000"
-        android:padding="8dp"/>
+        <TextView
+            android:id="@+id/header_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Transaction Details"
+            android:textSize="20sp"
+            android:textColor="#000"
+            android:layout_toEndOf="@id/logo"
+            android:layout_marginStart="8dp"
+            android:layout_centerVertical="true"/>
+    </RelativeLayout>
 
-    <TextView
-        android:id="@+id/txidTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TxID"
-        android:textSize="16sp"
-        android:textColor="#000"
-        android:padding="8dp"/>
+    <LinearLayout
+        android:id="@+id/contentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="#EEE8F1">
 
-    <TextView
-        android:id="@+id/feesTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Fees"
-        android:textSize="16sp"
-        android:textColor="#000"
-        android:padding="8dp"/>
+        <TextView
+            android:id="@+id/chainTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chain"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:padding="8dp"/>
 
-    <TextView
-        android:id="@+id/confirmationsTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Confirmations"
-        android:textSize="16sp"
-        android:textColor="#000"
-        android:padding="8dp"/>
+        <TextView
+            android:id="@+id/dateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:padding="8dp"/>
 
-    <TextView
-        android:id="@+id/timeTextView"
-        android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/balanceTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Balance"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/txidTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TxID"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/feesTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fees"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/confirmationsTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirmations"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/timeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Time"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/messageTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="#000000"
+            android:layout_marginTop="16dp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Time"
-        android:textSize="16sp"
-        android:textColor="#000"
-        android:padding="8dp"/>
-    <TextView
-        android:id="@+id/messageTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="#000000"
-        android:layout_marginTop="16dp" />
+        android:padding="16dp"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/backButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Back"
+                android:textColor="@android:color/white"
+                android:background="@drawable/button_background"
+                android:padding="8dp"
+                android:layout_marginEnd="16dp" />
+
+            <Button
+                android:id="@+id/printButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Print"
+                android:textColor="@android:color/white"
+                android:background="@drawable/button_background"
+                android:padding="8dp" />
+        </LinearLayout>
+
+        <include layout="@layout/receipt_view"
+            android:id="@+id/receiptView"
+            android:visibility="gone" />
+    </FrameLayout>
 </LinearLayout>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/receiptLayout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:padding="16dp"
+    android:elevation="4dp">
+
+    <TextView
+        android:id="@+id/receiptTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RECEIPT"
+        android:textStyle="bold"
+        android:textSize="24sp"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:layout_gravity="center"/>
+
+    <TextView
+        android:id="@+id/receiptDetails"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Transaction Details\n"
+        android:textColor="@android:color/black"
+        android:paddingTop="8dp"/>
+
+    <TextView
+        android:id="@+id/receiptBalance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Balance: "
+        android:textColor="@android:color/black"
+        android:paddingTop="4dp"/>
+
+    <TextView
+        android:id="@+id/receiptTxID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TxID: "
+        android:textColor="@android:color/black"
+        android:paddingTop="4dp"/>
+
+    <TextView
+        android:id="@+id/receiptFees"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fees: "
+        android:textColor="@android:color/black"
+        android:paddingTop="4dp"/>
+
+    <TextView
+        android:id="@+id/receiptConfirmations"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Confirmations: "
+        android:textColor="@android:color/black"
+        android:paddingTop="4dp"/>
+
+    <TextView
+        android:id="@+id/receiptChain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chain: "
+        android:textColor="@android:color/black"
+        android:paddingTop="4dp"/>
+
+    <TextView
+        android:id="@+id/receiptDeviceID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Device ID: "
+        android:textColor="@android:color/black"
+        android:paddingTop="4dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Thank you for your payment!"
+        android:textColor="@android:color/black"
+        android:paddingTop="16dp"
+        android:gravity="center"
+        android:layout_gravity="center"/>
+
+    <Button
+        android:id="@+id/printAgainButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Print Again"
+        android:textColor="@android:color/white"
+        android:background="@drawable/button_background"
+        android:padding="8dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"/>
+</LinearLayout>

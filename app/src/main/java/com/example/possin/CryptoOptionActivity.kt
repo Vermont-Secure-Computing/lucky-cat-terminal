@@ -1,14 +1,17 @@
 package com.example.possin
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
+import android.view.animation.ScaleAnimation
+import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.possin.R
 import com.example.possin.network.RetrofitClient
 import com.example.possin.model.ConversionResponse
 import com.example.possin.network.ConversionRequestBody
@@ -21,7 +24,6 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
-
 class CryptoOptionActivity : AppCompatActivity() {
 
     private var bitcoinManager: BitcoinManager? = null
@@ -29,7 +31,8 @@ class CryptoOptionActivity : AppCompatActivity() {
     private var ethereumManager: EthereumManager? = null
     private var dogecoinManager: DogecoinManager? = null
     private var woodcoinManager: WoodcoinManager? = null
-    //     private var dashManager: DashManager? = null
+    //    private var dashManager: DashManager? = null
+    private var tronManager: TronManager? = null
     private lateinit var selectedCurrencyCode: String
     private lateinit var message: String
 
@@ -48,38 +51,88 @@ class CryptoOptionActivity : AppCompatActivity() {
         xPubs["Ethereum"]?.let { ethereumManager = EthereumManager(this, it) }
         xPubs["Dogecoin"]?.let { dogecoinManager = DogecoinManager(this, it) }
         xPubs["Woodcoin"]?.let { woodcoinManager = WoodcoinManager(this, it) }
-        // xPubs["Dash"]?.let { dashManager = DashManager(this, it) }
+//        xPubs["Dash"]?.let { dashManager = DashManager(this, it) }
+        xPubs["USDT-Tron"]?.let { tronManager = TronManager(this, it) }
 
         // Assuming selectedCurrencyCode is obtained from POSView (e.g., from a Spinner or other input)
         selectedCurrencyCode = intent.getStringExtra("CURRENCY_CODE") ?: "BTC"
 
-        val btnBTC = findViewById<Button>(R.id.btnBTC)
-        val btnLTC = findViewById<Button>(R.id.btnLTC)
-        val btnDOGE = findViewById<Button>(R.id.btnDOGE)
-        val btnETH = findViewById<Button>(R.id.btnETH)
-        val btnXMR = findViewById<Button>(R.id.btnXMR)
-        val btnUSDT = findViewById<Button>(R.id.btnUSDT)
-        val btnLOG = findViewById<Button>(R.id.btnLOG)
-        val btnDASH = findViewById<Button>(R.id.btnDASH)
+        val buttonContainer: LinearLayout = findViewById(R.id.buttonContainer)
 
-        btnBTC.setOnClickListener { handleBTCClick(price) }
-        btnLTC.setOnClickListener { handleLTCClick(price) }
-        btnETH.setOnClickListener { handleETHClick(price) }
-        btnDOGE.setOnClickListener { handleDOGEClick(price) }
-        btnDASH.setOnClickListener { /* Handle DASH */ }
-        btnXMR.setOnClickListener { /* Handle XMR */ }
-        btnUSDT.setOnClickListener { /* Handle USDT */ }
-        btnLOG.setOnClickListener { handleLOGClick(price) }
+        addImageButton(buttonContainer, R.drawable.bitcoin_logo, xPubs.containsKey("Bitcoin")) { handleBTCClick(price) }
+        addImageButton(buttonContainer, R.drawable.litecoin_new_logo, xPubs.containsKey("Litecoin")) { handleLTCClick(price) }
+        addImageButton(buttonContainer, R.drawable.ethereum_logo, xPubs.containsKey("Ethereum")) { handleETHClick(price) }
+        addImageButton(buttonContainer, R.drawable.dogecoin_logo, xPubs.containsKey("Dogecoin")) { handleDOGEClick(price) }
+//        addImageButton(buttonContainer, R.drawable.dashcoin_logo, xPubs.containsKey("Dash")) { handleDashClick(price) }
+        addImageButton(buttonContainer, R.drawable.tether_logo, xPubs.containsKey("USDT-Tron")) { handleUSDTClick(price) }
 
-        // Set visibility based on XPUB availability
-        btnBTC.visibility = if (xPubs.containsKey("Bitcoin")) View.VISIBLE else View.GONE
-        btnLTC.visibility = if (xPubs.containsKey("Litecoin")) View.VISIBLE else View.GONE
-        btnETH.visibility = if (xPubs.containsKey("Ethereum")) View.VISIBLE else View.GONE
-        btnDOGE.visibility = if (xPubs.containsKey("Dogecoin")) View.VISIBLE else View.GONE
-        btnDASH.visibility = if (xPubs.containsKey("Dash")) View.VISIBLE else View.GONE
-        btnXMR.visibility = View.GONE // Assuming no XPUB required for XMR
-        btnUSDT.visibility = View.GONE // Assuming no XPUB required for USDT
-        btnLOG.visibility = if (xPubs.containsKey("Woodcoin")) View.VISIBLE else View.GONE
+        val backText: TextView = findViewById(R.id.backText)
+        backText.setOnClickListener {
+            finish() // Navigate back to the previous activity
+        }
+    }
+
+    private fun addImageButton(container: LinearLayout, imageResId: Int, isVisible: Boolean, onClick: () -> Unit) {
+        val originalBitmap = BitmapFactory.decodeResource(resources, imageResId)
+        val targetSize = 200 // Target size in pixels for the image before scaling down
+        val resizedBitmap = Bitmap.createScaledBitmap(
+            originalBitmap,
+            targetSize,
+            targetSize,
+            true
+        )
+        val scaledBitmap = Bitmap.createScaledBitmap(
+            resizedBitmap,
+            targetSize / 2,
+            targetSize / 2,
+            true
+        )
+
+        val button = ImageButton(this).apply {
+            this.setImageBitmap(scaledBitmap)
+            this.visibility = if (isVisible) View.VISIBLE else View.GONE
+            setOnClickListener { onClick() }
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                width = LinearLayout.LayoutParams.WRAP_CONTENT
+                height = LinearLayout.LayoutParams.WRAP_CONTENT
+                setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
+            }
+            setBackgroundResource(R.drawable.button_selector)
+
+            // Set press animation
+            setOnTouchListener { v, event ->
+                when (event.action) {
+                    android.view.MotionEvent.ACTION_DOWN -> {
+                        val scaleAnimation = ScaleAnimation(
+                            1f, 0.9f, 1f, 0.9f,
+                            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
+                            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f
+                        ).apply {
+                            duration = 150
+                            fillAfter = true
+                        }
+                        this.startAnimation(scaleAnimation)
+                    }
+                    android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                        val scaleAnimation = ScaleAnimation(
+                            0.9f, 1f, 0.9f, 1f,
+                            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
+                            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f
+                        ).apply {
+                            duration = 150
+                            fillAfter = true
+                        }
+                        this.startAnimation(scaleAnimation)
+                    }
+                }
+                false
+            }
+        }
+        container.addView(button)
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
     }
 
     private fun loadXPubsFromSettings(): Map<String, String> {
@@ -90,19 +143,19 @@ class CryptoOptionActivity : AppCompatActivity() {
         }
 
         val xPubs = mutableMapOf<String, String>()
-        properties.getProperty("Bitcoin_xpub")?.let { xPubs["Bitcoin"] = it }
-        properties.getProperty("Litecoin_xpub")?.let { xPubs["Litecoin"] = it }
-        properties.getProperty("Dogecoin_xpub")?.let { xPubs["Dogecoin"] = it }
-        properties.getProperty("Ethereum_xpub")?.let { xPubs["Ethereum"] = it }
-        properties.getProperty("Woodcoin_xpub")?.let { xPubs["Woodcoin"] = it }
-        // properties.getProperty("Dash_xpub")?.let { xPubs["Dash"] = it }
+        properties.stringPropertyNames().forEach { key ->
+            if (key.endsWith("_value")) {
+                val cryptoKey = key.substringBefore("_value")
+                properties.getProperty(key)?.let { xPubs[cryptoKey] = it }
+            }
+        }
 
         return xPubs
     }
 
     private fun handleBTCClick(price: String) {
         bitcoinManager?.let { manager ->
-            val (address, index) = manager.getAddress()
+            val (address, index) = if (BitcoinManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
 
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
@@ -116,7 +169,7 @@ class CryptoOptionActivity : AppCompatActivity() {
 
     private fun handleLTCClick(price: String) {
         litecoinManager?.let { manager ->
-            val (address, index) = manager.getAddress()
+            val (address, index) = if (LitecoinManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
 
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
@@ -130,7 +183,7 @@ class CryptoOptionActivity : AppCompatActivity() {
 
     private fun handleETHClick(price: String) {
         ethereumManager?.let { manager ->
-            val (address, index) = manager.getAddress()
+            val (address, index) = if (EthereumManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
 
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
@@ -144,7 +197,7 @@ class CryptoOptionActivity : AppCompatActivity() {
 
     private fun handleDOGEClick(price: String) {
         dogecoinManager?.let { manager ->
-            val (address, index) = manager.getAddress()
+            val (address, index) = if (DogecoinManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
 
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
@@ -156,6 +209,36 @@ class CryptoOptionActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleUSDTClick(price: String) {
+        tronManager?.let { manager ->
+            val (address, index) = if (TronManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
+
+            val numericPrice = price.filter { it.isDigit() || it == '.' }
+
+            postConversionApi(numericPrice, selectedCurrencyCode, address, "USDT-TRON", R.drawable.tether_logo) { feeStatus, status, formattedRate ->
+                startGenerateQRActivity(address, formattedRate, R.drawable.tether_logo, "USDT-TRON", index, feeStatus, status, "USDT-Tron")
+            }
+        } ?: run {
+            Toast.makeText(this, "USDT Tron Manager not initialized", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+//    private fun handleDashClick(price: String) {
+//        dashManager?.let { manager ->
+//            val (address, index) = if (DashManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
+//
+//            val numericPrice = price.filter { it.isDigit() || it == '.' }
+//
+//            Log.d("ADDRESS", address)
+//
+////            postConversionApi(numericPrice, selectedCurrencyCode, address, "DASH", R.drawable.dashcoin_logo) { feeStatus, status, formattedRate ->
+////                startGenerateQRActivity(address, formattedRate, R.drawable.dashcoin_logo, "Dash", index, feeStatus, status, "Dash")
+////            }
+//        } ?: run {
+//            Toast.makeText(this, "Dash Manager not initialized", Toast.LENGTH_SHORT).show()
+//        }
+//    }
+
     private fun handleLOGClick(price: String) {
         woodcoinManager?.let {
             val address = it.getAddress()
@@ -165,7 +248,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             Log.d("ADDRESS", address)
 
             // Call the API to get the conversion rate
-            // postConversionApi(numericPrice, selectedCurrencyCode, address, "DOGE", R.drawable.dogecoin_logo)
+            // postConversionApi(numericPrice, selectedCurrencyCode, address, "LOG", R.drawable.woodcoin_logo)
         } ?: run {
             Toast.makeText(this, "Woodcoin Manager not initialized", Toast.LENGTH_SHORT).show()
         }

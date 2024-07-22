@@ -1,6 +1,7 @@
 package com.example.possin
 
 import android.os.Bundle
+import android.widget.Button
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -17,6 +18,12 @@ class ViewAllActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_all)
+
+        // Set up back button
+        val backButton = findViewById<Button>(R.id.backButton)
+        backButton.setOnClickListener {
+            finish()
+        }
 
         // Set up RecyclerView
         val transactionsRecyclerView = findViewById<RecyclerView>(R.id.transactionsRecyclerView)
