@@ -1,51 +1,74 @@
 package com.example.possin
 
-import android.content.Context
 import android.content.Intent
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
+import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
+import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import com.google.common.truth.Truth.assertThat
+import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
 
-    private lateinit var propertiesFile: File
-
     @Before
     fun setUp() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        propertiesFile = File(context.filesDir, "config.properties")
-        propertiesFile.delete() // Ensure file is deleted before each test
+        val intent = Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
+        ActivityScenario.launch<MainActivity>(intent)
     }
 
     @Test
-    fun testOnboardingViewShownWhenPropertiesFileDoesNotExist() {
-        ActivityScenario.launch(MainActivity::class.java).use {
-            onView(withId(R.id.checkbox_bitcoin)).check(matches(isDisplayed()))
-            onView(withId(R.id.checkbox_ethereum)).check(matches(isDisplayed()))
-        }
+    fun testHeaderIsDisplayed() {
+        onView(withId(R.id.top_view)).check(matches(isDisplayed()))
+        onView(withId(R.id.header)).check(matches(isDisplayed()))
+        onView(withId(R.id.logo_image)).check(matches(isDisplayed()))
+        onView(withId(R.id.submit_text)).check(matches(isDisplayed()))
     }
 
     @Test
-    fun testHomeActivityStartedWhenPropertiesFileExists() {
-        // Create a non-empty properties file
-        propertiesFile.writeText("cryptocurrencies=Bitcoin,Ethereum")
+    fun testSearchBarIsDisplayed() {
+        onView(withId(R.id.search_bar)).check(matches(isDisplayed()))
+    }
 
-        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                val expectedIntent = Intent(activity, HomeActivity::class.java)
-                val actualIntent = activity.intent
-                assertThat(actualIntent.component).isEqualTo(expectedIntent.component)
-            }
-        }
+    @Test
+    fun testSelectedCryptocurrenciesContainerIsDisplayed() {
+        onView(withId(R.id.selected_cryptocurrencies_container)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun testRecyclerViewIsDisplayed() {
+        onView(withId(R.id.recycler_view)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun testAddCryptocurrency() {
+        onView(withId(R.id.search_bar)).perform(typeText("Bitcoin"), closeSoftKeyboard())
+        onView(withId(R.id.recycler_view)).perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+        onView(withId(R.id.selected_cryptocurrencies_container)).check(matches(hasDescendant(withText("Bitcoin"))))
+    }
+
+    @Test
+    fun testSubmitButtonWithoutSelection() {
+        onView(withId(R.id.submit_text)).perform(click())
+        onView(withText("Please select at least one cryptocurrency.")).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun testSubmitButtonWithSelection() {
+        onView(withId(R.id.search_bar)).perform(typeText("Bitcoin"), closeSoftKeyboard())
+        onView(withId(R.id.recycler_view)).perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+        onView(withId(R.id.submit_text)).perform(click())
+        onView(withId(R.id.xpub_input_container)).check(matches(isDisplayed()))
     }
 }

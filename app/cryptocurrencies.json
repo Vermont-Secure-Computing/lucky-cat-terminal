@@ -1,0 +1,34 @@
+{
+  "cryptocurrencies": [
+    {
+      "name": "Bitcoin",
+      "shortname": "BTC",
+      "chain": "Bitcoin",
+      "logo": "bitcoin_logo.png"
+    },
+    {
+      "name": "Ethereum",
+      "shortname": "ETH",
+      "chain": "Ethereum",
+      "logo": "ethereum_logo.png"
+    },
+    {
+      "name": "Litecoin",
+      "shortname": "LTC",
+      "chain": "Litecoin",
+      "logo": "litecoin_new_logo.png"
+    },
+    {
+      "name": "Dogecoin",
+      "shortname": "DOGE",
+      "chain": "Dogecoin",
+      "logo": "dogecoin_logo.png"
+    },
+    {
+      "name": "Tether",
+      "shortname": "USDT",
+      "chain": "Tron",
+      "logo": "tether_logo.png"
+    }
+  ]
+}

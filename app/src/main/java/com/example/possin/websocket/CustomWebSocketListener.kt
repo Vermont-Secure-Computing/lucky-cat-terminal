@@ -11,7 +11,7 @@ class CustomWebSocketListener(
     private val address: String,
     private val amount: String,
     private val chain: String,
-    private val checkBalance: String,
+    private val type: String,
     private val callback: PaymentStatusCallback,
     private val addressIndex: Int,
     private val managerType: String
@@ -30,7 +30,7 @@ class CustomWebSocketListener(
             put("address", address)
             put("amount", amount)
             put("chain", chain)
-            put("type", checkBalance)
+            put("type", type)
         }
 
         // Send the JSON object as a string
@@ -43,11 +43,13 @@ class CustomWebSocketListener(
         val jsonObject = JSONObject(text)
         val status = jsonObject.getString("status")
         if (status == "paid") {
+            println(jsonObject.getLong("balance"))
             val balance = jsonObject.getLong("balance")
             val txid = jsonObject.getString("txid")
             val fees = jsonObject.getLong("fees")
             val confirmations = jsonObject.getInt("confirmations")
             val feeStatus = jsonObject.getString("feeStatus")
+            Log.d("BALANCE_CUSTOM", balance.toString())
             callback.onPaymentStatusPaid(status, balance, txid, fees, confirmations, feeStatus, chain, addressIndex, managerType)
         }
     }

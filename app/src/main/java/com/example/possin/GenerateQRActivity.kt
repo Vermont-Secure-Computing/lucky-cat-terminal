@@ -2,61 +2,59 @@ package com.example.possin
 
 import android.Manifest
 import android.app.AlertDialog
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
-import androidx.core.content.ContextCompat
-import androidx.core.app.ActivityCompat
 import android.content.pm.PackageManager
-import android.os.CountDownTimer
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
 import android.media.MediaPlayer
-import android.print.PrintManager
-import android.os.Bundle
 import android.os.Build
+import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.TextView
 import android.widget.LinearLayout
-import androidx.lifecycle.lifecycleScope
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.possin.database.AppDatabase
+import com.example.possin.model.Transaction
 import com.example.possin.websocket.CustomWebSocketListener
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
-import com.example.possin.database.AppDatabase
-import com.example.possin.model.Transaction
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import okhttp3.WebSocket
-import com.dantsu.escposprinter.EscPosPrinter
-import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
-import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
 import java.math.BigDecimal
 import java.math.RoundingMode
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import java.net.URLEncoder
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentStatusCallback {
 
     private lateinit var timerTextView: TextView
+    private lateinit var gatheringBlocksTextView: TextView
     private lateinit var countDownTimer: CountDownTimer
     private lateinit var qrCodeImageView: ImageView
     private lateinit var client: OkHttpClient
@@ -73,6 +71,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     private lateinit var chain: String
     private lateinit var txid: String
     private lateinit var message: String
+    private lateinit var cancelText: TextView
 
     private lateinit var db: AppDatabase
 
@@ -98,17 +97,25 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
         message = intent.getStringExtra("MESSAGE") ?: ""
 
-        val formattedPrice = if (currency == "USDT-TRON") {
+        Log.d("CURRENCY", currency)
+        Log.d("PRICE", price)
+
+
+        val formattedPrice = if (currency == "TRON") {
             BigDecimal(price).setScale(6, RoundingMode.HALF_UP).toPlainString()
         } else {
             price
         }
 
+        Log.d("DogeAddress", address)
+        Log.d("DogeChain", currency)
+        Log.d("Price", formattedPrice)
+
         val uri = when (currency) {
             "LTC" -> "litecoin:$address?amount=$formattedPrice"
-            "DOGE" -> "dogecoin:$address?amount=$formattedPrice"
+            "DOGE" -> "dogecoin:${urlEncode(address)}?amount=${urlEncode(formattedPrice)}"
             "ETH" -> "ethereum:$address?amount=$formattedPrice"
-            "USDT-TRON" -> "tron:$address?amount=$formattedPrice"
+            "TRON" -> "tron:$address?amount=$formattedPrice"
             else -> "bitcoin:$address?amount=$formattedPrice"
         }
 
@@ -117,10 +124,14 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
         qrCodeImageView = findViewById(R.id.qrCodeImageView)
         val qrCodeBitmap = generateQRCodeWithLogo(uri, logoResId)
+//        val qrCodeBitmap = generateQRCode(uri)
         qrCodeImageView.setImageBitmap(qrCodeBitmap)
 
         // Initialize the timer TextView
         timerTextView = findViewById(R.id.timerTextView)
+
+        // Initialize the gathering blocks TextView
+        gatheringBlocksTextView = findViewById(R.id.gatheringBlocksTextView)
 
         // Initialize the new TextViews
         balanceTextView = findViewById(R.id.balanceTextView)
@@ -130,6 +141,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         confirmationsLayout = findViewById(R.id.confirmationsLayout)
         printButton = findViewById(R.id.printButton)
         printButton.setOnClickListener {
+            handler.removeCallbacksAndMessages(null)
+            gatheringBlocksTextView.visibility = View.GONE
             showReceiptDialog(deviceId)
         }
 
@@ -147,7 +160,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         requestBluetoothPermissions()
 
         // Start the 30-minute countdown timer
-        startTimer(10 * 60 * 1000) // 10 minutes in milliseconds
+        startTimer(30 * 60 * 1000) // 10 minutes in milliseconds
 
         // Initialize WebSocket connection
         initializeWebSocket(address, formattedPrice, currency, addressIndex, managerType)
@@ -166,10 +179,14 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         }
 
         // Handle cancel click
-        val cancelText: TextView = findViewById(R.id.cancelText)
+        cancelText = findViewById(R.id.cancelText)
         cancelText.setOnClickListener {
             showCancelDialog()
         }
+    }
+
+    private fun urlEncode(value: String): String {
+        return URLEncoder.encode(value, "UTF-8")
     }
 
     private fun requestBluetoothPermissions() {
@@ -245,6 +262,19 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         return overlayBitmap(qrCodeBitmap, logo, overlaySize)
     }
 
+    private fun generateQRCode(text: String): Bitmap {
+        val size = 600
+        val bitMatrix: BitMatrix = MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, size, size)
+        val qrCodeBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565)
+
+        for (x in 0 until size) {
+            for (y in 0 until size) {
+                qrCodeBitmap.setPixel(x, y, if (bitMatrix.get(x, y)) Color.BLACK else Color.WHITE)
+            }
+        }
+        return qrCodeBitmap
+    }
+
     private fun overlayBitmap(qrCodeBitmap: Bitmap, logo: Bitmap, overlaySize: Int): Bitmap {
         val combined = Bitmap.createBitmap(qrCodeBitmap.width, qrCodeBitmap.height, qrCodeBitmap.config)
         val canvas = Canvas(combined)
@@ -259,22 +289,67 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     }
 
 
+    private lateinit var websocketParams: WebSocketParams
+
+    data class WebSocketParams(
+        val address: String,
+        val amount: String,
+        val chain: String,
+        val addressIndex: Int,
+        val managerType: String
+    )
+
     private fun initializeWebSocket(address: String, amount: String, chain: String, addressIndex: Int, managerType: String) {
+        websocketParams = WebSocketParams(address, amount, chain, addressIndex, managerType)
+        connectWebSocket("checkBalance")
+    }
+
+    private fun connectWebSocket(type: String) {
+        Log.d("WebSocket body", websocketParams.address)
+        Log.d("WebSocket body", websocketParams.amount)
+        Log.d("WebSocket body", websocketParams.chain)
+        Log.d("WebSocket body", websocketParams.addressIndex.toString())
+        Log.d("WebSocket body", websocketParams.managerType)
+
         client = OkHttpClient()
 
         val request = Request.Builder()
             .url("ws://198.7.125.183/ws")
             .build()
 
-        val listener = CustomWebSocketListener("ltc1qp4zm5e0a2s36cw5h5gfr64lzverrxvzn0ef9kg", "0.19469647", chain, "checkBalance", this, addressIndex, managerType)
+        val listener = CustomWebSocketListener(
+            websocketParams.address,
+            websocketParams.amount,
+            websocketParams.chain,
+            type,
+            this,
+            websocketParams.addressIndex,
+            websocketParams.managerType
+        )
 
         webSocket = client.newWebSocket(request, listener)
-
-        client.dispatcher.executorService.shutdown()
     }
 
     private fun closeWebSocket() {
         webSocket.close(1000, "Payment received")
+        cancelText.visibility = View.GONE
+        timerTextView.visibility = View.GONE
+        gatheringBlocksTextView.visibility = View.VISIBLE
+        startGatheringBlocksAnimation()
+        connectWebSocket("cancel")
+    }
+
+    private fun startGatheringBlocksAnimation() {
+        val initialText = "Gathering Blocks"
+        val dots = listOf("", ".", "..", "...")
+        var dotIndex = 0
+        handler.post(object : Runnable {
+            override fun run() {
+                gatheringBlocksTextView.text = "$initialText${dots[dotIndex]}"
+                dotIndex = (dotIndex + 1) % dots.size
+                handler.postDelayed(this, 500) // Change dots every 500ms
+            }
+        })
     }
 
     override fun onDestroy() {
@@ -288,20 +363,31 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             if (::qrCodeImageView.isInitialized) {
                 qrCodeImageView.setImageBitmap(null)
                 closeWebSocket()
+                Log.d("BALANCE", balance.toString())
+                Log.d("FEES", fees.toString())
 
                 // Update the TextViews with the received data
-                val formattedBalance = if (chain == "USDT-TRON") {
-                    String.format("%.6f", balance.toDouble() / 1000000)
+                // Convert balance and fees to their correct values
+                val formattedBalance = if (chain == "TRON") {
+                    String.format("%.6f", balance.toDouble() / 1_000_000)
                 } else {
-                    String.format("%.8f", balance.toDouble() / 100000000)
+                    String.format("%.8f", balance.toDouble() / 100_000_000)
                 }
+
+                val formattedFees = if (chain == "TRON") {
+                    String.format("%.6f", fees.toDouble() / 1_000_000)
+                } else {
+                    String.format("%.8f", fees.toDouble() / 100_000_000)
+                }
+
+                // Update the TextViews with the received data
                 balanceTextView.text = "Amount: $formattedBalance"
                 balanceTextView.visibility = TextView.VISIBLE
                 txidTextView.text = "Transaction ID: $txid"
                 txidTextView.visibility = TextView.VISIBLE
-                feesTextView.text = "Fees: ${String.format("%.8f", fees.toDouble() / 100000000)}"
+                feesTextView.text = "Fees: $formattedFees"
                 feesTextView.visibility = TextView.VISIBLE
-                confirmationsTextView.text = "$confirmations"
+                confirmationsTextView.text = "Confirmations: $confirmations"
                 confirmationsTextView.visibility = TextView.VISIBLE
                 confirmationsLayout.visibility = View.VISIBLE
 
@@ -321,12 +407,14 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
                 if (feeStatus == "Fee is okay" || confirmations > 0) {
                     saveTransaction(balance, txid, fees, confirmations, chain, message)
+                    printButton.visibility = View.VISIBLE
                 }
 
                 // Show the print button if there is at least one confirmation
-                if (confirmations > 0) {
-                    printButton.visibility = View.VISIBLE
-                }
+//                if (confirmations > 0) {
+//                    printButton.visibility = View.VISIBLE
+//                }
+
             }
         }
     }

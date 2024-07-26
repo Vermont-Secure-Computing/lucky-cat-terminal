@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="dark_gray">#A9A9A9</color>
     <color name="colorPrimary">#6200EE</color>
+    <color name="tapeRed">#bc0120</color>
 </resources>

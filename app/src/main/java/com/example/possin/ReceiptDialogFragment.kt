@@ -1,11 +1,14 @@
 package com.example.possin
 
 import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.animation.AnimatorListenerAdapter
+import android.content.Intent
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -101,13 +104,15 @@ class ReceiptDialogFragment : DialogFragment() {
         // Show the print again button
         printAgainButton.visibility = View.VISIBLE
         printAgainButton.setOnClickListener {
-            performPrintCopies(1, "Owner's Copy")
+            performPrintCopies(1, "Owner's Copy") {
+                startActivity(Intent(activity, HomeActivity::class.java))
+            }
             printAgainButton.visibility = View.GONE // Hide the print again button
             startPrintAnimation(receiptLayout, ::dismiss)
         }
     }
 
-    private fun performPrintCopies(copies: Int, copyType: String) {
+    private fun performPrintCopies(copies: Int, copyType: String, onComplete: () -> Unit = {}) {
         val bluetoothConnection = BluetoothPrintersConnections.selectFirstPaired()
         if (bluetoothConnection == null) {
             Toast.makeText(activity, "No paired Bluetooth printer found", Toast.LENGTH_SHORT).show()
@@ -136,6 +141,7 @@ class ReceiptDialogFragment : DialogFragment() {
                             "[C]Thank you for your payment!\n"
                 )
             }
+            onComplete()
         } catch (e: Exception) {
             e.printStackTrace()
             // Handle printing errors

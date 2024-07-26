@@ -24,6 +24,7 @@
                 <map>
                   <entry key="Duration" value="90" />
                   <entry key="H10 H10" value="120" />
+                  <entry key="POS_API_34" value="120" />
                   <entry key="Small_Phone_API_34" value="120" />
                   <entry key="Tests" value="360" />
                 </map>

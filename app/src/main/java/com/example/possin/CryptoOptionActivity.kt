@@ -52,7 +52,7 @@ class CryptoOptionActivity : AppCompatActivity() {
         xPubs["Dogecoin"]?.let { dogecoinManager = DogecoinManager(this, it) }
         xPubs["Woodcoin"]?.let { woodcoinManager = WoodcoinManager(this, it) }
 //        xPubs["Dash"]?.let { dashManager = DashManager(this, it) }
-        xPubs["USDT-Tron"]?.let { tronManager = TronManager(this, it) }
+        xPubs["Tether"]?.let { tronManager = TronManager(this, it) }
 
         // Assuming selectedCurrencyCode is obtained from POSView (e.g., from a Spinner or other input)
         selectedCurrencyCode = intent.getStringExtra("CURRENCY_CODE") ?: "BTC"
@@ -64,7 +64,7 @@ class CryptoOptionActivity : AppCompatActivity() {
         addImageButton(buttonContainer, R.drawable.ethereum_logo, xPubs.containsKey("Ethereum")) { handleETHClick(price) }
         addImageButton(buttonContainer, R.drawable.dogecoin_logo, xPubs.containsKey("Dogecoin")) { handleDOGEClick(price) }
 //        addImageButton(buttonContainer, R.drawable.dashcoin_logo, xPubs.containsKey("Dash")) { handleDashClick(price) }
-        addImageButton(buttonContainer, R.drawable.tether_logo, xPubs.containsKey("USDT-Tron")) { handleUSDTClick(price) }
+        addImageButton(buttonContainer, R.drawable.tether_logo, xPubs.containsKey("Tether")) { handleUSDTClick(price) }
 
         val backText: TextView = findViewById(R.id.backText)
         backText.setOnClickListener {
@@ -215,8 +215,8 @@ class CryptoOptionActivity : AppCompatActivity() {
 
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
-            postConversionApi(numericPrice, selectedCurrencyCode, address, "USDT-TRON", R.drawable.tether_logo) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.tether_logo, "USDT-TRON", index, feeStatus, status, "USDT-Tron")
+            postConversionApi(numericPrice, selectedCurrencyCode, address, "TRON", R.drawable.tether_logo) { feeStatus, status, formattedRate ->
+                startGenerateQRActivity(address, formattedRate, R.drawable.tether_logo, "TRON", index, feeStatus, status, "Tron")
             }
         } ?: run {
             Toast.makeText(this, "USDT Tron Manager not initialized", Toast.LENGTH_SHORT).show()

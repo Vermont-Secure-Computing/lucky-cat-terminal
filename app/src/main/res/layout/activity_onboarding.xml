@@ -1,56 +1,98 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:layout_marginTop="16dp"
+    android:background="@android:color/white"
     tools:context=".MainActivity">
 
-    <CheckBox
-        android:id="@+id/checkbox_bitcoin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Bitcoin" />
+    <!-- Top view with the same color as the header -->
+    <View
+        android:id="@+id/top_view"
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:background="@color/tapeRed"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <CheckBox
-        android:id="@+id/checkbox_ethereum"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ethereum" />
+        android:padding="16dp"
+        android:background="@color/tapeRed"
+        android:elevation="4dp"
+        app:layout_constraintTop_toBottomOf="@id/top_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <CheckBox
-        android:id="@+id/checkbox_litecoin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Litecoin" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
 
-    <CheckBox
-        android:id="@+id/checkbox_dogecoin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Dogecoin" />
+        <ImageView
+            android:id="@+id/logo_image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/logo"
+            app:layout_constraintEnd_toStartOf="@+id/guideline"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-    <CheckBox
-        android:id="@+id/checkbox_dash"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Dash" />
+        <TextView
+            android:id="@+id/submit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Submit"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:paddingStart="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <CheckBox
-        android:id="@+id/checkbox_usdt"
-        android:layout_width="wrap_content"
+    <AutoCompleteTextView
+        android:id="@+id/search_bar"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="USDT-Tron" />
+        android:hint="Search for cryptocurrency"
+        android:background="@drawable/bordered_edit_text"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <CheckBox
-        android:id="@+id/checkbox_woodcoin"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/selected_cryptocurrencies_container"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Woodcoin" />
+        android:orientation="horizontal"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        app:layout_constraintTop_toBottomOf="@id/search_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
-        android:id="@+id/button_submit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Submit" />
-</LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintTop_toBottomOf="@id/selected_cryptocurrencies_container"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="vertical" />
+</androidx.constraintlayout.widget.ConstraintLayout>
