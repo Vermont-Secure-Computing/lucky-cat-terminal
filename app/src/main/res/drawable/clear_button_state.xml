@@ -1,0 +1,4 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_empty="true" android:drawable="@null" /> <!-- No drawable when text is empty -->
+    <item android:drawable="@drawable/ic_clear_search" /> <!-- Clear button when text is present -->
+</selector>

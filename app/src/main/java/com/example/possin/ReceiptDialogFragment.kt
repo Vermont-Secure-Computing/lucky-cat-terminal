@@ -6,6 +6,8 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,10 +62,10 @@ class ReceiptDialogFragment : DialogFragment() {
         receiptChain.text = args?.getString("receiptChain")
         receiptDeviceID.text = args?.getString("receiptDeviceID")
 
-        // Print the first copy (Customer Copy)
+
         performPrintCopies(1, "Customer Copy")
 
-        // Start the first animation
+
         startPrintAnimation(receiptLayout, ::onFirstAnimationEnd)
 
         return view
@@ -104,10 +106,12 @@ class ReceiptDialogFragment : DialogFragment() {
         // Show the print again button
         printAgainButton.visibility = View.VISIBLE
         printAgainButton.setOnClickListener {
-            performPrintCopies(1, "Owner's Copy") {
-                startActivity(Intent(activity, HomeActivity::class.java))
-            }
-            printAgainButton.visibility = View.GONE // Hide the print again button
+            Handler(Looper.getMainLooper()).postDelayed({
+                performPrintCopies(1, "Owner's Copy") {
+                    startActivity(Intent(activity, HomeActivity::class.java))
+                    dismissAllowingStateLoss() // Use commitAllowingStateLoss to prevent IllegalStateException
+                }
+            }, 1700)
             startPrintAnimation(receiptLayout, ::dismiss)
         }
     }

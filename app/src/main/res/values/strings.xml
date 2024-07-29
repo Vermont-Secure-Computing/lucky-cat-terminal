@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Possin</string>
+    <string-array name="type_array">
+        <item>xpub</item>
+        <item>address</item>
+    </string-array>
 </resources>
