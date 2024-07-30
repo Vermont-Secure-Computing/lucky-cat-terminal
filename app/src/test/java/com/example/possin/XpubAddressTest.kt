@@ -49,7 +49,7 @@ class XpubAddressTest {
         activity.filterCryptocurrencies("Bitcoin")
         activity.populateCryptocurrencyContainer()
 
-        val filteredList = activity.filteredCryptocurrencies
+        val filteredList = activity.getFilteredCryptocurrencies()
         assertEquals(1, filteredList.size)
         assertEquals("Bitcoin", filteredList[0].name)
     }

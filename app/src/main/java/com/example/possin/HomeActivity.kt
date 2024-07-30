@@ -22,8 +22,6 @@ import java.io.File
 import java.io.InputStreamReader
 import java.util.Properties
 
-
-
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var merchantPropertiesFile: File
@@ -43,8 +41,14 @@ class HomeActivity : AppCompatActivity() {
         cryptocurrencyNames = loadCryptocurrencyNames()
 
         // Check if the properties files exist and have required inputs
-        if (!propertiesFilesExist() || !inputsExist()) {
-            showFillUpProfileDialog()
+        if (!propertiesFilesExist()) {
+            if (!merchantPropertiesFile.exists()) {
+                showFillUpProfileDialog(MerchantActivity::class.java)
+            } else if (!configPropertiesFile.exists() || configPropertiesContainsDefaultKey()) {
+                showFillUpProfileDialog(XpubAddress::class.java)
+            }
+        } else if (!inputsExist()) {
+            showFillUpProfileDialog(MerchantActivity::class.java)
         }
 
         transactionsCardView = findViewById(R.id.transactionsCardView)
@@ -122,6 +126,14 @@ class HomeActivity : AppCompatActivity() {
         return merchantPropertiesFile.exists() && configPropertiesFile.exists()
     }
 
+    private fun configPropertiesContainsDefaultKey(): Boolean {
+        val configProperties = Properties()
+        if (configPropertiesFile.exists()) {
+            configProperties.load(configPropertiesFile.inputStream())
+        }
+        return configProperties.getProperty("default_key") != null
+    }
+
     private fun inputsExist(): Boolean {
         val merchantProperties = Properties()
         if (merchantPropertiesFile.exists()) {
@@ -136,9 +148,8 @@ class HomeActivity : AppCompatActivity() {
 
         var addressOrXpubExists = false
         for (cryptoName in cryptocurrencyNames) {
-            val address = configProperties.getProperty("${cryptoName}_type", "")
-            val xpub = configProperties.getProperty("${cryptoName}_type", "")
-            if (address.isNotEmpty() || xpub.isNotEmpty()) {
+            val addressXpub = configProperties.getProperty("${cryptoName}_type", "")
+            if (addressXpub.isNotEmpty()) {
                 addressOrXpubExists = true
                 break
             }
@@ -147,13 +158,13 @@ class HomeActivity : AppCompatActivity() {
         return merchantName.isNotEmpty() && addressOrXpubExists
     }
 
-    private fun showFillUpProfileDialog() {
+    private fun showFillUpProfileDialog(activityClass: Class<*>) {
         AlertDialog.Builder(this)
             .setTitle("Incomplete Profile")
             .setMessage("Please fill up your merchant profile, xpub, and address.")
             .setPositiveButton("OK") { dialog, _ ->
                 dialog.dismiss()
-                val intent = Intent(this, MerchantActivity::class.java)
+                val intent = Intent(this, activityClass)
                 startActivity(intent)
             }
             .setCancelable(false)
