@@ -4,13 +4,13 @@ import android.content.Context
 import android.util.Log
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.NetworkParameters
-import org.bitcoinj.params.MainNetParams
-import org.bitcoinj.crypto.HDKeyDerivation
-import org.bitcoinj.crypto.DeterministicKey
-import org.bitcoinj.script.Script
-import org.bitcoinj.script.ScriptBuilder
-import org.bitcoinj.crypto.ChildNumber
 import org.bitcoinj.core.SegwitAddress
+import org.bitcoinj.crypto.ChildNumber
+import org.bitcoinj.crypto.DeterministicKey
+import org.bitcoinj.crypto.HDKeyDerivation
+import org.bitcoinj.params.MainNetParams
+import org.bitcoinj.script.Script
+
 
 class BitcoinManager(private val context: Context, private val xPub: String) {
 
@@ -33,8 +33,11 @@ class BitcoinManager(private val context: Context, private val xPub: String) {
         fun isValidAddress(address: String): Boolean {
             return try {
                 val params: NetworkParameters = MainNetParams.get()
-                if (address.length !in 26..35) return false
-                Address.fromString(params, address)
+                if (address.startsWith("bc1")) {
+                    SegwitAddress.fromBech32(params, address)
+                } else {
+                    Address.fromString(params, address)
+                }
                 true
             } catch (e: Exception) {
                 false

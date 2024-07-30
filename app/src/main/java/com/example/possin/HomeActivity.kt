@@ -40,16 +40,7 @@ class HomeActivity : AppCompatActivity() {
         // Load cryptocurrency names from JSON file
         cryptocurrencyNames = loadCryptocurrencyNames()
 
-        // Check if the properties files exist and have required inputs
-        if (!propertiesFilesExist()) {
-            if (!merchantPropertiesFile.exists()) {
-                showFillUpProfileDialog(MerchantActivity::class.java)
-            } else if (!configPropertiesFile.exists() || configPropertiesContainsDefaultKey()) {
-                showFillUpProfileDialog(XpubAddress::class.java)
-            }
-        } else if (!inputsExist()) {
-            showFillUpProfileDialog(MerchantActivity::class.java)
-        }
+
 
         transactionsCardView = findViewById(R.id.transactionsCardView)
         val seeAllTextView = findViewById<TextView>(R.id.seeAllTextView)
@@ -95,13 +86,31 @@ class HomeActivity : AppCompatActivity() {
         // Set up ImageButton 1 to navigate to POSActivity
         val button1 = findViewById<ImageButton>(R.id.button1)
         button1.setOnClickListener {
-            val intent = Intent(this, POSActivity::class.java)
+            // Check if the properties files exist and have required inputs
+            if (!propertiesFilesExist()) {
+                if (!merchantPropertiesFile.exists()) {
+                    showFillUpProfileDialog(MerchantActivity::class.java)
+                } else if (!configPropertiesFile.exists() || configPropertiesContainsDefaultKey()) {
+                    showFillUpProfileDialog(XpubAddress::class.java)
+                }
+            } else if (!inputsExist()) {
+                showFillUpProfileDialog(MerchantActivity::class.java)
+            } else {
+                val intent = Intent(this, POSActivity::class.java)
+                startActivity(intent)
+            }
+        }
+
+        val button2 = findViewById<ImageButton>(R.id.button2)
+        button2.setOnClickListener {
+            val intent = Intent(this, APIActivity::class.java)
             startActivity(intent)
         }
 
         val button3 = findViewById<ImageButton>(R.id.button3)
         button3.setOnClickListener {
-            // Handle button 3 click
+            val intent = Intent(this, BaseCurrency::class.java)
+            startActivity(intent)
         }
 
         val button4 = findViewById<ImageButton>(R.id.button4)

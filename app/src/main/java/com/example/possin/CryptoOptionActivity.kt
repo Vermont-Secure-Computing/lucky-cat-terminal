@@ -12,17 +12,17 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.possin.network.RetrofitClient
 import com.example.possin.model.ConversionResponse
 import com.example.possin.network.ConversionRequestBody
+import com.example.possin.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
-import java.util.Properties
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.util.Properties
 
 class CryptoOptionActivity : AppCompatActivity() {
 
@@ -255,7 +255,7 @@ class CryptoOptionActivity : AppCompatActivity() {
     }
 
     private fun postConversionApi(price: String, currency: String, address: String, chain: String, logoResId: Int, onResult: (String, String, String) -> Unit) {
-        val apiService = RetrofitClient.apiService
+        val apiService = RetrofitClient.getApiService(this)
         val requestBody = ConversionRequestBody(price, currency, chain)
         val call = apiService.postConversion(requestBody)
 

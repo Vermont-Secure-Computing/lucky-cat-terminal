@@ -30,6 +30,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.possin.database.AppDatabase
 import com.example.possin.model.Transaction
+import com.example.possin.utils.PropertiesUtil
 import com.example.possin.websocket.CustomWebSocketListener
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
@@ -311,10 +312,13 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         Log.d("WebSocket body", websocketParams.addressIndex.toString())
         Log.d("WebSocket body", websocketParams.managerType)
 
+        val apiKey = PropertiesUtil.getProperty(this, "api_key")
+        Log.d("API", apiKey.toString())
+
         client = OkHttpClient()
 
         val request = Request.Builder()
-            .url("ws://198.7.125.183/ws")
+            .url("wss://dogpay.mom/ws?apiKey=$apiKey")
             .build()
 
         val listener = CustomWebSocketListener(
@@ -459,10 +463,15 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     }
 
     private fun getConfirmations(chain: String, txid: String) {
-        val url = "http://198.7.125.183/terminal/tx_confirmations/$chain/$txid"
-        val request = Request.Builder().url(url).build()
+        val url = "https://dogpay.mom/terminal/tx_confirmations/$chain/$txid"
+        val apiKey = PropertiesUtil.getProperty(this, "api_key")
 
-        client = OkHttpClient()
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("x-api-key", apiKey ?: "")
+            .build()
+
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()

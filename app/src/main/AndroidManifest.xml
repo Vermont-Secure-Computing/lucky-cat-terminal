@@ -23,6 +23,12 @@
             android:name=".HomeActivity"
             android:exported="true"/>
         <activity
+            android:name=".BaseCurrency"
+            android:exported="true"/>
+        <activity
+            android:name=".APIActivity"
+            android:exported="true"/>
+        <activity
             android:name=".MerchantActivity"
             android:exported="true"/>
         <activity

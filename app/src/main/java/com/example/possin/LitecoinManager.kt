@@ -4,13 +4,13 @@ import android.content.Context
 import android.util.Log
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.NetworkParameters
-import org.bitcoinj.params.AbstractBitcoinNetParams
-import org.bitcoinj.params.MainNetParams
-import org.bitcoinj.crypto.HDKeyDerivation
-import org.bitcoinj.crypto.DeterministicKey
-import org.bitcoinj.script.Script
+import org.bitcoinj.core.SegwitAddress
 import org.bitcoinj.crypto.ChildNumber
+import org.bitcoinj.crypto.DeterministicKey
+import org.bitcoinj.crypto.HDKeyDerivation
+import org.bitcoinj.params.AbstractBitcoinNetParams
 import org.bitcoinj.params.Networks
+import org.bitcoinj.script.Script
 
 class LitecoinMainNetParams : AbstractBitcoinNetParams() {
     init {
@@ -23,6 +23,8 @@ class LitecoinMainNetParams : AbstractBitcoinNetParams() {
 
         bip32HeaderP2PKHpub = 0x019da462 // Ltub
         bip32HeaderP2PKHpriv = 0x019d9cfe // Ltpv
+        bip32HeaderP2WPKHpub = 0x04b24746 // Mtub
+        bip32HeaderP2WPKHpriv = 0x04b2430c // Mtpv
 
         // DNS Seeds
         dnsSeeds = arrayOf(
@@ -61,8 +63,15 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
         fun isValidXpub(xPub: String): Boolean {
             return try {
                 val params: NetworkParameters = LitecoinMainNetParams.get()
-                if (xPub.length < 111) return false
-                DeterministicKey.deserializeB58(null, xPub, params)
+                val validPrefixes = listOf("Ltub", "Mtub", "zpub")
+                if (validPrefixes.none { xPub.startsWith(it) }) return false
+                // Convert the zpub to Ltub if necessary
+                val adaptedXpub = if (xPub.startsWith("zpub")) {
+                    convertBitcoinZpubToLitecoinLtub(xPub)
+                } else {
+                    xPub
+                }
+                DeterministicKey.deserializeB58(null, adaptedXpub, params)
                 true
             } catch (e: Exception) {
                 false
@@ -72,12 +81,27 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
         fun isValidAddress(address: String): Boolean {
             return try {
                 val params: NetworkParameters = LitecoinMainNetParams.get()
-                if (address.length !in 26..35) return false
-                Address.fromString(params, address)
+                if (address.startsWith("ltc1")) {
+                    SegwitAddress.fromBech32(params, address)
+                } else {
+                    Address.fromString(params, address)
+                }
                 true
             } catch (e: Exception) {
                 false
             }
+        }
+
+        // Utility function to convert zpub to Ltub
+        private fun convertBitcoinZpubToLitecoinLtub(zpub: String): String {
+            val zpubBytes = Base58.decode(zpub)
+            // Replace the version bytes from Bitcoin zpub (0x04b24746) to Litecoin Ltub (0x019da462)
+            val ltubBytes = zpubBytes.copyOf()
+            ltubBytes[0] = 0x01
+            ltubBytes[1] = 0x9d.toByte()
+            ltubBytes[2] = 0xa4.toByte()
+            ltubBytes[3] = 0x62.toByte()
+            return Base58.encode(ltubBytes)
         }
     }
 
