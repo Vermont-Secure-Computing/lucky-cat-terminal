@@ -9,12 +9,14 @@ import kotlinx.parcelize.Parcelize
 @Entity(tableName = "transactions")
 data class Transaction(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val balance: Long,
+    val balance: Double,
     val txid: String,
-    val fees: Long,
+    val fees: Double,
     val confirmations: Int,
     val date: String,
     val time: String,
     val chain: String,
-    val message: String? = null  // Added message field
+    val message: String? = null,
+    val numericPrice: String,
+    val selectedCurrencyCode: String
 ) : Parcelable

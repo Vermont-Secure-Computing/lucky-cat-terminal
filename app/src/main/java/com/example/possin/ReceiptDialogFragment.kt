@@ -22,8 +22,11 @@ import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnection
 class ReceiptDialogFragment : DialogFragment() {
 
     private lateinit var receiptTitle: TextView
+    private lateinit var receiptAddress: TextView
     private lateinit var receiptDetails: TextView
     private lateinit var receiptBalance: TextView
+    private lateinit var receiptBaseCurrency: TextView
+    private lateinit var receiptBasePrice: TextView
     private lateinit var receiptTxID: TextView
     private lateinit var receiptFees: TextView
     private lateinit var receiptConfirmations: TextView
@@ -40,8 +43,11 @@ class ReceiptDialogFragment : DialogFragment() {
         val view = inflater.inflate(R.layout.fragment_receipt_dialog, container, false)
 
         receiptTitle = view.findViewById(R.id.receiptTitle)
+        receiptAddress = view.findViewById(R.id.receiptAddress)
         receiptDetails = view.findViewById(R.id.receiptDetails)
         receiptBalance = view.findViewById(R.id.receiptBalance)
+        receiptBaseCurrency = view.findViewById(R.id.receiptBaseCurrency)
+        receiptBasePrice = view.findViewById(R.id.receiptBasePrice)
         receiptTxID = view.findViewById(R.id.receiptTxID)
         receiptFees = view.findViewById(R.id.receiptFees)
         receiptConfirmations = view.findViewById(R.id.receiptConfirmations)
@@ -54,8 +60,11 @@ class ReceiptDialogFragment : DialogFragment() {
         // Get data from arguments
         val args = arguments
         receiptTitle.text = args?.getString("receiptTitle")
+        receiptAddress.text = args?.getString("receiptAddress")
         receiptDetails.text = args?.getString("receiptDetails")
         receiptBalance.text = args?.getString("receiptBalance")
+        receiptBaseCurrency.text = args?.getString("receiptSelectedCurrencyCode")
+        receiptBasePrice.text = args?.getString("receiptNumericPrice")
         receiptTxID.text = args?.getString("receiptTxID")
         receiptFees.text = args?.getString("receiptFees")
         receiptConfirmations.text = args?.getString("receiptConfirmations")
@@ -99,7 +108,7 @@ class ReceiptDialogFragment : DialogFragment() {
 
     private fun onFirstAnimationEnd() {
         // Show the Owner's Copy
-        receiptTitle.text = "Owner's Copy"
+//        receiptTitle.text = "Owner's Copy"
         receiptLayout.alpha = 1f // Reset alpha
         receiptLayout.translationY = 0f // Reset translation
 
@@ -126,13 +135,16 @@ class ReceiptDialogFragment : DialogFragment() {
             val printer = EscPosPrinter(bluetoothConnection, 203, 48f, 32)
             for (i in 1..copies) {
                 printer.printFormattedText(
-                    "[C]<u><font size='big'>RECEIPT</font></u>\n" +
+                    "[C]<font size='big'>${receiptTitle.text}</font>\n" +
+                            "[C]${receiptAddress.text}\n" +
                             "[L]\n" +
                             "[C]-------------------------------\n" +
                             "[L]\n" +
                             "[L]<b>Transaction Details</b>\n" +
                             "[L]\n" +
                             "[L]${receiptBalance.text}\n" +
+                            "[L]${receiptBaseCurrency.text}\n" +
+                            "[L]${receiptBasePrice.text}\n" +
                             "[L]${receiptTxID.text}\n" +
                             "[L]${receiptFees.text}\n" +
                             "[L]${receiptConfirmations.text}\n" +

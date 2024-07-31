@@ -18,7 +18,7 @@ class CustomWebSocketListener(
 ) : WebSocketListener() {
 
     interface PaymentStatusCallback {
-        fun onPaymentStatusPaid(status: String, balance: Long, txid: String, fees: Long, confirmations: Int, feeStatus: String, chain: String, addressIndex: Int, managerType: String)
+        fun onPaymentStatusPaid(status: String, balance: Double, txid: String, fees: Double, confirmations: Int, feeStatus: String, chain: String, addressIndex: Int, managerType: String)
     }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
@@ -42,11 +42,16 @@ class CustomWebSocketListener(
         // Handle the received message
         val jsonObject = JSONObject(text)
         val status = jsonObject.getString("status")
+        println(status)
         if (status == "paid") {
-            println(jsonObject.getLong("balance"))
-            val balance = jsonObject.getLong("balance")
+            println(jsonObject.getDouble("balance"))
+            println(jsonObject.getDouble("fees"))
+            println(jsonObject.getString("txid"))
+            println(jsonObject.getInt("confirmations"))
+            println(jsonObject.getString("feeStatus"))
+            val balance = jsonObject.getDouble("balance")
             val txid = jsonObject.getString("txid")
-            val fees = jsonObject.getLong("fees")
+            val fees = jsonObject.getDouble("fees")
             val confirmations = jsonObject.getInt("confirmations")
             val feeStatus = jsonObject.getString("feeStatus")
             Log.d("BALANCE_CUSTOM", balance.toString())

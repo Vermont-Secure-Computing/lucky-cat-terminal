@@ -35,7 +35,7 @@ class TransactionAdapter(private val context: Context, private val transactions:
         fun bind(transaction: Transaction) {
             chainTextView.text = transaction.chain
             dateTextView.text = transaction.date
-            balanceTextView.text = "Amount: ${String.format("%.8f", transaction.balance.toDouble() / 100000000)}"
+            balanceTextView.text = "Amount: ${transaction.balance}"
         }
     }
 }

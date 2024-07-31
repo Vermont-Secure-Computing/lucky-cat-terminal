@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.possin.adapter.ViewAllTransactionAdapter
-import com.example.possin.viewmodel.TransactionViewModel
+import com.example.possin.model.TransactionViewModel
 
 class ViewAllActivity : AppCompatActivity() {
 

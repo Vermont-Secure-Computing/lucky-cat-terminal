@@ -12,9 +12,17 @@
         android:id="@+id/receiptTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="RECEIPT"
         android:textStyle="bold"
         android:textSize="24sp"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:layout_gravity="center"/>
+
+    <TextView
+        android:id="@+id/receiptAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
         android:textColor="@android:color/black"
         android:gravity="center"
         android:layout_gravity="center"/>
@@ -32,6 +40,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Balance: "
+        android:textColor="@android:color/black"
+        android:paddingTop="4dp"/>
+
+    <TextView
+        android:id="@+id/receiptBaseCurrency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Base Currency: "
+        android:textColor="@android:color/black"
+        android:paddingTop="4dp"/>
+
+    <TextView
+        android:id="@+id/receiptBasePrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Base Price: "
         android:textColor="@android:color/black"
         android:paddingTop="4dp"/>
 

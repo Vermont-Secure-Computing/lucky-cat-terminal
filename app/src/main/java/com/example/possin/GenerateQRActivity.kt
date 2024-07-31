@@ -44,6 +44,7 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import org.json.JSONObject
+import java.io.File
 import java.io.IOException
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -51,6 +52,7 @@ import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.Properties
 
 class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentStatusCallback {
 
@@ -73,6 +75,14 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     private lateinit var txid: String
     private lateinit var message: String
     private lateinit var cancelText: TextView
+    private lateinit var baseCurrencyTextView: TextView
+    private lateinit var basePriceTextView: TextView
+    private lateinit var merchantName: TextView
+    private lateinit var merchantAddress: TextView
+    private lateinit var merchantPropertiesFile: File
+
+    private lateinit var numericPrice: String
+    private lateinit var selectedCurrencyCode: String
 
     private lateinit var db: AppDatabase
 
@@ -94,7 +104,11 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         val feeStatus = intent.getStringExtra("FEE_STATUS") ?: ""
         val status = intent.getStringExtra("STATUS") ?: ""
         val managerType = intent.getStringExtra("MANAGER_TYPE") ?: "Bitcoin"
+
         val deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+
+        numericPrice = intent.getStringExtra("NUMERIC_PRICE") ?: ""
+        selectedCurrencyCode = intent.getStringExtra("SELECTED_CURRENCY_CODE") ?: ""
 
         message = intent.getStringExtra("MESSAGE") ?: ""
 
@@ -116,7 +130,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             "LTC" -> "litecoin:$address?amount=$formattedPrice"
             "DOGE" -> "dogecoin:${urlEncode(address)}?amount=${urlEncode(formattedPrice)}"
             "ETH" -> "ethereum:$address?amount=$formattedPrice"
-            "TRON" -> "tron:$address?amount=$formattedPrice"
+            "TRON-NETWORK" -> "tron:$address?amount=$formattedPrice"
             else -> "bitcoin:$address?amount=$formattedPrice"
         }
 
@@ -134,6 +148,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         // Initialize the gathering blocks TextView
         gatheringBlocksTextView = findViewById(R.id.gatheringBlocksTextView)
 
+        merchantPropertiesFile = File(filesDir, "merchant.properties")
+
         // Initialize the new TextViews
         balanceTextView = findViewById(R.id.balanceTextView)
         txidTextView = findViewById(R.id.txidTextView)
@@ -141,10 +157,14 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         confirmationsTextView = findViewById(R.id.confirmationsTextView)
         confirmationsLayout = findViewById(R.id.confirmationsLayout)
         printButton = findViewById(R.id.printButton)
+        baseCurrencyTextView = findViewById(R.id.baseCurrencyTextView)
+        basePriceTextView = findViewById(R.id.basePriceTextView)
+        merchantAddress = findViewById(R.id.merchantAddress)
+        merchantName = findViewById(R.id.merchantName)
         printButton.setOnClickListener {
             handler.removeCallbacksAndMessages(null)
             gatheringBlocksTextView.visibility = View.GONE
-            showReceiptDialog(deviceId)
+            showReceiptDialog(deviceId, numericPrice, selectedCurrencyCode)
         }
 
         confirmationBlocks = listOf(
@@ -362,34 +382,59 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         countDownTimer.cancel()
     }
 
-    override fun onPaymentStatusPaid(status: String, balance: Long, txid: String, fees: Long, confirmations: Int, feeStatus: String, chain: String, addressIndex: Int, managerType: String) {
+    private fun getProperty(key: String): String? {
+        val properties = Properties()
+        if (merchantPropertiesFile.exists()) {
+            properties.load(merchantPropertiesFile.inputStream())
+        }
+        return properties.getProperty(key)
+    }
+
+    fun getMerchantName(): String? {
+        return getProperty("merchant_name")
+    }
+
+    fun getMechantAddress(): String? {
+        return getProperty("address")
+    }
+
+    override fun onPaymentStatusPaid(status: String, balance: Double, txid: String, fees: Double, confirmations: Int, feeStatus: String, chain: String, addressIndex: Int, managerType: String) {
         runOnUiThread {
             if (::qrCodeImageView.isInitialized) {
                 qrCodeImageView.setImageBitmap(null)
                 closeWebSocket()
                 Log.d("BALANCE", balance.toString())
                 Log.d("FEES", fees.toString())
+                Log.d("FEE STATUS", feeStatus)
 
                 // Update the TextViews with the received data
                 // Convert balance and fees to their correct values
-                val formattedBalance = if (chain == "TRON") {
-                    String.format("%.6f", balance.toDouble() / 1_000_000)
-                } else {
-                    String.format("%.8f", balance.toDouble() / 100_000_000)
-                }
-
-                val formattedFees = if (chain == "TRON") {
-                    String.format("%.6f", fees.toDouble() / 1_000_000)
-                } else {
-                    String.format("%.8f", fees.toDouble() / 100_000_000)
-                }
+//                val formattedBalance = if (chain == "TRON") {
+//                    String.format("%.6f", balance / 1_000_000)
+//                } else {
+//                    String.format("%.8f", balance / 100_000_000)
+//                }
+//
+//                val formattedFees = if (chain == "TRON") {
+//                    String.format("%.6f", fees / 1_000_000)
+//                } else {
+//                    String.format("%.8f", fees / 100_000_000)
+//                }
 
                 // Update the TextViews with the received data
-                balanceTextView.text = "Amount: $formattedBalance"
+                merchantName.text = getMerchantName()
+                merchantName.visibility = TextView.VISIBLE
+                merchantAddress.text = getMechantAddress()
+                merchantAddress.visibility = TextView.VISIBLE
+                balanceTextView.text = "Amount: $balance"
                 balanceTextView.visibility = TextView.VISIBLE
+                baseCurrencyTextView.text = "Base Currency: $selectedCurrencyCode"
+                baseCurrencyTextView.visibility = TextView.VISIBLE
+                basePriceTextView.text = "Base Price: $numericPrice"
+                basePriceTextView.visibility = TextView.VISIBLE
                 txidTextView.text = "Transaction ID: $txid"
                 txidTextView.visibility = TextView.VISIBLE
-                feesTextView.text = "Fees: $formattedFees"
+                feesTextView.text = "Fees: $fees"
                 feesTextView.visibility = TextView.VISIBLE
                 confirmationsTextView.text = "Confirmations: $confirmations"
                 confirmationsTextView.visibility = TextView.VISIBLE
@@ -409,10 +454,10 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 // Start repeated API calls
                 startRepeatedApiCalls()
 
-                if (feeStatus == "Fee is okay" || confirmations > 0) {
-                    saveTransaction(balance, txid, fees, confirmations, chain, message)
-                    printButton.visibility = View.VISIBLE
-                }
+//                if (feeStatus == "Fee is okay" || confirmations > 0) {
+                saveTransaction(balance, txid, fees, confirmations, chain, message, numericPrice, selectedCurrencyCode)
+                printButton.visibility = View.VISIBLE
+//                }
 
                 // Show the print button if there is at least one confirmation
 //                if (confirmations > 0) {
@@ -437,7 +482,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             "Litecoin" -> LitecoinManager.PREFS_NAME
             "Ethereum" -> EthereumManager.PREFS_NAME
             "Dogecoin" -> DogecoinManager.PREFS_NAME
-            "USDT-Tron" -> TronManager.PREFS_NAME
+            "Tron-network" -> TronManager.PREFS_NAME
             else -> BitcoinManager.PREFS_NAME
         }
     }
@@ -448,7 +493,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             "Litecoin" -> LitecoinManager.LAST_INDEX_KEY
             "Ethereum" -> EthereumManager.LAST_INDEX_KEY
             "Dogecoin" -> DogecoinManager.LAST_INDEX_KEY
-            "USDT-Tron" -> TronManager.LAST_INDEX_KEY
+            "Tron-network" -> TronManager.LAST_INDEX_KEY
             else -> BitcoinManager.LAST_INDEX_KEY
         }
     }
@@ -496,12 +541,13 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         })
     }
 
-    private fun showReceiptDialog(deviceId: String) {
+    private fun showReceiptDialog(deviceId: String, numericPrice: String, selectedCurrencyCode: String) {
         val receiptDialog = ReceiptDialogFragment()
 
         // Pass data to the dialog fragment
         val args = Bundle()
-        args.putString("receiptTitle", "RECEIPT")
+        args.putString("receiptTitle", "${merchantName.text}")
+        args.putString("receiptAddress", "${merchantAddress.text}")
         args.putString("receiptDetails", "Transaction Details")
         args.putString("receiptBalance", "Balance: ${balanceTextView.text}")
         args.putString("receiptTxID", "TxID: ${txidTextView.text}")
@@ -509,15 +555,18 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         args.putString("receiptConfirmations", "Confirmations: ${confirmationsTextView.text}")
         args.putString("receiptChain", "Chain: ${chain}")
         args.putString("receiptDeviceID", "Device ID: $deviceId")
+        args.putString("receiptNumericPrice", "Base Price: $numericPrice")
+        args.putString("receiptSelectedCurrencyCode", "Base Currency: $selectedCurrencyCode")
+
         receiptDialog.arguments = args
 
         receiptDialog.show(supportFragmentManager, "ReceiptDialog")
     }
 
-    private fun saveTransaction(balance: Long? = null, txid: String? = null, fees: Long? = null, confirmations: Int = 0, chain: String, message: String? = null) {
-        val currentBalance = balance ?: balanceTextView.text.toString().replace("Balance: ", "").toLong()
+    private fun saveTransaction(balance: Double? = null, txid: String? = null, fees: Double? = null, confirmations: Int = 0, chain: String, message: String? = null, numericPrice: String, selectedCurrencyCode: String) {
+        val currentBalance = balance ?: balanceTextView.text.toString().replace("Balance: ", "").toDouble()
         val currentTxid = txid ?: txidTextView.text.toString().replace("Transaction ID: ", "")
-        val currentFees = fees ?: feesTextView.text.toString().replace("Fees: ", "").toLong()
+        val currentFees = fees ?: feesTextView.text.toString().replace("Fees: ", "").toDouble()
         val currentConfirmations = confirmationsTextView.text.toString().replace("Confirmations: ", "").toInt()
         val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
@@ -530,7 +579,9 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             date = currentDate,
             time = currentTime,
             chain = chain,
-            message = message  // Include the message here
+            message = message,  // Include the message here
+            numericPrice = numericPrice,
+            selectedCurrencyCode = selectedCurrencyCode
         )
 
         lifecycleScope.launch(Dispatchers.IO) {

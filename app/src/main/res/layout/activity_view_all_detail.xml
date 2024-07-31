@@ -42,6 +42,24 @@
         android:background="#EEE8F1">
 
         <TextView
+            android:id="@+id/merchantName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Business name:"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/merchantAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Business address:"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:padding="8dp"/>
+
+        <TextView
             android:id="@+id/chainTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -61,6 +79,24 @@
 
         <TextView
             android:id="@+id/balanceTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Balance"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/baseCurrencyTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Balance"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/basePriceTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Balance"

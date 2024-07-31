@@ -160,7 +160,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "BTC", R.drawable.bitcoin_logo) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.bitcoin_logo, "BTC", index, feeStatus, status, "Bitcoin")
+                startGenerateQRActivity(address, formattedRate, R.drawable.bitcoin_logo, "BTC", index, feeStatus, status, "Bitcoin", numericPrice, selectedCurrencyCode)
             }
         } ?: run {
             Toast.makeText(this, "Bitcoin Manager not initialized", Toast.LENGTH_SHORT).show()
@@ -174,7 +174,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "LTC", R.drawable.litecoin_new_logo) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.litecoin_new_logo, "LTC", index, feeStatus, status, "Litecoin")
+                startGenerateQRActivity(address, formattedRate, R.drawable.litecoin_new_logo, "LTC", index, feeStatus, status, "Litecoin", numericPrice, selectedCurrencyCode)
             }
         } ?: run {
             Toast.makeText(this, "Litecoin Manager not initialized", Toast.LENGTH_SHORT).show()
@@ -188,7 +188,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "ETH", R.drawable.ethereum_logo) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.ethereum_logo, "ETH", index, feeStatus, status, "Ethereum")
+                startGenerateQRActivity(address, formattedRate, R.drawable.ethereum_logo, "ETH", index, feeStatus, status, "Ethereum", numericPrice, selectedCurrencyCode)
             }
         } ?: run {
             Toast.makeText(this, "Ethereum Manager not initialized", Toast.LENGTH_SHORT).show()
@@ -202,7 +202,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "DOGE", R.drawable.dogecoin_logo) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.dogecoin_logo, "DOGE", index, feeStatus, status, "Dogecoin")
+                startGenerateQRActivity(address, formattedRate, R.drawable.dogecoin_logo, "DOGE", index, feeStatus, status, "Dogecoin", numericPrice, selectedCurrencyCode)
             }
         } ?: run {
             Toast.makeText(this, "Dogecoin Manager not initialized", Toast.LENGTH_SHORT).show()
@@ -215,8 +215,8 @@ class CryptoOptionActivity : AppCompatActivity() {
 
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
-            postConversionApi(numericPrice, selectedCurrencyCode, address, "TRON", R.drawable.tether_logo) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.tether_logo, "TRON", index, feeStatus, status, "Tron")
+            postConversionApi(numericPrice, selectedCurrencyCode, address, "TRON-NETWORK", R.drawable.tether_logo) { feeStatus, status, formattedRate ->
+                startGenerateQRActivity(address, formattedRate, R.drawable.tether_logo, "TRON-NETWORK", index, feeStatus, status, "Tron-network", numericPrice, selectedCurrencyCode)
             }
         } ?: run {
             Toast.makeText(this, "USDT Tron Manager not initialized", Toast.LENGTH_SHORT).show()
@@ -304,7 +304,7 @@ class CryptoOptionActivity : AppCompatActivity() {
         return decimalFormat.format(bigDecimal)
     }
 
-    private fun startGenerateQRActivity(address: String, price: String, logoResId: Int, currency: String, index: Int, feeStatus: String, status: String, managerType: String) {
+    private fun startGenerateQRActivity(address: String, price: String, logoResId: Int, currency: String, index: Int, feeStatus: String, status: String, managerType: String, numericPrice: String, selectedCurrencyCode: String) {
         Log.d("MESSAGE", message)
         val intent = Intent(this, GenerateQRActivity::class.java).apply {
             putExtra("ADDRESS", address)
@@ -316,6 +316,8 @@ class CryptoOptionActivity : AppCompatActivity() {
             putExtra("STATUS", status)
             putExtra("MANAGER_TYPE", managerType)
             putExtra("MESSAGE", message)
+            putExtra("NUMERIC_PRICE", numericPrice)
+            putExtra("SELECTED_CURRENCY_CODE", selectedCurrencyCode)
         }
         startActivity(intent)
     }

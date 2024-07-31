@@ -51,12 +51,46 @@
         android:layout_gravity="center" />
 
     <TextView
+        android:id="@+id/merchantName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Business name:"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:layout_marginTop="16dp"/>
+
+    <TextView
+        android:id="@+id/merchantAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Business address:"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
         android:id="@+id/balanceTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Amount"
         android:visibility="gone"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/baseCurrencyTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Base Currency"
+        android:visibility="gone"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/basePriceTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Base Price"
+        android:visibility="gone"
+        android:layout_marginTop="8dp" />
 
     <TextView
         android:id="@+id/txidTextView"

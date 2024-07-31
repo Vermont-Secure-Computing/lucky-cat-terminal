@@ -2,22 +2,18 @@ package com.example.possin
 
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.example.possin.database.AppDatabase
 import com.example.possin.model.Transaction
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import okhttp3.*
-import org.json.JSONObject
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
+import okhttp3.OkHttpClient
+import java.io.File
+import java.util.Properties
 
 class ViewAllDetailActivity : AppCompatActivity() {
 
@@ -29,6 +25,10 @@ class ViewAllDetailActivity : AppCompatActivity() {
     private lateinit var confirmationsTextView: TextView
     private lateinit var timeTextView: TextView
     private lateinit var messageTextView: TextView
+    private lateinit var baseCurrencyTextView: TextView
+    private lateinit var basePriceTextView: TextView
+    private lateinit var merchantName: TextView
+    private lateinit var merchantAddress: TextView
 
     private lateinit var transaction: Transaction
     private lateinit var client: OkHttpClient
@@ -36,6 +36,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
 
     private lateinit var chain: String
     private lateinit var deviceId: String
+    private lateinit var merchantPropertiesFile: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,17 +45,25 @@ class ViewAllDetailActivity : AppCompatActivity() {
         chainTextView = findViewById(R.id.chainTextView)
         dateTextView = findViewById(R.id.dateTextView)
         balanceTextView = findViewById(R.id.balanceTextView)
+        baseCurrencyTextView = findViewById(R.id.baseCurrencyTextView)
+        basePriceTextView = findViewById(R.id.basePriceTextView)
         txidTextView = findViewById(R.id.txidTextView)
         feesTextView = findViewById(R.id.feesTextView)
         confirmationsTextView = findViewById(R.id.confirmationsTextView)
         timeTextView = findViewById(R.id.timeTextView)
         messageTextView = findViewById(R.id.messageTextView)
+        merchantAddress = findViewById(R.id.merchantAddress)
+        merchantName = findViewById(R.id.merchantName)
+        merchantPropertiesFile = File(filesDir, "merchant.properties")
 
         transaction = intent.getParcelableExtra("transaction")!!
 
         transaction?.let {
             updateUI(it)
         }
+
+
+
 
         db = AppDatabase.getDatabase(this)
         client = OkHttpClient()
@@ -75,12 +84,33 @@ class ViewAllDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun getProperty(key: String): String? {
+        val properties = Properties()
+        if (merchantPropertiesFile.exists()) {
+            properties.load(merchantPropertiesFile.inputStream())
+        }
+        return properties.getProperty(key)
+    }
+
+    fun getMerchantName(): String? {
+        return getProperty("merchant_name")
+    }
+
+    fun getMechantAddress(): String? {
+        return getProperty("address")
+    }
+
     private fun updateUI(transaction: Transaction) {
+        Log.d("CONFIRMATION", transaction.confirmations.toString())
+        merchantName.text = getMerchantName()
+        merchantAddress.text = getMechantAddress()
         chainTextView.text = transaction.chain
         dateTextView.text = transaction.date
-        balanceTextView.text = "Amount: ${String.format("%.8f", transaction.balance.toDouble() / 100000000)}"
+        balanceTextView.text = "Amount: ${transaction.balance}"
+        baseCurrencyTextView.text = "Base Currency: ${transaction.selectedCurrencyCode}"
+        basePriceTextView.text = "Base Price: ${transaction.numericPrice}"
         txidTextView.text = "TxID: ${transaction.txid}"
-        feesTextView.text = "Fees: ${String.format("%.8f", transaction.fees.toDouble() / 100000000)}"
+        feesTextView.text = "Fees: ${transaction.fees}"
         confirmationsTextView.text = "Confirmations: ${transaction.confirmations}"
         timeTextView.text = "Time: ${transaction.time}"
         messageTextView.text = transaction.message ?: "No message"
@@ -91,14 +121,17 @@ class ViewAllDetailActivity : AppCompatActivity() {
 
         // Pass data to the dialog fragment
         val args = Bundle()
-        args.putString("receiptTitle", "RECEIPT")
+        args.putString("receiptTitle", "${merchantName.text}")
+        args.putString("receiptAddress", "${merchantAddress.text}")
         args.putString("receiptDetails", "Transaction Details")
-        args.putString("receiptBalance", "Balance: ${balanceTextView.text}")
-        args.putString("receiptTxID", "TxID: ${txidTextView.text}")
-        args.putString("receiptFees", "Fees: ${feesTextView.text}")
-        args.putString("receiptConfirmations", "Confirmations: ${confirmationsTextView.text}")
-        args.putString("receiptChain", "Chain: ${chainTextView.text}")
-        args.putString("receiptDeviceID", "Device ID: $deviceId")
+        args.putString("receiptBalance", "${balanceTextView.text}")
+        args.putString("receiptTxID", "${txidTextView.text}")
+        args.putString("receiptFees", "${feesTextView.text}")
+        args.putString("receiptConfirmations", "${confirmationsTextView.text}")
+        args.putString("receiptChain", "${chainTextView.text}")
+        args.putString("receiptDeviceID", "$deviceId")
+        args.putString("receiptNumericPrice", "B${basePriceTextView.text}")
+        args.putString("receiptSelectedCurrencyCode", "${baseCurrencyTextView.text}")
         receiptDialog.arguments = args
 
         receiptDialog.show(supportFragmentManager, "ReceiptDialog")

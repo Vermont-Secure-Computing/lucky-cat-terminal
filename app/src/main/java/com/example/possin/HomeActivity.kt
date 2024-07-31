@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.possin.adapter.TransactionAdapter
-import com.example.possin.viewmodel.TransactionViewModel
+import com.example.possin.model.TransactionViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
@@ -26,6 +26,7 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var merchantPropertiesFile: File
     private lateinit var configPropertiesFile: File
+    private lateinit var apiPropertiesFile: File
     private val transactionViewModel: TransactionViewModel by viewModels()
     private lateinit var transactionsCardView: CardView
     private lateinit var cryptocurrencyNames: List<String>
@@ -36,6 +37,7 @@ class HomeActivity : AppCompatActivity() {
 
         merchantPropertiesFile = File(filesDir, "merchant.properties")
         configPropertiesFile = File(filesDir, "config.properties")
+        apiPropertiesFile = File(filesDir, "api.properties")
 
         // Load cryptocurrency names from JSON file
         cryptocurrencyNames = loadCryptocurrencyNames()
@@ -93,8 +95,8 @@ class HomeActivity : AppCompatActivity() {
                 } else if (!configPropertiesFile.exists() || configPropertiesContainsDefaultKey()) {
                     showFillUpProfileDialog(XpubAddress::class.java)
                 }
-            } else if (!inputsExist()) {
-                showFillUpProfileDialog(MerchantActivity::class.java)
+            } else if (!inputsExist() || !apiKeyExists()) {
+                showFillUpProfileDialog(APIActivity::class.java)
             } else {
                 val intent = Intent(this, POSActivity::class.java)
                 startActivity(intent)
@@ -165,6 +167,14 @@ class HomeActivity : AppCompatActivity() {
         }
 
         return merchantName.isNotEmpty() && addressOrXpubExists
+    }
+
+    private fun apiKeyExists(): Boolean {
+        val apiProperties = Properties()
+        if (apiPropertiesFile.exists()) {
+            apiProperties.load(apiPropertiesFile.inputStream())
+        }
+        return apiProperties.getProperty("api_key", "").isNotEmpty()
     }
 
     private fun showFillUpProfileDialog(activityClass: Class<*>) {
