@@ -5,6 +5,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Properties
@@ -18,6 +19,8 @@ class APIActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_api)
+
+        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
 
         apiKeyInput = findViewById(R.id.api_key_input)
         submitTextView = findViewById(R.id.submit_text)

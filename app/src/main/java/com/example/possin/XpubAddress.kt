@@ -34,6 +34,8 @@ class XpubAddress : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_xpub_address)
 
+        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
+
         properties = ConfigProperties.loadProperties(this)
 
         // Find views

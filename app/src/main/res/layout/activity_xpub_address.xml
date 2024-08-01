@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@android:color/white"
+    android:background="@color/customGray"
     tools:context=".XpubAddress">
 
     <!-- Header View -->
@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:background="@color/tapeRed"
+        android:background="@android:color/white"
         android:elevation="4dp">
 
         <androidx.constraintlayout.widget.Guideline
@@ -25,8 +25,8 @@
 
         <ImageView
             android:id="@+id/back_arrow"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:src="@drawable/ic_back_arrow"
             android:contentDescription="Back"
             app:layout_constraintStart_toStartOf="parent"
@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:text="Submit"
             android:textSize="18sp"
-            android:textColor="@android:color/white"
+            android:textColor="@color/tapeRed"
             android:paddingStart="16dp"
             android:clickable="true"
             android:focusable="true"
@@ -65,8 +65,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
-        android:layout_margin="16dp"
+        android:padding="8dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
         android:background="@android:color/white">
 
         <com.example.possin.CustomAutoCompleteTextView

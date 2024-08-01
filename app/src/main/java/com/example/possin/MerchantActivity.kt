@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -29,6 +30,8 @@ class MerchantActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_merchant)
+
+        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
 
         // Initialize the EditTexts
         editTextBusinessName = findViewById(R.id.edittext_business_name)

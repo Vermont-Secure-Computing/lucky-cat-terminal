@@ -5,7 +5,13 @@ import android.content.Intent
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.TextView
 import org.json.JSONArray
 import java.io.InputStream
 
@@ -31,8 +37,8 @@ class POSView @JvmOverloads constructor(
         itemPriceInput = findViewById(R.id.itemPriceInput)
         currencySpinner = findViewById(R.id.currencySpinner)
 
-        val homeText: TextView = findViewById(R.id.homeText)
-        homeText.setOnClickListener {
+        val backArrow: ImageView = findViewById(R.id.back_arrow)
+        backArrow.setOnClickListener {
             context.startActivity(Intent(context, HomeActivity::class.java))
         }
 

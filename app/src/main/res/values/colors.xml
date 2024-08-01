@@ -5,4 +5,6 @@
     <color name="dark_gray">#A9A9A9</color>
     <color name="colorPrimary">#6200EE</color>
     <color name="tapeRed">#bc0120</color>
+    <color name="customGray">#f4f4f4</color>
+    <color name="grey">#DEDEDE</color>
 </resources>

@@ -3,50 +3,50 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#EEE8F1"
+    android:background="@color/customGray"
     android:fitsSystemWindows="true">
 
     <!-- Header with logo and text -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="8dp"
-        android:background="@android:color/transparent"
+        android:padding="16dp"
+        android:background="#FFFFFF"
+        android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
         <ImageView
-            android:id="@+id/logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/logo"
-            android:contentDescription="Logo"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:id="@+id/headerText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="My POS Application"
-            android:textSize="20sp"
-            android:textColor="#000000"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:id="@+id/homeText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Home"
-            android:textSize="20sp"
-            android:textColor="#0000FF"
+            android:id="@+id/back_arrow"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_back_arrow"
+            android:contentDescription="Back"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:clickable="true"
-            android:layout_marginEnd="8dp" />
+            android:focusable="true" />
 
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/logo_image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/logo"
+            app:layout_constraintEnd_toStartOf="@+id/guideline"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <RelativeLayout
         android:id="@+id/priceInputContainer"
@@ -54,7 +54,7 @@
         android:layout_height="180dp"
         android:layout_marginTop="16dp"
         android:padding="16dp"
-        android:background="#490282"
+        android:background="#8B0000"
         app:layout_constraintTop_toBottomOf="@id/header"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -69,13 +69,12 @@
             android:textColor="#FFFFFF"
             android:layout_marginBottom="2dp" />
 
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:orientation="horizontal"
-            android:gravity="center" >
+            android:gravity="center">
 
             <Spinner
                 android:id="@+id/currencySpinner"
@@ -112,19 +111,82 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <Button android:id="@+id/btn1" style="@style/CalcButton" android:text="1" android:layout_columnWeight="1" />
-        <Button android:id="@+id/btn2" style="@style/CalcButton" android:text="2" android:layout_columnWeight="1" />
-        <Button android:id="@+id/btn3" style="@style/CalcButton" android:text="3" android:layout_columnWeight="1" />
-        <Button android:id="@+id/btnDel" style="@style/CalcButton" android:text="DEL" android:layout_columnWeight="1" />
+        <Button
+            android:id="@+id/btn1"
+            style="@style/CalcButton"
+            android:text="1"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
 
-        <Button android:id="@+id/btn4" style="@style/CalcButton" android:text="4" android:layout_columnWeight="1" />
-        <Button android:id="@+id/btn5" style="@style/CalcButton" android:text="5" android:layout_columnWeight="1" />
-        <Button android:id="@+id/btn6" style="@style/CalcButton" android:text="6" android:layout_columnWeight="1" />
-        <Button android:id="@+id/btnClear" style="@style/CalcButton" android:text="Clr" android:layout_columnWeight="1" />
+        <Button
+            android:id="@+id/btn2"
+            style="@style/CalcButton"
+            android:text="2"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
 
-        <Button android:id="@+id/btn7" style="@style/CalcButton" android:text="7" android:layout_columnWeight="1" />
-        <Button android:id="@+id/btn8" style="@style/CalcButton" android:text="8" android:layout_columnWeight="1" />
-        <Button android:id="@+id/btn9" style="@style/CalcButton" android:text="9" android:layout_columnWeight="1" />
+        <Button
+            android:id="@+id/btn3"
+            style="@style/CalcButton"
+            android:text="3"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
+
+        <Button
+            android:id="@+id/btnDel"
+            style="@style/CalcButton"
+            android:text="DEL"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
+
+        <Button
+            android:id="@+id/btn4"
+            style="@style/CalcButton"
+            android:text="4"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
+
+        <Button
+            android:id="@+id/btn5"
+            style="@style/CalcButton"
+            android:text="5"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
+
+        <Button
+            android:id="@+id/btn6"
+            style="@style/CalcButton"
+            android:text="6"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
+
+        <Button
+            android:id="@+id/btnClear"
+            style="@style/CalcButton"
+            android:text="Clr"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
+
+        <Button
+            android:id="@+id/btn7"
+            style="@style/CalcButton"
+            android:text="7"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
+
+        <Button
+            android:id="@+id/btn8"
+            style="@style/CalcButton"
+            android:text="8"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
+
+        <Button
+            android:id="@+id/btn9"
+            style="@style/CalcButton"
+            android:text="9"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
 
         <Button
             android:id="@+id/btnEnter"
@@ -135,11 +197,29 @@
             android:layout_height="0dp"
             android:layout_gravity="fill_vertical"
             android:layout_width="0dp"
-            android:layout_columnWeight="1" />
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
 
-        <Button android:id="@+id/btn00" style="@style/CalcButton" android:text="00" android:layout_columnWeight="1" />
-        <Button android:id="@+id/btn0" style="@style/CalcButton" android:text="0" android:layout_columnWeight="1" />
-        <Button android:id="@+id/btnDot" style="@style/CalcButton" android:text="." android:layout_columnWeight="1" />
+        <Button
+            android:id="@+id/btn00"
+            style="@style/CalcButton"
+            android:text="00"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
+
+        <Button
+            android:id="@+id/btn0"
+            style="@style/CalcButton"
+            android:text="0"
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
+
+        <Button
+            android:id="@+id/btnDot"
+            style="@style/CalcButton"
+            android:text="."
+            android:layout_columnWeight="1"
+            app:backgroundTint="@color/white" />
 
     </GridLayout>
 

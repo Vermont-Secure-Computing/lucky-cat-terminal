@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#EEE8F1"
+    android:background="#FFFFFF"
     tools:context=".MerchantActivity">
 
     <!-- Header View -->
@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:background="@color/tapeRed"
+        android:background="#FFFFFF"
         android:elevation="4dp">
 
         <androidx.constraintlayout.widget.Guideline
@@ -25,8 +25,8 @@
 
         <ImageView
             android:id="@+id/back_arrow"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:src="@drawable/ic_back_arrow"
             android:contentDescription="Back"
             app:layout_constraintStart_toStartOf="parent"
@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:text="Submit"
             android:textSize="18sp"
-            android:textColor="@android:color/white"
+            android:textColor="@color/tapeRed"
             android:paddingStart="16dp"
             android:clickable="true"
             android:focusable="true"
@@ -69,79 +69,160 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp"> <!-- Added padding -->
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Business Name"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:paddingBottom="4dp"/>
             <EditText
                 android:id="@+id/edittext_business_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter your business name"
-                android:background="@drawable/bordered_edit_text"
                 android:padding="8dp"
-                android:inputType="text" />
+                android:backgroundTint="@color/customGray"
+                android:inputType="text"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Address"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"/>
             <EditText
                 android:id="@+id/edittext_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter your address (optional)"
-                android:background="@drawable/bordered_edit_text"
                 android:padding="8dp"
-                android:inputType="text" />
+                android:backgroundTint="@color/customGray"
+                android:inputType="text"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/rounded_edittext"/>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="City"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"/>
             <EditText
                 android:id="@+id/edittext_city"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter your city (optional)"
-                android:background="@drawable/bordered_edit_text"
                 android:padding="8dp"
-                android:inputType="text" />
+                android:backgroundTint="@color/customGray"
+                android:inputType="text"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="State"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"/>
             <EditText
                 android:id="@+id/edittext_state"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter your state (optional)"
-                android:background="@drawable/bordered_edit_text"
-                android:padding="8dp"
-                android:inputType="text" />
 
+                android:padding="8dp"
+                android:backgroundTint="@color/customGray"
+                android:inputType="text"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Zip Code"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"/>
             <EditText
                 android:id="@+id/edittext_zip_code"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter your zip code (optional)"
-                android:background="@drawable/bordered_edit_text"
                 android:padding="8dp"
-                android:inputType="textPostalAddress" />
+                android:backgroundTint="@color/customGray"
+                android:inputType="textPostalAddress"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Country"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"/>
             <EditText
                 android:id="@+id/edittext_country"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter your country (optional)"
-                android:background="@drawable/bordered_edit_text"
                 android:padding="8dp"
-                android:inputType="text" />
+                android:backgroundTint="@color/customGray"
+                android:inputType="text"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Phone Number"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"/>
             <EditText
                 android:id="@+id/edittext_merchant_phone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter your phone number (optional)"
-                android:background="@drawable/bordered_edit_text"
                 android:padding="8dp"
-                android:inputType="phone" />
+                android:backgroundTint="@color/customGray"
+                android:inputType="phone"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"/>
             <EditText
                 android:id="@+id/edittext_merchant_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter your email (optional)"
-                android:background="@drawable/bordered_edit_text"
                 android:padding="8dp"
-                android:inputType="textEmailAddress" />
+                android:backgroundTint="@color/customGray"
+                android:inputType="textEmailAddress"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

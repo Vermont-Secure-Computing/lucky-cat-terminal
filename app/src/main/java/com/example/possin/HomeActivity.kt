@@ -35,6 +35,8 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home)
 
+        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
+
         merchantPropertiesFile = File(filesDir, "merchant.properties")
         configPropertiesFile = File(filesDir, "config.properties")
         apiPropertiesFile = File(filesDir, "api.properties")
@@ -70,7 +72,8 @@ class HomeActivity : AppCompatActivity() {
                     transactionsCardView.visibility = View.GONE
                 } else {
                     transactionsCardView.visibility = View.VISIBLE
-                    val adapter = TransactionAdapter(this, it)
+                    val limitedTransactions = it.take(3) // Limit to 3 transactions
+                    val adapter = TransactionAdapter(this, limitedTransactions)
                     transactionsRecyclerView.adapter = adapter
                 }
             }
