@@ -8,21 +8,29 @@ import android.util.Log
 import android.view.View
 import android.view.animation.ScaleAnimation
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import com.example.possin.model.ConversionResponse
 import com.example.possin.network.ConversionRequestBody
 import com.example.possin.network.RetrofitClient
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
+import java.io.InputStreamReader
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.util.Properties
+
+data class CryptoCurrency(val name: String, val shortname: String, val chain: String, val logo: String)
 
 class CryptoOptionActivity : AppCompatActivity() {
 
@@ -40,6 +48,8 @@ class CryptoOptionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.crypto_option)
 
+        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
+
         val price = intent.getStringExtra("PRICE") ?: "0.00"
         val priceTextView: TextView = findViewById(R.id.priceTextView)
         priceTextView.text = price
@@ -54,45 +64,78 @@ class CryptoOptionActivity : AppCompatActivity() {
 //        xPubs["Dash"]?.let { dashManager = DashManager(this, it) }
         xPubs["Tether"]?.let { tronManager = TronManager(this, it) }
 
-        // Assuming selectedCurrencyCode is obtained from POSView (e.g., from a Spinner or other input)
         selectedCurrencyCode = intent.getStringExtra("CURRENCY_CODE") ?: "BTC"
 
         val buttonContainer: LinearLayout = findViewById(R.id.buttonContainer)
+        val cryptoCurrencies = loadCryptocurrenciesFromJson()
 
-        addImageButton(buttonContainer, R.drawable.bitcoin_logo, xPubs.containsKey("Bitcoin")) { handleBTCClick(price) }
-        addImageButton(buttonContainer, R.drawable.litecoin_new_logo, xPubs.containsKey("Litecoin")) { handleLTCClick(price) }
-        addImageButton(buttonContainer, R.drawable.ethereum_logo, xPubs.containsKey("Ethereum")) { handleETHClick(price) }
-        addImageButton(buttonContainer, R.drawable.dogecoin_logo, xPubs.containsKey("Dogecoin")) { handleDOGEClick(price) }
-//        addImageButton(buttonContainer, R.drawable.dashcoin_logo, xPubs.containsKey("Dash")) { handleDashClick(price) }
-        addImageButton(buttonContainer, R.drawable.tether_logo, xPubs.containsKey("Tether")) { handleUSDTClick(price) }
+        cryptoCurrencies.forEach { crypto ->
+            val logoResId = resources.getIdentifier(crypto.logo, "drawable", packageName)
+            addCardView(buttonContainer, logoResId, xPubs.containsKey(crypto.name), crypto) {
+                handleCryptoClick(crypto, price)
+            }
+        }
 
-        val backText: TextView = findViewById(R.id.backText)
-        backText.setOnClickListener {
+        val backArrow: ImageView = findViewById(R.id.back_arrow)
+        backArrow.setOnClickListener {
             finish() // Navigate back to the previous activity
         }
     }
 
-    private fun addImageButton(container: LinearLayout, imageResId: Int, isVisible: Boolean, onClick: () -> Unit) {
-        val originalBitmap = BitmapFactory.decodeResource(resources, imageResId)
-        val targetSize = 200 // Target size in pixels for the image before scaling down
-        val resizedBitmap = Bitmap.createScaledBitmap(
-            originalBitmap,
-            targetSize,
-            targetSize,
-            true
-        )
-        val scaledBitmap = Bitmap.createScaledBitmap(
-            resizedBitmap,
-            targetSize / 2,
-            targetSize / 2,
-            true
-        )
+    private fun loadCryptocurrenciesFromJson(): List<CryptoCurrency> {
+        val inputStream = assets.open("cryptocurrencies.json")
+        val reader = InputStreamReader(inputStream)
+        val jsonObject = Gson().fromJson(reader, JsonObject::class.java)
+        val cryptoList = Gson().fromJson(jsonObject.getAsJsonArray("cryptocurrencies"), Array<CryptoCurrency>::class.java).toList()
+        reader.close()
+        return cryptoList
+    }
 
-        val button = ImageButton(this).apply {
+    private fun addCardView(container: LinearLayout, imageResId: Int, isVisible: Boolean, crypto: CryptoCurrency, onClick: () -> Unit) {
+        val cardView = CardView(this).apply {
+            radius = 16f
+            cardElevation = 8f
+            visibility = if (isVisible) View.VISIBLE else View.GONE
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8)) // Increased left and right margins
+            }
+        }
+
+        val cardContent = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            setPadding(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8)) // Adjust padding as needed
+            gravity = android.view.Gravity.CENTER
+        }
+
+        val imageButton = ImageButton(this).apply {
+            val originalBitmap = BitmapFactory.decodeResource(resources, imageResId)
+            val targetSize = 300 // Increased target size for larger logo
+            val resizedBitmap = Bitmap.createScaledBitmap(
+                originalBitmap,
+                targetSize,
+                targetSize,
+                true
+            )
+            val scaledBitmap = Bitmap.createScaledBitmap(
+                resizedBitmap,
+                targetSize / 2,
+                targetSize / 2,
+                true
+            )
+
             this.setImageBitmap(scaledBitmap)
-            this.visibility = if (isVisible) View.VISIBLE else View.GONE
             setOnClickListener { onClick() }
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
                 width = LinearLayout.LayoutParams.WRAP_CONTENT
                 height = LinearLayout.LayoutParams.WRAP_CONTENT
                 setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
@@ -128,7 +171,44 @@ class CryptoOptionActivity : AppCompatActivity() {
                 false
             }
         }
-        container.addView(button)
+
+        val textLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(dpToPx(16), 0, 0, 0) // Add left margin to separate text from image
+            }
+        }
+
+        val nameTextView = TextView(this).apply {
+            text = crypto.name
+            textSize = 18f
+            setTextColor(resources.getColor(android.R.color.black))
+        }
+
+        val shortnameTextView = TextView(this).apply {
+            text = crypto.shortname
+            textSize = 14f
+            setTextColor(resources.getColor(android.R.color.darker_gray))
+        }
+
+        val chainTextView = TextView(this).apply {
+            text = crypto.chain
+            textSize = 14f
+            setTextColor(resources.getColor(android.R.color.darker_gray))
+        }
+
+        textLayout.addView(nameTextView)
+        textLayout.addView(shortnameTextView)
+        textLayout.addView(chainTextView)
+
+        cardContent.addView(imageButton)
+        cardContent.addView(textLayout)
+
+        cardView.addView(cardContent)
+        container.addView(cardView)
     }
 
     private fun dpToPx(dp: Int): Int {
@@ -151,6 +231,17 @@ class CryptoOptionActivity : AppCompatActivity() {
         }
 
         return xPubs
+    }
+
+    private fun handleCryptoClick(crypto: CryptoCurrency, price: String) {
+        when (crypto.shortname) {
+            "BTC" -> handleBTCClick(price)
+            "LTC" -> handleLTCClick(price)
+            "ETH" -> handleETHClick(price)
+            "DOGE" -> handleDOGEClick(price)
+            "USDT" -> handleUSDTClick(price)
+            // Add other cryptocurrencies as needed
+        }
     }
 
     private fun handleBTCClick(price: String) {
@@ -220,37 +311,6 @@ class CryptoOptionActivity : AppCompatActivity() {
             }
         } ?: run {
             Toast.makeText(this, "USDT Tron Manager not initialized", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-//    private fun handleDashClick(price: String) {
-//        dashManager?.let { manager ->
-//            val (address, index) = if (DashManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
-//
-//            val numericPrice = price.filter { it.isDigit() || it == '.' }
-//
-//            Log.d("ADDRESS", address)
-//
-////            postConversionApi(numericPrice, selectedCurrencyCode, address, "DASH", R.drawable.dashcoin_logo) { feeStatus, status, formattedRate ->
-////                startGenerateQRActivity(address, formattedRate, R.drawable.dashcoin_logo, "Dash", index, feeStatus, status, "Dash")
-////            }
-//        } ?: run {
-//            Toast.makeText(this, "Dash Manager not initialized", Toast.LENGTH_SHORT).show()
-//        }
-//    }
-
-    private fun handleLOGClick(price: String) {
-        woodcoinManager?.let {
-            val address = it.getAddress()
-
-            val numericPrice = price.filter { it.isDigit() || it == '.' }
-
-            Log.d("ADDRESS", address)
-
-            // Call the API to get the conversion rate
-            // postConversionApi(numericPrice, selectedCurrencyCode, address, "LOG", R.drawable.woodcoin_logo)
-        } ?: run {
-            Toast.makeText(this, "Woodcoin Manager not initialized", Toast.LENGTH_SHORT).show()
         }
     }
 

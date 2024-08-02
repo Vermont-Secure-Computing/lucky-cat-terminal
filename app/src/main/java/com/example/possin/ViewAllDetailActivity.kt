@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.example.possin.database.AppDatabase
@@ -42,6 +44,8 @@ class ViewAllDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_all_detail)
 
+        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
+
         chainTextView = findViewById(R.id.chainTextView)
         dateTextView = findViewById(R.id.dateTextView)
         balanceTextView = findViewById(R.id.balanceTextView)
@@ -62,18 +66,15 @@ class ViewAllDetailActivity : AppCompatActivity() {
             updateUI(it)
         }
 
-
-
-
         db = AppDatabase.getDatabase(this)
         client = OkHttpClient()
 
         // Get the device ID
         deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
 
-        // Set up back button
-        val backButton = findViewById<Button>(R.id.backButton)
-        backButton.setOnClickListener {
+        // Set up back arrow
+        val backArrow = findViewById<ImageView>(R.id.back_arrow)
+        backArrow.setOnClickListener {
             finish()
         }
 
@@ -102,13 +103,13 @@ class ViewAllDetailActivity : AppCompatActivity() {
 
     private fun updateUI(transaction: Transaction) {
         Log.d("CONFIRMATION", transaction.confirmations.toString())
-        merchantName.text = getMerchantName()
-        merchantAddress.text = getMechantAddress()
-        chainTextView.text = transaction.chain
-        dateTextView.text = transaction.date
+        merchantName.text = "Name: ${getMerchantName()}"
+        merchantAddress.text = "Address: ${getMechantAddress()}"
+        chainTextView.text = "Chain: ${transaction.chain}"
         balanceTextView.text = "Amount: ${transaction.balance}"
         baseCurrencyTextView.text = "Base Currency: ${transaction.selectedCurrencyCode}"
         basePriceTextView.text = "Base Price: ${transaction.numericPrice}"
+        dateTextView.text = "Date: ${transaction.date}"
         txidTextView.text = "TxID: ${transaction.txid}"
         feesTextView.text = "Fees: ${transaction.fees}"
         confirmationsTextView.text = "Confirmations: ${transaction.confirmations}"

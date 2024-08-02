@@ -29,6 +29,12 @@
       "shortname": "USDT",
       "chain": "Tron",
       "logo": "tether_logo"
+    },
+    {
+      "name": "Dash",
+      "shortname": "Dash",
+      "chain": "Dash",
+      "logo": "dashcoin_logo"
     }
   ]
 }

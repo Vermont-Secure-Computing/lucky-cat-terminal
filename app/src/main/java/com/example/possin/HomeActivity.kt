@@ -3,6 +3,7 @@ package com.example.possin
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
@@ -44,8 +45,6 @@ class HomeActivity : AppCompatActivity() {
         // Load cryptocurrency names from JSON file
         cryptocurrencyNames = loadCryptocurrencyNames()
 
-
-
         transactionsCardView = findViewById(R.id.transactionsCardView)
         val seeAllTextView = findViewById<TextView>(R.id.seeAllTextView)
 
@@ -57,14 +56,14 @@ class HomeActivity : AppCompatActivity() {
         transactionsRecyclerView.layoutManager = LinearLayoutManager(this)
 
         // Add custom divider item decoration
-        val dividerItemDecoration = DividerItemDecoration(
-            transactionsRecyclerView.context,
-            (transactionsRecyclerView.layoutManager as LinearLayoutManager).orientation
-        )
-        ContextCompat.getDrawable(this, R.drawable.divider)?.let {
-            dividerItemDecoration.setDrawable(it)
-        }
-        transactionsRecyclerView.addItemDecoration(dividerItemDecoration)
+//        val dividerItemDecoration = DividerItemDecoration(
+//            transactionsRecyclerView.context,
+//            (transactionsRecyclerView.layoutManager as LinearLayoutManager).orientation
+//        )
+//        ContextCompat.getDrawable(this, R.drawable.divider)?.let {
+//            dividerItemDecoration.setDrawable(it)
+//        }
+//        transactionsRecyclerView.addItemDecoration(dividerItemDecoration)
 
         transactionViewModel.allTransactions.observe(this, Observer { transactions ->
             transactions?.let {
@@ -88,10 +87,17 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
-        // Set up ImageButton 1 to navigate to POSActivity
         val button1 = findViewById<ImageButton>(R.id.button1)
-        button1.setOnClickListener {
-            // Check if the properties files exist and have required inputs
+        val button2 = findViewById<ImageButton>(R.id.button2)
+        val button3 = findViewById<ImageButton>(R.id.button3)
+        val button4 = findViewById<ImageButton>(R.id.button4)
+        val button5 = findViewById<ImageButton>(R.id.button5)
+        val button6 = findViewById<ImageButton>(R.id.button6)
+
+        // Log to check if buttons are null
+        Log.d("HomeActivity", "button1: $button1, button2: $button2, button3: $button3, button4: $button4, button5: $button5, button6: $button6")
+
+        button1?.setOnClickListener {
             if (!propertiesFilesExist()) {
                 if (!merchantPropertiesFile.exists()) {
                     showFillUpProfileDialog(MerchantActivity::class.java)
@@ -106,32 +112,27 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        val button2 = findViewById<ImageButton>(R.id.button2)
-        button2.setOnClickListener {
+        button2?.setOnClickListener {
             val intent = Intent(this, APIActivity::class.java)
             startActivity(intent)
         }
 
-        val button3 = findViewById<ImageButton>(R.id.button3)
-        button3.setOnClickListener {
+        button3?.setOnClickListener {
             val intent = Intent(this, BaseCurrency::class.java)
             startActivity(intent)
         }
 
-        val button4 = findViewById<ImageButton>(R.id.button4)
-        button4.setOnClickListener {
+        button4?.setOnClickListener {
             val intent = Intent(this, MerchantActivity::class.java)
             startActivity(intent)
         }
 
-        val button5 = findViewById<ImageButton>(R.id.button5)
-        button5.setOnClickListener {
+        button5?.setOnClickListener {
             val intent = Intent(this, XpubAddress::class.java)
             startActivity(intent)
         }
 
-        val button6 = findViewById<ImageButton>(R.id.button6)
-        button6.setOnClickListener {
+        button6?.setOnClickListener {
             // Handle button 6 click
         }
     }

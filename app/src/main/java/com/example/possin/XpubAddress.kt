@@ -206,6 +206,9 @@ class XpubAddress : AppCompatActivity() {
             "Tether" -> {
                 if (inputType == "xpub") TronManager.isValidXpub(value) else TronManager.isValidAddress(value)
             }
+            "Dash" -> {
+                if (inputType == "xpub") DashManager.isValidXpub(value) else DashManager.isValidAddress(value)
+            }
             else -> false
         }
 
@@ -217,7 +220,7 @@ class XpubAddress : AppCompatActivity() {
             errorTextView.text = ""
             submitText.isEnabled = allInputsValid()
             if (submitText.isEnabled) {
-                submitText.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+                submitText.setTextColor(ContextCompat.getColor(this, R.color.tapeRed))
             } else {
                 submitText.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
             }
