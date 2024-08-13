@@ -39,8 +39,9 @@ class CryptoOptionActivity : AppCompatActivity() {
     private var ethereumManager: EthereumManager? = null
     private var dogecoinManager: DogecoinManager? = null
     private var woodcoinManager: WoodcoinManager? = null
-    //    private var dashManager: DashManager? = null
+    private var dashManager: DashManager? = null
     private var tronManager: TronManager? = null
+    private var bitcoincashManager: BitcoinCashManager? = null
     private lateinit var selectedCurrencyCode: String
     private lateinit var message: String
 
@@ -61,8 +62,9 @@ class CryptoOptionActivity : AppCompatActivity() {
         xPubs["Ethereum"]?.let { ethereumManager = EthereumManager(this, it) }
         xPubs["Dogecoin"]?.let { dogecoinManager = DogecoinManager(this, it) }
         xPubs["Woodcoin"]?.let { woodcoinManager = WoodcoinManager(this, it) }
-//        xPubs["Dash"]?.let { dashManager = DashManager(this, it) }
+        xPubs["Dash"]?.let { dashManager = DashManager(this, it) }
         xPubs["Tether"]?.let { tronManager = TronManager(this, it) }
+        xPubs["Bitcoincash"]?.let { bitcoincashManager = BitcoinCashManager(this, it) }
 
         selectedCurrencyCode = intent.getStringExtra("CURRENCY_CODE") ?: "BTC"
 
@@ -240,6 +242,8 @@ class CryptoOptionActivity : AppCompatActivity() {
             "ETH" -> handleETHClick(price)
             "DOGE" -> handleDOGEClick(price)
             "USDT" -> handleUSDTClick(price)
+            "DASH" -> handleDASHlick(price)
+            "BCH" -> handleBCHlick(price)
             // Add other cryptocurrencies as needed
         }
     }
@@ -314,8 +318,50 @@ class CryptoOptionActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleDASHlick(price: String) {
+        dashManager?.let { manager ->
+            val addressIndexPair: Pair<String, Int>? = if (DashManager.isValidAddress(manager.getXpub())) {
+                Pair(manager.getXpub(), -1)
+            } else {
+                manager.getAddress()
+            }
+
+            if (addressIndexPair == null) {
+                Toast.makeText(this, "Failed to derive Dash address", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val (address, index) = addressIndexPair
+
+            val numericPrice = price.filter { it.isDigit() || it == '.' }
+
+            postConversionApi(numericPrice, selectedCurrencyCode, address, "DASH", R.drawable.dashcoin_logo) { feeStatus, status, formattedRate ->
+                startGenerateQRActivity(address, formattedRate, R.drawable.dashcoin_logo, "DASH", index, feeStatus, status, "Dash", numericPrice, selectedCurrencyCode)
+            }
+        } ?: run {
+            Toast.makeText(this, "Dash Manager not initialized", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun handleBCHlick(price: String) {
+        bitcoincashManager?.let { manager ->
+            val (address, index) = if (BitcoinCashManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
+
+            val numericPrice = price.filter { it.isDigit() || it == '.' }
+
+            postConversionApi(numericPrice, selectedCurrencyCode, address, "BCH", R.drawable.bitcoin_cash) { feeStatus, status, formattedRate ->
+                startGenerateQRActivity(address, formattedRate, R.drawable.bitcoin_cash, "BCH", index, feeStatus, status, "Bitcoincash", numericPrice, selectedCurrencyCode)
+            }
+        } ?: run {
+            Toast.makeText(this, "Bitcoincash Manager not initialized", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun postConversionApi(price: String, currency: String, address: String, chain: String, logoResId: Int, onResult: (String, String, String) -> Unit) {
         val apiService = RetrofitClient.getApiService(this)
+        println("Price $price")
+        println("Currency $currency")
+        println("Chain $chain")
         val requestBody = ConversionRequestBody(price, currency, chain)
         val call = apiService.postConversion(requestBody)
 

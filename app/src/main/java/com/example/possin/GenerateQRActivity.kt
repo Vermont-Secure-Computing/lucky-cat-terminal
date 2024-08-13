@@ -44,6 +44,8 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import org.json.JSONObject
+import pl.droidsonroids.gif.GifDrawable
+import pl.droidsonroids.gif.GifImageView
 import java.io.File
 import java.io.IOException
 import java.math.BigDecimal
@@ -83,6 +85,12 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
     private lateinit var numericPrice: String
     private lateinit var selectedCurrencyCode: String
+    private lateinit var homeText: TextView
+
+    private var previousReceivedAmt: Double = 0.0
+    private var initialTxid: String = ""
+    private lateinit var address: String
+    private lateinit var currency: String
 
     private lateinit var db: AppDatabase
 
@@ -94,12 +102,14 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         super.onCreate(savedInstanceState)
         setContentView(R.layout.generate_qr)
 
+        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
+
         db = AppDatabase.getDatabase(this)
 
-        val address = intent.getStringExtra("ADDRESS") ?: "No address provided"
+        address = intent.getStringExtra("ADDRESS") ?: "No address provided"
         val price = intent.getStringExtra("PRICE") ?: "No price provided"
         val logoResId = intent.getIntExtra("LOGO_RES_ID", R.drawable.bitcoin_logo)
-        val currency = intent.getStringExtra("CURRENCY") ?: "BTC"
+        currency = intent.getStringExtra("CURRENCY") ?: "BTC"
         val addressIndex = intent.getIntExtra("ADDRESS_INDEX", -1)
         val feeStatus = intent.getStringExtra("FEE_STATUS") ?: ""
         val status = intent.getStringExtra("STATUS") ?: ""
@@ -131,11 +141,19 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             "DOGE" -> "dogecoin:${urlEncode(address)}?amount=${urlEncode(formattedPrice)}"
             "ETH" -> "ethereum:$address?amount=$formattedPrice"
             "TRON-NETWORK" -> "tron:$address?amount=$formattedPrice"
+            "DASH" -> "dash:$address?amount=$formattedPrice"
+            "BCH" -> "bitcoincash:$address?amount=$formattedPrice"
             else -> "bitcoin:$address?amount=$formattedPrice"
         }
 
         val addressTextView: TextView = findViewById(R.id.addressTextView)
-        addressTextView.text = "Address: $address\nAmount: $formattedPrice $currency"
+        val addressTextViewAddress: TextView = findViewById(R.id.addressTextViewAddress)
+        val amountTextViewAddress: TextView = findViewById(R.id.amountTextViewAddress)
+        val amountTextViewAddressChain: TextView = findViewById(R.id.amountTextViewAddressChain)
+        addressTextView.text = "Address:"
+        addressTextViewAddress.text = "$address"
+        amountTextViewAddress.text = "Amount:"
+        amountTextViewAddressChain.text = "$formattedPrice $currency"
 
         qrCodeImageView = findViewById(R.id.qrCodeImageView)
         val qrCodeBitmap = generateQRCodeWithLogo(uri, logoResId)
@@ -164,7 +182,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         printButton.setOnClickListener {
             handler.removeCallbacksAndMessages(null)
             gatheringBlocksTextView.visibility = View.GONE
-            showReceiptDialog(deviceId, numericPrice, selectedCurrencyCode)
+            showReceiptDialog(deviceId, numericPrice, selectedCurrencyCode, address)
         }
 
         confirmationBlocks = listOf(
@@ -203,6 +221,11 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         cancelText = findViewById(R.id.cancelText)
         cancelText.setOnClickListener {
             showCancelDialog()
+        }
+        // Handle home click
+        homeText = findViewById(R.id.homeText)
+        homeText.setOnClickListener {
+            showHomeConfirmationDialog()
         }
     }
 
@@ -317,11 +340,12 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         val amount: String,
         val chain: String,
         val addressIndex: Int,
-        val managerType: String
+        val managerType: String,
+        val txid: String?
     )
 
     private fun initializeWebSocket(address: String, amount: String, chain: String, addressIndex: Int, managerType: String) {
-        websocketParams = WebSocketParams(address, amount, chain, addressIndex, managerType)
+        websocketParams = WebSocketParams(address, amount, chain, addressIndex, managerType, txid = null)
         connectWebSocket("checkBalance")
     }
 
@@ -348,20 +372,28 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             type,
             this,
             websocketParams.addressIndex,
-            websocketParams.managerType
+            websocketParams.managerType,
+            websocketParams.txid
         )
 
         webSocket = client.newWebSocket(request, listener)
+
     }
 
-    private fun closeWebSocket() {
-        webSocket.close(1000, "Payment received")
-        cancelText.visibility = View.GONE
-        timerTextView.visibility = View.GONE
-        gatheringBlocksTextView.visibility = View.VISIBLE
-        startGatheringBlocksAnimation()
-        connectWebSocket("cancel")
+    private fun closeWebSocket(reconnect: Boolean = true) {
+        if (::webSocket.isInitialized) {
+            webSocket.close(1000, "Payment received")
+        }
+
+        if (reconnect) {
+            cancelText.visibility = View.GONE
+            timerTextView.visibility = View.GONE
+            gatheringBlocksTextView.visibility = View.VISIBLE
+            startGatheringBlocksAnimation()
+            connectWebSocket("cancel")
+        }
     }
+
 
     private fun startGatheringBlocksAnimation() {
         val initialText = "Gathering Blocks"
@@ -398,6 +430,71 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         return getProperty("address")
     }
 
+    override fun onInsufficientPayment(receivedAmt: Double, totalAmount: Double, difference: Double, txid: String) {
+        runOnUiThread {
+            previousReceivedAmt = receivedAmt
+            initialTxid = txid
+            showInsufficientPaymentDialog(receivedAmt, totalAmount, difference, txid, intent.getIntExtra("LOGO_RES_ID", R.drawable.bitcoin_logo))
+        }
+    }
+
+    private fun showInsufficientPaymentDialog(receivedAmt: Double, totalAmount: Double, difference: Double, txid: String, logoResId: Int) {
+        val dialogView = layoutInflater.inflate(R.layout.insufficient_payment_dialog, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false) // Make the dialog modal
+            .create()
+
+        val paidAmountTextView: TextView = dialogView.findViewById(R.id.receivedAmt)
+        val requiredAmountTextView: TextView = dialogView.findViewById(R.id.difference)
+        val totalAmountTextView: TextView = dialogView.findViewById(R.id.totalAmount)
+        val TXIDTextView: TextView = dialogView.findViewById(R.id.txidTextView)
+
+        paidAmountTextView.text = "Paid Amount: $receivedAmt"
+        requiredAmountTextView.text = "Required Amount: $difference"
+        totalAmountTextView.text = "Total Amount: $totalAmount"
+        TXIDTextView.text = "TXID: $txid"
+
+        val amountTextViewAddressChain: TextView = findViewById(R.id.amountTextViewAddressChain)
+        amountTextViewAddressChain.text = "Received: $difference $currency"
+
+        dialogView.findViewById<Button>(R.id.btnRetry).setOnClickListener {
+            dialog.dismiss()
+            // Close the previous WebSocket connection without reconnecting with "cancel"
+            closeWebSocket(reconnect = false)
+
+            // Generate new QR code with the difference amount
+            val uri = when (currency) {
+                "LTC" -> "litecoin:$address?amount=$difference"
+                "DOGE" -> "dogecoin:$address?amount=$difference"
+                "ETH" -> "ethereum:$address?amount=$difference"
+                "TRON-NETWORK" -> "tron:$address?amount=$difference"
+                else -> "bitcoin:$address?amount=$difference"
+            }
+
+            val qrCodeBitmap = generateQRCodeWithLogo(uri, logoResId)
+            qrCodeImageView.setImageBitmap(qrCodeBitmap)
+
+            // Reconnect WebSocket with new parameters
+            connectWebSocketForRetry(address, difference.toString(), currency, txid)
+        }
+
+        dialogView.findViewById<Button>(R.id.btnCancel).setOnClickListener {
+            dialog.dismiss()
+            navigateToHome()
+        }
+
+        dialog.show()
+    }
+
+
+    private fun connectWebSocketForRetry(address: String, amount: String, chain: String, txid: String) {
+        println("connect txid: $txid")
+        websocketParams = WebSocketParams(address, amount, chain, websocketParams.addressIndex, websocketParams.managerType, txid)
+        connectWebSocket("checkBalance")
+    }
+
+
     override fun onPaymentStatusPaid(status: String, balance: Double, txid: String, fees: Double, confirmations: Int, feeStatus: String, chain: String, addressIndex: Int, managerType: String) {
         runOnUiThread {
             if (::qrCodeImageView.isInitialized) {
@@ -407,34 +504,40 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 Log.d("FEES", fees.toString())
                 Log.d("FEE STATUS", feeStatus)
 
+                // Show the home button
+                homeText.visibility = View.VISIBLE
+
+                // Accumulate received amount
+                val totalReceivedAmount = previousReceivedAmt + balance
+
                 // Update the TextViews with the received data
                 // Convert balance and fees to their correct values
-//                val formattedBalance = if (chain == "TRON") {
-//                    String.format("%.6f", balance / 1_000_000)
-//                } else {
-//                    String.format("%.8f", balance / 100_000_000)
-//                }
-//
-//                val formattedFees = if (chain == "TRON") {
-//                    String.format("%.6f", fees / 1_000_000)
-//                } else {
-//                    String.format("%.8f", fees / 100_000_000)
-//                }
+                val formattedBalance = if (chain == "TRON") {
+                    String.format("%.6f", convertBalance(totalReceivedAmount))
+                } else {
+                    String.format("%.8f", convertBalance(totalReceivedAmount))
+                }
+
+                val formattedFees = if (chain == "TRON") {
+                    String.format("%.6f", convertFee(fees))
+                } else {
+                    String.format("%.8f", convertFee(fees))
+                }
 
                 // Update the TextViews with the received data
                 merchantName.text = getMerchantName()
                 merchantName.visibility = TextView.VISIBLE
                 merchantAddress.text = getMechantAddress()
                 merchantAddress.visibility = TextView.VISIBLE
-                balanceTextView.text = "Amount: $balance"
+                balanceTextView.text = "Amount: $formattedBalance"
                 balanceTextView.visibility = TextView.VISIBLE
                 baseCurrencyTextView.text = "Base Currency: $selectedCurrencyCode"
                 baseCurrencyTextView.visibility = TextView.VISIBLE
                 basePriceTextView.text = "Base Price: $numericPrice"
                 basePriceTextView.visibility = TextView.VISIBLE
-                txidTextView.text = "Transaction ID: $txid"
+                txidTextView.text = "Transaction IDs: $initialTxid, $txid"
                 txidTextView.visibility = TextView.VISIBLE
-                feesTextView.text = "Fees: $fees"
+                feesTextView.text = "Fees: $formattedFees"
                 feesTextView.visibility = TextView.VISIBLE
                 confirmationsTextView.text = "Confirmations: $confirmations"
                 confirmationsTextView.visibility = TextView.VISIBLE
@@ -442,9 +545,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
                 // Save the last index if the status is "paid"
                 if (status == "paid") {
-                    val mediaPlayer = MediaPlayer.create(this@GenerateQRActivity, R.raw.coins_received)
-                    mediaPlayer.start()
                     saveLastIndex(addressIndex, managerType)
+                    showPaymentReceivedDialog()
                 }
 
                 // Store txid and chain for repeated API calls
@@ -454,17 +556,33 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 // Start repeated API calls
                 startRepeatedApiCalls()
 
-//                if (feeStatus == "Fee is okay" || confirmations > 0) {
-                saveTransaction(balance, txid, fees, confirmations, chain, message, numericPrice, selectedCurrencyCode)
+                saveTransaction(totalReceivedAmount, txid, fees, confirmations, chain, message, numericPrice, selectedCurrencyCode, websocketParams.address)
                 printButton.visibility = View.VISIBLE
-//                }
-
-                // Show the print button if there is at least one confirmation
-//                if (confirmations > 0) {
-//                    printButton.visibility = View.VISIBLE
-//                }
-
             }
+        }
+    }
+
+
+    override fun onPaymentError(error: String) {
+        runOnUiThread {
+            Toast.makeText(this, "Payment Error: $error", Toast.LENGTH_LONG).show()
+            // Handle error appropriately, such as showing a dialog or retrying the connection
+        }
+    }
+
+    private fun convertFee(fee: Double): Double {
+        return when {
+            fee < 1_000_000 -> fee
+            fee < 100_000_000 -> fee / 1_000_000
+            else -> fee / 100_000_000
+        }
+    }
+
+    private fun convertBalance(balance: Double): Double {
+        return when {
+            balance < 1_000_000 -> balance
+            balance < 100_000_000 -> balance / 1_000_000
+            else -> balance / 100_000_000
         }
     }
 
@@ -541,7 +659,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         })
     }
 
-    private fun showReceiptDialog(deviceId: String, numericPrice: String, selectedCurrencyCode: String) {
+    private fun showReceiptDialog(deviceId: String, numericPrice: String, selectedCurrencyCode: String, address: String) {
         val receiptDialog = ReceiptDialogFragment()
 
         // Pass data to the dialog fragment
@@ -549,21 +667,22 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         args.putString("receiptTitle", "${merchantName.text}")
         args.putString("receiptAddress", "${merchantAddress.text}")
         args.putString("receiptDetails", "Transaction Details")
-        args.putString("receiptBalance", "Balance: ${balanceTextView.text}")
-        args.putString("receiptTxID", "TxID: ${txidTextView.text}")
-        args.putString("receiptFees", "Fees: ${feesTextView.text}")
-        args.putString("receiptConfirmations", "Confirmations: ${confirmationsTextView.text}")
-        args.putString("receiptChain", "Chain: ${chain}")
-        args.putString("receiptDeviceID", "Device ID: $deviceId")
+        args.putString("receiptBalance", "${balanceTextView.text}")
+        args.putString("receiptTxID", "${txidTextView.text}")
+        args.putString("receiptFees", "${feesTextView.text}")
+        args.putString("receiptConfirmations", "${confirmationsTextView.text}")
+        args.putString("receiptChain", "${chain}")
+        args.putString("receiptDeviceID", deviceId)
         args.putString("receiptNumericPrice", "Base Price: $numericPrice")
         args.putString("receiptSelectedCurrencyCode", "Base Currency: $selectedCurrencyCode")
+        args.putString("receivingAddress", "address: $address")
 
         receiptDialog.arguments = args
 
         receiptDialog.show(supportFragmentManager, "ReceiptDialog")
     }
 
-    private fun saveTransaction(balance: Double? = null, txid: String? = null, fees: Double? = null, confirmations: Int = 0, chain: String, message: String? = null, numericPrice: String, selectedCurrencyCode: String) {
+    private fun saveTransaction(balance: Double? = null, txid: String? = null, fees: Double? = null, confirmations: Int = 0, chain: String, message: String? = null, numericPrice: String, selectedCurrencyCode: String, address: String) {
         val currentBalance = balance ?: balanceTextView.text.toString().replace("Balance: ", "").toDouble()
         val currentTxid = txid ?: txidTextView.text.toString().replace("Transaction ID: ", "")
         val currentFees = fees ?: feesTextView.text.toString().replace("Fees: ", "").toDouble()
@@ -581,7 +700,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             chain = chain,
             message = message,  // Include the message here
             numericPrice = numericPrice,
-            selectedCurrencyCode = selectedCurrencyCode
+            selectedCurrencyCode = selectedCurrencyCode,
+            address = address
         )
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -590,6 +710,25 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     }
 
     private fun showCancelDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.cancel_dialog, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.btnCancel).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.btnOkay).setOnClickListener {
+            dialog.dismiss()
+            navigateToHome()
+            closeWebSocket()
+        }
+
+        dialog.show()
+    }
+
+    private fun showHomeConfirmationDialog() {
         val dialogView = layoutInflater.inflate(R.layout.cancel_dialog, null)
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
@@ -613,4 +752,35 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         startActivity(intent)
         finish()
     }
+
+    private fun showPaymentReceivedDialog() {
+        if (!isFinishing && !isDestroyed) {
+            val dialogView = layoutInflater.inflate(R.layout.payment_received_dialog, null)
+            val dialog = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create()
+
+            val gifImageView = dialogView.findViewById<GifImageView>(R.id.gifImageView)
+            val gifDrawable = GifDrawable(resources, R.raw.green_check_circle_animation_300x300)
+
+            gifImageView.setImageDrawable(gifDrawable)
+
+            val mediaPlayer = MediaPlayer.create(this, R.raw.coins_received)
+            mediaPlayer.start()
+
+            // Get the duration of the GIF animation
+            val gifDuration = gifDrawable.duration
+
+            // Dismiss the dialog and release the media player after the animation completes
+            handler.postDelayed({
+                if (!isFinishing && !isDestroyed) {
+                    dialog.dismiss()
+                }
+                mediaPlayer.release()
+            }, gifDuration.toLong())
+
+            dialog.show()
+        }
+    }
+
 }

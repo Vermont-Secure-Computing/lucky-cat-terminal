@@ -1,9 +1,10 @@
 package com.example.possin
 
-import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -102,17 +103,20 @@ class MerchantActivity : AppCompatActivity() {
 
     private fun showSuccessDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_success, null)
-        val builder = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setCancelable(false)
-
-        val dialog = builder.create()
+        val dialog = Dialog(this, R.style.CustomDialog)
+        dialog.setContentView(dialogView)
+        dialog.setCancelable(false)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialogView.findViewById<Button>(R.id.btn_ok).setOnClickListener {
             dialog.dismiss()
             navigateToHome()
         }
         dialog.show()
     }
+
+
+
 
     private fun navigateToHome() {
         val intent = Intent(this, HomeActivity::class.java)

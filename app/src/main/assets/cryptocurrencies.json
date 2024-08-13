@@ -32,9 +32,15 @@
     },
     {
       "name": "Dash",
-      "shortname": "Dash",
+      "shortname": "DASH",
       "chain": "Dash",
       "logo": "dashcoin_logo"
+    },
+    {
+      "name": "Bitcoincash",
+      "shortname": "BCH",
+      "chain": "Bitcoincash",
+      "logo": "bitcoin_cash"
     }
   ]
 }

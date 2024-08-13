@@ -18,5 +18,6 @@ data class Transaction(
     val chain: String,
     val message: String? = null,
     val numericPrice: String,
-    val selectedCurrencyCode: String
+    val selectedCurrencyCode: String,
+    val address: String
 ) : Parcelable

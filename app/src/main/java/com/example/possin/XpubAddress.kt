@@ -5,19 +5,25 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.zxing.integration.android.IntentIntegrator
+import com.google.zxing.integration.android.IntentResult
 import java.util.Properties
+
 
 class XpubAddress : AppCompatActivity() {
 
@@ -29,6 +35,7 @@ class XpubAddress : AppCompatActivity() {
     private lateinit var properties: Properties
     private lateinit var submitText: TextView
     private lateinit var backArrow: ImageView
+    private var currentInputField: EditText? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,8 +111,10 @@ class XpubAddress : AppCompatActivity() {
             val shortnameTextView = itemView.findViewById<TextView>(R.id.crypto_shortname)
             val chainTextView = itemView.findViewById<TextView>(R.id.crypto_chain)
             val typeSpinner = itemView.findViewById<Spinner>(R.id.type_spinner)
+            val segwitLegacySpinner = itemView.findViewById<Spinner>(R.id.segwit_legacy_spinner)
             val inputField = itemView.findViewById<EditText>(R.id.input_field)
             val errorTextView = itemView.findViewById<TextView>(R.id.error_text)
+            val scannerButton = itemView.findViewById<ImageButton>(R.id.scanner_button)
 
             val logoId = resources.getIdentifier(crypto.logo, "drawable", packageName)
             logoImageView.setImageResource(logoId)
@@ -114,43 +123,90 @@ class XpubAddress : AppCompatActivity() {
             chainTextView.text = crypto.chain
 
             // Set up type spinner
-            val adapter = ArrayAdapter.createFromResource(this, R.array.type_array, android.R.layout.simple_spinner_item)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            typeSpinner.adapter = adapter
+            val typeAdapter = ArrayAdapter.createFromResource(this, R.array.type_array, android.R.layout.simple_spinner_item)
+            typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            typeSpinner.adapter = typeAdapter
+
+            // Set up segwit/legacy spinner
+            val segwitLegacyAdapter = ArrayAdapter.createFromResource(this, R.array.segwit_legacy_array, android.R.layout.simple_spinner_item)
+            segwitLegacyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            segwitLegacySpinner.adapter = segwitLegacyAdapter
 
             // Load saved values if they exist
             val savedType = properties.getProperty("${crypto.name}_type")
+            val savedSegwitLegacy = properties.getProperty("${crypto.name}_segwit_legacy")
             val savedValue = properties.getProperty("${crypto.name}_value")
 
             if (savedType != null) {
-                val spinnerPosition = adapter.getPosition(savedType)
+                val spinnerPosition = typeAdapter.getPosition(savedType)
                 typeSpinner.setSelection(spinnerPosition)
+            }
+
+            if (savedSegwitLegacy != null) {
+                val spinnerPosition = segwitLegacyAdapter.getPosition(savedSegwitLegacy)
+                segwitLegacySpinner.setSelection(spinnerPosition)
             }
 
             if (savedValue != null) {
                 inputField.setText(savedValue)
             }
 
+            // Initially hide segwit/legacy spinner
+            segwitLegacySpinner.visibility = View.GONE
+
             inputField.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
                 override fun afterTextChanged(s: Editable?) {
-                    validateInput(inputField, typeSpinner.selectedItem.toString(), crypto.name, errorTextView, submitText)
+                    validateInput(inputField, typeSpinner.selectedItem.toString(), segwitLegacySpinner.selectedItem.toString(), crypto.name, errorTextView, submitText)
                 }
             })
 
             typeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                     val selectedType = parent.getItemAtPosition(position).toString()
-                    inputField.hint = "Enter $selectedType ${crypto.name} name"
-                    validateInput(inputField, selectedType, crypto.name, errorTextView, submitText)
+                    inputField.hint = "Enter $selectedType ${crypto.name}"
+                    if (selectedType == "xpub" && (crypto.name == "Bitcoin" || crypto.name == "Litecoin")) {
+                        segwitLegacySpinner.visibility = View.VISIBLE
+                    } else {
+                        segwitLegacySpinner.visibility = View.GONE
+                    }
+                    validateInput(inputField, selectedType, segwitLegacySpinner.selectedItem.toString(), crypto.name, errorTextView, submitText)
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>) {}
             }
 
+            segwitLegacySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                    // No validation needed here, handle other logic if necessary
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+
+            scannerButton.setOnClickListener {
+                currentInputField = inputField // Store the current input field
+                val integrator = IntentIntegrator(this@XpubAddress)
+                integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
+                integrator.setPrompt("Scan a barcode or QR code")
+                integrator.setCameraId(0)  // Use a specific camera of the device
+                integrator.setBeepEnabled(true)
+                integrator.setBarcodeImageEnabled(true)
+                integrator.initiateScan()
+            }
+
             cryptocurrencyContainer.addView(itemView)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val result: IntentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result.contents != null) {
+            // Set the scanned value to the stored input field
+            currentInputField?.setText(result.contents)
+            currentInputField = null // Clear the reference after use
         }
     }
 
@@ -160,25 +216,30 @@ class XpubAddress : AppCompatActivity() {
             val itemView = cryptocurrencyContainer.getChildAt(i)
             val nameTextView = itemView.findViewById<TextView>(R.id.crypto_name)
             val typeSpinner = itemView.findViewById<Spinner>(R.id.type_spinner)
+            val segwitLegacySpinner = itemView.findViewById<Spinner>(R.id.segwit_legacy_spinner)
             val inputField = itemView.findViewById<EditText>(R.id.input_field)
 
             val cryptoName = nameTextView.text.toString()
             val inputType = typeSpinner.selectedItem.toString()
+            val segwitLegacy = segwitLegacySpinner.selectedItem.toString()
             val value = inputField.text.toString()
 
             // Only save if value is not empty
             if (value.isNotEmpty()) {
                 properties.setProperty("${cryptoName}_type", inputType)
+                if (inputType == "xpub" && (cryptoName == "Bitcoin" || cryptoName == "Litecoin")) {
+                    properties.setProperty("${cryptoName}_segwit_legacy", segwitLegacy)
+                }
                 properties.setProperty("${cryptoName}_value", value)
             }
         }
 
         ConfigProperties.saveProperties(this, properties)
         showSuccessModal()
-
     }
 
-    private fun validateInput(editText: EditText, inputType: String, currency: String, errorTextView: TextView, submitText: TextView) {
+
+    private fun validateInput(editText: EditText, inputType: String, segwitLegacy: String, currency: String, errorTextView: TextView, submitText: TextView) {
         val value = editText.text.toString()
         println(value)
 
@@ -198,7 +259,7 @@ class XpubAddress : AppCompatActivity() {
                 if (inputType == "xpub") DogecoinManager.isValidXpub(value) else DogecoinManager.isValidAddress(value)
             }
             "Litecoin" -> {
-                if (inputType == "xpub") LitecoinManager.isValidXpub(value) else LitecoinManager.isValidAddress(value)
+                if (inputType == "xpub") LitecoinManager.isValidXpub(value, this) else LitecoinManager.isValidAddress(value)
             }
             "Ethereum" -> {
                 if (inputType == "xpub") EthereumManager.isValidXpub(value) else EthereumManager.isValidAddress(value)
@@ -208,6 +269,9 @@ class XpubAddress : AppCompatActivity() {
             }
             "Dash" -> {
                 if (inputType == "xpub") DashManager.isValidXpub(value) else DashManager.isValidAddress(value)
+            }
+            "Bitcoincash" -> {
+                if (inputType == "xpub") BitcoinCashManager.isValidXpub(value) else BitcoinCashManager.isValidAddress(value)
             }
             else -> false
         }
@@ -239,18 +303,21 @@ class XpubAddress : AppCompatActivity() {
     }
 
     private fun showSuccessModal() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_success)
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_success, null)
+        val dialog = Dialog(this, R.style.CustomDialog)
+        dialog.setContentView(dialogView)
         dialog.setCancelable(false)
-
-        val okButton: Button = dialog.findViewById(R.id.btn_ok)
-        okButton.setOnClickListener {
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialogView.findViewById<Button>(R.id.btn_ok).setOnClickListener {
             dialog.dismiss()
             navigateToHome()
         }
-
         dialog.show()
     }
+
+
+
 
     private fun navigateToHome() {
         val intent = Intent(this, HomeActivity::class.java)

@@ -190,13 +190,14 @@
             android:id="@+id/btnEnter"
             style="@style/CalcButton"
             android:text="↵"
+            android:textColor="@color/white"
             android:textSize="30sp"
             android:layout_rowSpan="2"
             android:layout_height="0dp"
             android:layout_gravity="fill_vertical"
             android:layout_width="0dp"
             android:layout_columnWeight="1"
-            app:backgroundTint="@color/tapeRed" />
+            app:backgroundTint="@color/darkerRed" />
 
         <Button
             android:id="@+id/btn00"

@@ -1,6 +1,7 @@
 package com.example.possin
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.util.Log
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.NetworkParameters
@@ -10,6 +11,7 @@ import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.crypto.HDKeyDerivation
 import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.script.Script
+import java.util.Properties
 
 
 class BitcoinManager(private val context: Context, private val xPub: String) {
@@ -65,19 +67,26 @@ class BitcoinManager(private val context: Context, private val xPub: String) {
         }
     }
 
+
     private fun deriveAddress(index: Int): String {
         Log.d("BTC", "Bitcoin address index $index")
         val receivingKey = deriveKey(accountKey!!, index)
 
-        // Create a P2WPKH (Pay to Witness Public Key Hash) address
-        val address = Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH)
+        // Create a P2WPKH (Pay to Witness Public Key Hash) address (Bech32)
+        val addressType = getAddressTypeFromConfig()
+        val address = if (addressType == "legacy") {
+            Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH)
+        } else {
+            SegwitAddress.fromKey(params, receivingKey)
+        }
         Log.d("ADDRESS", address.toString())
         return address.toString()
     }
 
     private fun deriveKey(masterKey: DeterministicKey, index: Int): DeterministicKey {
-        // Use non-hardened derivation path m/0/index
+        // Use non-hardened derivation path m/0/0/index for native SegWit (non-hardened)
         val changeKey = HDKeyDerivation.deriveChildKey(masterKey, ChildNumber(0, false))
+//        val changeKey = HDKeyDerivation.deriveChildKey(accountKey, ChildNumber(0, false))
         return HDKeyDerivation.deriveChildKey(changeKey, index)
     }
 
@@ -90,5 +99,20 @@ class BitcoinManager(private val context: Context, private val xPub: String) {
 
     fun getXpub(): String {
         return xPub
+    }
+
+    private fun getAddressTypeFromConfig(): String {
+        val assetManager: AssetManager = context.assets
+        val properties = Properties()
+
+        try {
+            assetManager.open("config.properties").use { inputStream ->
+                properties.load(inputStream)
+            }
+        } catch (e: Exception) {
+            Log.e("BitcoinManager", "Error reading config.properties", e)
+        }
+
+        return properties.getProperty("Bitcoin_segwit_legacy", "segwit")
     }
 }

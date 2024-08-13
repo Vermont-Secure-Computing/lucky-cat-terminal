@@ -1,7 +1,9 @@
 package com.example.possin
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.util.Log
+import android.widget.Toast
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.core.SegwitAddress
@@ -11,6 +13,7 @@ import org.bitcoinj.crypto.HDKeyDerivation
 import org.bitcoinj.params.AbstractBitcoinNetParams
 import org.bitcoinj.params.Networks
 import org.bitcoinj.script.Script
+import java.util.Properties
 
 class LitecoinMainNetParams : AbstractBitcoinNetParams() {
     init {
@@ -60,18 +63,16 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
         const val PREFS_NAME = "LitecoinManagerPrefs"
         const val LAST_INDEX_KEY = "lastIndex"
 
-        fun isValidXpub(xPub: String): Boolean {
+        fun isValidXpub(xPub: String, context: Context): Boolean {
             return try {
                 val params: NetworkParameters = LitecoinMainNetParams.get()
                 val validPrefixes = listOf("Ltub", "Mtub", "zpub")
-                if (validPrefixes.none { xPub.startsWith(it) }) return false
-                // Convert the zpub to Ltub if necessary
-                val adaptedXpub = if (xPub.startsWith("zpub")) {
-                    convertBitcoinZpubToLitecoinLtub(xPub)
-                } else {
-                    xPub
+                if (xPub.startsWith("zpub")) {
+                    Toast.makeText(context, "Make sure your xpub is correct", Toast.LENGTH_LONG).show()
+                    return true
                 }
-                DeterministicKey.deserializeB58(null, adaptedXpub, params)
+                if (validPrefixes.none { xPub.startsWith(it) }) return false
+                DeterministicKey.deserializeB58(null, xPub, params)
                 true
             } catch (e: Exception) {
                 false
@@ -91,22 +92,10 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
                 false
             }
         }
-
-        // Utility function to convert zpub to Ltub
-        private fun convertBitcoinZpubToLitecoinLtub(zpub: String): String {
-            val zpubBytes = Base58.decode(zpub)
-            // Replace the version bytes from Bitcoin zpub (0x04b24746) to Litecoin Ltub (0x019da462)
-            val ltubBytes = zpubBytes.copyOf()
-            ltubBytes[0] = 0x01
-            ltubBytes[1] = 0x9d.toByte()
-            ltubBytes[2] = 0xa4.toByte()
-            ltubBytes[3] = 0x62.toByte()
-            return Base58.encode(ltubBytes)
-        }
     }
 
     private val params: NetworkParameters = LitecoinMainNetParams.get()
-    private val accountKey = if (isValidXpub(xPub)) DeterministicKey.deserializeB58(null, xPub, params) else null
+    private val accountKey = if (isValidXpub(xPub, context)) DeterministicKey.deserializeB58(null, xPub, params) else null
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     init {
@@ -127,12 +116,18 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
         }
     }
 
+
     private fun deriveAddress(index: Int): String {
         Log.d("LTC", "Litecoin address index $index")
         val receivingKey = deriveKey(accountKey!!, index)
 
         // Create a P2WPKH (Pay to Witness Public Key Hash) address with correct HRP for Litecoin
-        val address = Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH)
+        val addressType = getAddressTypeFromConfig()
+        val address = if (addressType == "legacy") {
+            Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH)
+        } else {
+            SegwitAddress.fromKey(params, receivingKey)
+        }
         Log.d("ADDRESS", address.toString())
         return address.toString()
     }
@@ -152,5 +147,20 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
 
     fun getXpub(): String {
         return xPub
+    }
+
+    private fun getAddressTypeFromConfig(): String {
+        val assetManager: AssetManager = context.assets
+        val properties = Properties()
+
+        try {
+            assetManager.open("config.properties").use { inputStream ->
+                properties.load(inputStream)
+            }
+        } catch (e: Exception) {
+            Log.e("LitecoinManager", "Error reading config.properties", e)
+        }
+
+        return properties.getProperty("Litecoin_segwit_legacy", "segwit")
     }
 }

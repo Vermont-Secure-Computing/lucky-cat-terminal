@@ -9,4 +9,11 @@
         <item name="android:background">@drawable/button_pos_background</item>
         <item name="android:textColor">#8B0000</item> <!-- Dark Red Text Color -->
     </style>
+    <style name="CustomDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowMinWidthMajor">70%</item>
+        <item name="android:windowMinWidthMinor">70%</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 </resources>

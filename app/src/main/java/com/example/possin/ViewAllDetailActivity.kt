@@ -31,6 +31,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
     private lateinit var basePriceTextView: TextView
     private lateinit var merchantName: TextView
     private lateinit var merchantAddress: TextView
+    private lateinit var receivingAddress: TextView
 
     private lateinit var transaction: Transaction
     private lateinit var client: OkHttpClient
@@ -52,6 +53,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
         baseCurrencyTextView = findViewById(R.id.baseCurrencyTextView)
         basePriceTextView = findViewById(R.id.basePriceTextView)
         txidTextView = findViewById(R.id.txidTextView)
+        receivingAddress = findViewById(R.id.receivingAddress)
         feesTextView = findViewById(R.id.feesTextView)
         confirmationsTextView = findViewById(R.id.confirmationsTextView)
         timeTextView = findViewById(R.id.timeTextView)
@@ -111,6 +113,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
         basePriceTextView.text = "Base Price: ${transaction.numericPrice}"
         dateTextView.text = "Date: ${transaction.date}"
         txidTextView.text = "TxID: ${transaction.txid}"
+        receivingAddress.text = "Address: ${transaction.address}"
         feesTextView.text = "Fees: ${transaction.fees}"
         confirmationsTextView.text = "Confirmations: ${transaction.confirmations}"
         timeTextView.text = "Time: ${transaction.time}"
@@ -127,11 +130,12 @@ class ViewAllDetailActivity : AppCompatActivity() {
         args.putString("receiptDetails", "Transaction Details")
         args.putString("receiptBalance", "${balanceTextView.text}")
         args.putString("receiptTxID", "${txidTextView.text}")
+        args.putString("receivingAddress", "${receivingAddress.text}")
         args.putString("receiptFees", "${feesTextView.text}")
         args.putString("receiptConfirmations", "${confirmationsTextView.text}")
         args.putString("receiptChain", "${chainTextView.text}")
         args.putString("receiptDeviceID", "$deviceId")
-        args.putString("receiptNumericPrice", "B${basePriceTextView.text}")
+        args.putString("receiptNumericPrice", "${basePriceTextView.text}")
         args.putString("receiptSelectedCurrencyCode", "${baseCurrencyTextView.text}")
         receiptDialog.arguments = args
 
@@ -159,7 +163,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
                             "[L]${txidTextView.text}\n" +
                             "[L]${feesTextView.text}\n" +
                             "[L]${confirmationsTextView.text}\n" +
-                            "[L]Chain: ${chainTextView.text}\n" +
+                            "[L]${chainTextView.text}\n" +
                             "[L]Device ID: $deviceId\n" +
                             "[L]\n" +
                             "[C]-------------------------------\n" +

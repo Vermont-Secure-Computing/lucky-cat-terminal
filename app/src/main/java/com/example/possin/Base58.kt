@@ -56,7 +56,7 @@ object Base58 {
     fun decode(input: String): ByteArray {
         if (input.isEmpty()) return ByteArray(0)
 
-        Log.e("Base58", "Decoding input: $input")
+//        Log.e("Base58", "Decoding input: $input")
         var zeros = input.takeWhile { it == ALPHABET[0] }.count()
         val decoded = ByteArray(input.length)
         var j = decoded.size

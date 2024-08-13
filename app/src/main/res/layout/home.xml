@@ -43,52 +43,44 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingBottom="16dp">
+
+                <ImageButton
+                    android:id="@+id/button1"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:background="@drawable/rounded_button"
+                    android:src="@drawable/coin_payment"
+                    android:scaleType="centerInside"
+                    android:padding="16dp" />
+
+            </LinearLayout>
+
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 card_view:cardBackgroundColor="#FFFFFF"
                 card_view:cardCornerRadius="10dp"
                 android:layout_marginBottom="16dp"
-                android:padding="16dp">
+                android:paddingTop="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Two-column GridLayout for payment and key buttons -->
+                    <!-- Four-row GridLayout for the buttons -->
                     <androidx.gridlayout.widget.GridLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="8dp"
-                        android:layout_marginTop="24dp"
                         app:columnCount="2"
                         app:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="4dp"
-                            app:layout_rowWeight="1"
-                            app:layout_columnWeight="1"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <ImageButton
-                                android:id="@+id/button1"
-                                android:layout_width="130dp"
-                                android:layout_height="130dp"
-                                android:background="@drawable/rounded_button"
-                                android:src="@drawable/coin_payment"
-                                android:scaleType="centerInside"
-                                android:padding="16dp" />
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="payment"
-                                android:textSize="14sp"
-                                android:layout_marginTop="4dp"/>
-                        </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -104,7 +96,7 @@
                                 android:layout_width="80dp"
                                 android:layout_height="76dp"
                                 android:background="@drawable/rounded_button"
-                                android:src="@drawable/coin"
+                                android:src="@drawable/key"
                                 android:scaleType="centerInside"
                                 android:padding="16dp" />
                             <TextView
@@ -114,16 +106,6 @@
                                 android:textSize="14sp"
                                 android:layout_marginTop="4dp"/>
                         </LinearLayout>
-                    </androidx.gridlayout.widget.GridLayout>
-
-                    <!-- Three-column GridLayout for merchant, xpub, and export buttons -->
-                    <androidx.gridlayout.widget.GridLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="8dp"
-                        android:layout_marginBottom="24dp"
-                        app:columnCount="3"
-                        app:orientation="horizontal">
 
                         <LinearLayout
                             android:layout_width="0dp"

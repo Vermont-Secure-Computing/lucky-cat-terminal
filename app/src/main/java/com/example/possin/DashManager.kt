@@ -50,7 +50,7 @@ class DashMainNetParams : AbstractBitcoinNetParams() {
     }
 }
 
-class DashManager(private val context: Context? = null, private val xPub: String? = null) {
+class DashManager(private val context: Context? = null, private val xPub: String) {
 
     companion object {
         const val PREFS_NAME = "DashManagerPrefs"
@@ -59,13 +59,12 @@ class DashManager(private val context: Context? = null, private val xPub: String
         fun isValidXpub(xPub: String): Boolean {
             return try {
                 val params: NetworkParameters = DashMainNetParams.get()
-                val convertedXpub = convertXpubToDrkp(xPub)
-                if (convertedXpub.length < 111) return false
-                val decoded = Base58.decodeChecked(convertedXpub)
+                if (xPub.length < 111) return false
+                val decoded = Base58.decodeChecked(xPub)
                 val header = ByteBuffer.wrap(decoded, 0, 4).int
                 Log.d("DashManager", "Decoded xPub header: $header, expected pub header: ${params.bip32HeaderP2PKHpub}, expected priv header: ${params.bip32HeaderP2PKHpriv}")
                 // Checking if the xPub has the correct header for Dash
-                header == params.bip32HeaderP2PKHpub || header == params.bip32HeaderP2PKHpriv
+                header == params.bip32HeaderP2PKHpub
             } catch (e: Exception) {
                 Log.e("DashManager", "Invalid xPub: ${e.message}")
                 false
@@ -83,28 +82,10 @@ class DashManager(private val context: Context? = null, private val xPub: String
                 false
             }
         }
-
-        fun convertXpubToDrkp(xPub: String): String {
-            val params = DashMainNetParams.get()
-            val decoded = Base58.decodeChecked(xPub)
-            val payload = decoded.copyOfRange(4, decoded.size)
-            return Base58.encodeChecked(params.bip32HeaderP2PKHpub, payload)
-        }
     }
 
     private val params: NetworkParameters = DashMainNetParams.get()
-    private val convertedXpub: String? = xPub?.let { convertXpubToDrkp(it) }
-    private val accountKey: DeterministicKey? = if (convertedXpub != null && isValidXpub(convertedXpub)) {
-        try {
-            DeterministicKey.deserializeB58(null, convertedXpub, params)
-        } catch (e: Exception) {
-            Log.e("DashManager", "Failed to deserialize xPub: ${e.message}")
-            null
-        }
-    } else {
-        Log.e("DashManager", "Invalid xPub: $xPub")
-        null
-    }
+    private val accountKey = if (DashManager.isValidXpub(xPub)) DeterministicKey.deserializeB58(null, xPub, params) else null
     private val sharedPreferences = context?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     init {
@@ -120,7 +101,6 @@ class DashManager(private val context: Context? = null, private val xPub: String
 
         val lastIndex = getLastIndex()
         val newIndex = if (lastIndex == -1) 0 else lastIndex + 1
-        saveLastIndex(newIndex)
         return Pair(deriveAddress(newIndex), newIndex)
     }
 
@@ -141,14 +121,15 @@ class DashManager(private val context: Context? = null, private val xPub: String
 
     private fun deriveKey(masterKey: DeterministicKey, index: Int): DeterministicKey {
         // BIP44 path: m/44'/5'/0'/0/index (5 is the coin type for Dash)
-        val purposeKey = HDKeyDerivation.deriveChildKey(masterKey, ChildNumber(44, true))
-        val coinTypeKey = HDKeyDerivation.deriveChildKey(purposeKey, ChildNumber(5, true))
-        val accountKey = HDKeyDerivation.deriveChildKey(coinTypeKey, ChildNumber(0, true))
-        val changeKey = HDKeyDerivation.deriveChildKey(accountKey, ChildNumber(0, false))
+        val changeKey = HDKeyDerivation.deriveChildKey(masterKey, ChildNumber(0, false))
         return HDKeyDerivation.deriveChildKey(changeKey, index)
     }
 
     private fun getLastIndex(): Int {
         return sharedPreferences?.getInt(LAST_INDEX_KEY, -1) ?: -1
+    }
+
+    fun getXpub(): String {
+        return xPub
     }
 }

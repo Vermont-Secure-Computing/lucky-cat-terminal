@@ -71,6 +71,10 @@ dependencies {
     implementation(libs.okhttp3)
     implementation(libs.androidx.foundation.android)
     implementation(libs.thermalPrinter)
+    implementation(libs.android.gif.drawable)
+    implementation(libs.org.slf4j)
+    implementation(libs.logback.classic)
+
 
     implementation(libs.room.runtime)
     kapt(libs.room.compiler)
@@ -82,8 +86,9 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.test.core)
     testImplementation(libs.test.ext.junit)
-    testImplementation(libs.test.runner)
-    testImplementation(libs.hamcrest)
+    androidTestImplementation(libs.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.hamcrest)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.espresso.contrib)

@@ -14,16 +14,20 @@ class CustomWebSocketListener(
     private val type: String,
     private val callback: PaymentStatusCallback,
     private val addressIndex: Int,
-    private val managerType: String
+    private val managerType: String,
+    val optionalParam: String? = null
 ) : WebSocketListener() {
 
     interface PaymentStatusCallback {
         fun onPaymentStatusPaid(status: String, balance: Double, txid: String, fees: Double, confirmations: Int, feeStatus: String, chain: String, addressIndex: Int, managerType: String)
+        fun onInsufficientPayment(receivedAmt: Double, totalAmount: Double, difference: Double, txid: String)
+        fun onPaymentError(error: String)
     }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         super.onOpen(webSocket, response)
         Log.d("WebSocket", "Connected to WebSocket server")
+
 
         // Construct the JSON object with the parameters
         val jsonObject = JSONObject().apply {
@@ -31,31 +35,40 @@ class CustomWebSocketListener(
             put("amount", amount)
             put("chain", chain)
             put("type", type)
+            optionalParam?.let { put("txid", it) }
         }
 
+        Log.d("WebSocket", "Sending: $jsonObject")
         // Send the JSON object as a string
         webSocket.send(jsonObject.toString())
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
         Log.d("WebSocket", "Received message: $text")
-        // Handle the received message
         val jsonObject = JSONObject(text)
         val status = jsonObject.getString("status")
-        println(status)
-        if (status == "paid") {
-            println(jsonObject.getDouble("balance"))
-            println(jsonObject.getDouble("fees"))
-            println(jsonObject.getString("txid"))
-            println(jsonObject.getInt("confirmations"))
-            println(jsonObject.getString("feeStatus"))
-            val balance = jsonObject.getDouble("balance")
-            val txid = jsonObject.getString("txid")
-            val fees = jsonObject.getDouble("fees")
-            val confirmations = jsonObject.getInt("confirmations")
-            val feeStatus = jsonObject.getString("feeStatus")
-            Log.d("BALANCE_CUSTOM", balance.toString())
-            callback.onPaymentStatusPaid(status, balance, txid, fees, confirmations, feeStatus, chain, addressIndex, managerType)
+
+        when (status) {
+            "insufficient payment" -> {
+                val receivedAmt = jsonObject.getDouble("receivedAmt")
+                val totalAmount = jsonObject.getDouble("totalAmount")
+                val difference = jsonObject.getDouble("difference")
+                val txid = jsonObject.getString("txid")
+                callback.onInsufficientPayment(receivedAmt, totalAmount, difference, txid)
+            }
+            "paid" -> {
+                val balance = jsonObject.getDouble("balance")
+                val txid = jsonObject.getString("txid")
+                val fees = jsonObject.getDouble("fees")
+                val confirmations = jsonObject.getInt("confirmations")
+                val feeStatus = jsonObject.getString("feeStatus")
+                callback.onPaymentStatusPaid(status, balance, txid, fees, confirmations, feeStatus, chain, addressIndex, managerType)
+            }
+            "error" -> {
+                val errorMessage = jsonObject.getString("errorMessage")
+                callback.onPaymentError(errorMessage)
+            }
+            else -> Log.d("WebSocket", "Unhandled status: $status")
         }
     }
 
@@ -79,5 +92,8 @@ class CustomWebSocketListener(
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         super.onFailure(webSocket, t, response)
         Log.e("WebSocket", "WebSocket error", t)
+        response?.let {
+            Log.e("WebSocket", "Response: ${it.body?.string()}")
+        }
     }
 }

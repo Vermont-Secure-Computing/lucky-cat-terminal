@@ -28,6 +28,7 @@ class ReceiptDialogFragment : DialogFragment() {
     private lateinit var receiptBaseCurrency: TextView
     private lateinit var receiptBasePrice: TextView
     private lateinit var receiptTxID: TextView
+    private lateinit var receivingAddress: TextView
     private lateinit var receiptFees: TextView
     private lateinit var receiptConfirmations: TextView
     private lateinit var receiptChain: TextView
@@ -49,6 +50,7 @@ class ReceiptDialogFragment : DialogFragment() {
         receiptBaseCurrency = view.findViewById(R.id.receiptBaseCurrency)
         receiptBasePrice = view.findViewById(R.id.receiptBasePrice)
         receiptTxID = view.findViewById(R.id.receiptTxID)
+        receivingAddress = view.findViewById(R.id.receivingAddress)
         receiptFees = view.findViewById(R.id.receiptFees)
         receiptConfirmations = view.findViewById(R.id.receiptConfirmations)
         receiptChain = view.findViewById(R.id.receiptChain)
@@ -70,6 +72,7 @@ class ReceiptDialogFragment : DialogFragment() {
         receiptConfirmations.text = args?.getString("receiptConfirmations")
         receiptChain.text = args?.getString("receiptChain")
         receiptDeviceID.text = args?.getString("receiptDeviceID")
+        receivingAddress.text = args?.getString("receivingAddress")
 
 
         performPrintCopies(1, "Customer Copy")
@@ -115,13 +118,16 @@ class ReceiptDialogFragment : DialogFragment() {
         // Show the print again button
         printAgainButton.visibility = View.VISIBLE
         printAgainButton.setOnClickListener {
+            // Delay the printing for 1 second
             Handler(Looper.getMainLooper()).postDelayed({
-                performPrintCopies(1, "Owner's Copy") {
+                performPrintCopies(1, "Owner's Copy")
+            }, 1050)
+            startPrintAnimation(receiptLayout) {
+                Handler(Looper.getMainLooper()).postDelayed({
                     startActivity(Intent(activity, HomeActivity::class.java))
-                    dismissAllowingStateLoss() // Use commitAllowingStateLoss to prevent IllegalStateException
-                }
-            }, 1700)
-            startPrintAnimation(receiptLayout, ::dismiss)
+                    dismissAllowingStateLoss()
+                }, 2000)
+            }
         }
     }
 
@@ -146,9 +152,10 @@ class ReceiptDialogFragment : DialogFragment() {
                             "[L]${receiptBaseCurrency.text}\n" +
                             "[L]${receiptBasePrice.text}\n" +
                             "[L]${receiptTxID.text}\n" +
+                            "[L]${receivingAddress.text}\n" +
                             "[L]${receiptFees.text}\n" +
                             "[L]${receiptConfirmations.text}\n" +
-                            "[L]Chain: ${receiptChain.text}\n" +
+                            "[L]${receiptChain.text}\n" +
                             "[L]Device ID: ${receiptDeviceID.text}\n" +
                             "[L]\n" +
                             "[C]-------------------------------\n" +

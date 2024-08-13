@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center"
-    android:background="#EEE8F1">
+    android:background="@color/white">
 
     <!-- Header with logo and cancel text -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="8dp"
-        android:background="@android:color/transparent">
+        android:padding="16dp"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
-            android:id="@+id/logo"
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/logo"
-            android:contentDescription="Logo"
-            android:layout_marginEnd="8dp" />
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.50121653" />
 
         <TextView
             android:id="@+id/cancelText"
@@ -30,11 +31,40 @@
             android:layout_height="wrap_content"
             android:text="Cancel"
             android:textSize="20sp"
-            android:textColor="#0000FF"
+            android:textColor="@color/tapeRed"
             android:clickable="true"
-            android:layout_marginEnd="8dp"
-            android:layout_gravity="end" />
-    </LinearLayout>
+            android:focusable="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageView
+            android:id="@+id/logo_image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/logo"
+            android:contentDescription="Logo"
+            app:layout_constraintEnd_toStartOf="@+id/guideline"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/homeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Home"
+            android:textSize="20sp"
+            android:textColor="@color/tapeRed"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginEnd="16dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <TextView
         android:id="@+id/addressTextView"
@@ -42,7 +72,33 @@
         android:layout_height="wrap_content"
         android:textSize="18sp"
         android:textColor="#000000"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginTop="24dp"
+        android:layout_gravity="center" />
+
+    <TextView
+        android:id="@+id/addressTextViewAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="#000000"
+        android:layout_gravity="center" />
+
+    <TextView
+        android:id="@+id/amountTextViewAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textColor="#000000"
+        android:layout_gravity="center" />
+
+    <TextView
+        android:id="@+id/amountTextViewAddressChain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="#000000"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="center" />
 
     <ImageView
         android:id="@+id/qrCodeImageView"
@@ -57,7 +113,8 @@
         android:text="Business name:"
         android:textSize="16sp"
         android:visibility="gone"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center" />
 
     <TextView
         android:id="@+id/merchantAddress"
@@ -66,7 +123,8 @@
         android:text="Business address:"
         android:textSize="16sp"
         android:visibility="gone"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp"
+        android:layout_gravity="center" />
 
     <TextView
         android:id="@+id/balanceTextView"
@@ -74,7 +132,8 @@
         android:layout_height="wrap_content"
         android:text="Amount"
         android:visibility="gone"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:layout_gravity="center" />
 
     <TextView
         android:id="@+id/baseCurrencyTextView"
@@ -82,7 +141,8 @@
         android:layout_height="wrap_content"
         android:text="Base Currency"
         android:visibility="gone"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:layout_gravity="center" />
 
     <TextView
         android:id="@+id/basePriceTextView"
@@ -90,7 +150,8 @@
         android:layout_height="wrap_content"
         android:text="Base Price"
         android:visibility="gone"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:layout_gravity="center" />
 
     <TextView
         android:id="@+id/txidTextView"
@@ -98,7 +159,10 @@
         android:layout_height="wrap_content"
         android:text="Transaction ID"
         android:visibility="gone"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_gravity="center" />
 
     <TextView
         android:id="@+id/feesTextView"
@@ -106,7 +170,8 @@
         android:layout_height="wrap_content"
         android:text="Fees"
         android:visibility="gone"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:layout_gravity="center" />
 
     <TextView
         android:id="@+id/confirmationsTextView"
@@ -114,7 +179,8 @@
         android:layout_height="wrap_content"
         android:text="Confirmations: 0"
         android:visibility="gone"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:layout_gravity="center" />
 
     <!-- Confirmation blocks -->
     <LinearLayout
@@ -123,7 +189,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="16dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:layout_gravity="center" >
 
         <View
             android:id="@+id/block1"
@@ -194,6 +261,9 @@
         android:layout_height="wrap_content"
         android:text="Print Receipt"
         android:layout_marginTop="16dp"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:backgroundTint="@color/darkerRed"
+        android:layout_gravity="center" />
+
 
 </LinearLayout>

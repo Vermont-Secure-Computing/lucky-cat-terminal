@@ -1,7 +1,11 @@
 <resources>
     <string name="app_name">Possin</string>
     <string-array name="type_array">
-        <item>xpub</item>
         <item>address</item>
+        <item>xpub</item>
+    </string-array>
+    <string-array name="segwit_legacy_array">
+        <item>segwit</item>
+        <item>legacy</item>
     </string-array>
 </resources>
