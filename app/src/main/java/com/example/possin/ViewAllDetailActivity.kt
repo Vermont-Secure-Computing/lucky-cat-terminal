@@ -3,6 +3,7 @@ package com.example.possin
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -32,6 +33,9 @@ class ViewAllDetailActivity : AppCompatActivity() {
     private lateinit var merchantName: TextView
     private lateinit var merchantAddress: TextView
     private lateinit var receivingAddress: TextView
+    private lateinit var txType: TextView
+    private lateinit var previousBalanceInTextView: TextView
+    private lateinit var previousTxidInTextView: TextView
 
     private lateinit var transaction: Transaction
     private lateinit var client: OkHttpClient
@@ -60,6 +64,9 @@ class ViewAllDetailActivity : AppCompatActivity() {
         messageTextView = findViewById(R.id.messageTextView)
         merchantAddress = findViewById(R.id.merchantAddress)
         merchantName = findViewById(R.id.merchantName)
+        txType = findViewById(R.id.txType)
+        previousBalanceInTextView = findViewById(R.id.previousBalanceInTextView)
+        previousTxidInTextView = findViewById(R.id.previousTxidInTextView)
         merchantPropertiesFile = File(filesDir, "merchant.properties")
 
         transaction = intent.getParcelableExtra("transaction")!!
@@ -99,14 +106,14 @@ class ViewAllDetailActivity : AppCompatActivity() {
         return getProperty("merchant_name")
     }
 
-    fun getMechantAddress(): String? {
+    fun getMerchantAddress(): String? {
         return getProperty("address")
     }
 
     private fun updateUI(transaction: Transaction) {
         Log.d("CONFIRMATION", transaction.confirmations.toString())
         merchantName.text = "Name: ${getMerchantName()}"
-        merchantAddress.text = "Address: ${getMechantAddress()}"
+        merchantAddress.text = "Address: ${getMerchantAddress()}"
         chainTextView.text = "Chain: ${transaction.chain}"
         balanceTextView.text = "Amount: ${transaction.balance}"
         baseCurrencyTextView.text = "Base Currency: ${transaction.selectedCurrencyCode}"
@@ -115,9 +122,32 @@ class ViewAllDetailActivity : AppCompatActivity() {
         txidTextView.text = "TxID: ${transaction.txid}"
         receivingAddress.text = "Address: ${transaction.address}"
         feesTextView.text = "Fees: ${transaction.fees}"
+        txType.text = "Type: ${transaction.txtype}"
         confirmationsTextView.text = "Confirmations: ${transaction.confirmations}"
         timeTextView.text = "Time: ${transaction.time}"
-        messageTextView.text = transaction.message ?: "No message"
+        messageTextView.text = if (transaction.message.isNullOrEmpty()) {
+            "No message"
+        } else {
+            "Message: ${transaction.message}"
+        }
+
+        if (transaction.balanceIn != null) {
+            previousBalanceInTextView.visibility = View.VISIBLE
+            if (transaction.txtype == "insufficient") {
+                previousBalanceInTextView.text = "Difference: ${transaction.balanceIn}"
+            } else {
+                previousBalanceInTextView.text = "Previous Receive: ${transaction.balanceIn}"
+            }
+        } else {
+            previousBalanceInTextView.visibility = View.GONE
+        }
+
+        if (transaction.txidIn != null) {
+            previousTxidInTextView.visibility = View.VISIBLE
+            previousTxidInTextView.text = "Previous TXID: ${transaction.txidIn}"
+        } else {
+            previousTxidInTextView.visibility = View.GONE
+        }
     }
 
     private fun showReceiptDialog() {

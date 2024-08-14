@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.possin.adapter.ViewAllTransactionAdapter
+import com.example.possin.model.Transaction
 import com.example.possin.model.TransactionViewModel
 
 class ViewAllActivity : AppCompatActivity() {
@@ -40,7 +41,11 @@ class ViewAllActivity : AppCompatActivity() {
 
         transactionViewModel.allTransactions.observe(this, Observer { transactions ->
             transactions?.let {
-                val adapter = ViewAllTransactionAdapter(it)
+                val sortedTransactions = it.sortedWith(
+                    compareByDescending<Transaction> { it.date }
+                        .thenByDescending { it.time }
+                )
+                val adapter = ViewAllTransactionAdapter(sortedTransactions)
                 transactionsRecyclerView.adapter = adapter
             }
         })

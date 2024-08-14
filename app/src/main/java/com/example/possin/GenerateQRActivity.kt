@@ -28,6 +28,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.dantsu.escposprinter.EscPosPrinter
+import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.example.possin.database.AppDatabase
 import com.example.possin.model.Transaction
 import com.example.possin.utils.PropertiesUtil
@@ -110,6 +112,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         val price = intent.getStringExtra("PRICE") ?: "No price provided"
         val logoResId = intent.getIntExtra("LOGO_RES_ID", R.drawable.bitcoin_logo)
         currency = intent.getStringExtra("CURRENCY") ?: "BTC"
+        chain = currency
         val addressIndex = intent.getIntExtra("ADDRESS_INDEX", -1)
         val feeStatus = intent.getStringExtra("FEE_STATUS") ?: ""
         val status = intent.getStringExtra("STATUS") ?: ""
@@ -430,20 +433,21 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         return getProperty("address")
     }
 
-    override fun onInsufficientPayment(receivedAmt: Double, totalAmount: Double, difference: Double, txid: String) {
+    override fun onInsufficientPayment(receivedAmt: Double, totalAmount: Double, difference: Double, txid: String, fees: Double, confirmations: Int, addressIndex: Int, managerType: String) {
         runOnUiThread {
             previousReceivedAmt = receivedAmt
             initialTxid = txid
-            showInsufficientPaymentDialog(receivedAmt, totalAmount, difference, txid, intent.getIntExtra("LOGO_RES_ID", R.drawable.bitcoin_logo))
+            showInsufficientPaymentDialog(receivedAmt, totalAmount, difference, txid, intent.getIntExtra("LOGO_RES_ID", R.drawable.bitcoin_logo), fees, confirmations, addressIndex, managerType)
         }
     }
 
-    private fun showInsufficientPaymentDialog(receivedAmt: Double, totalAmount: Double, difference: Double, txid: String, logoResId: Int) {
+    private fun showInsufficientPaymentDialog(receivedAmt: Double, totalAmount: Double, difference: Double, txid: String, logoResId: Int, fees: Double, confirmations: Int, addressIndex: Int, managerType: String) {
         val dialogView = layoutInflater.inflate(R.layout.insufficient_payment_dialog, null)
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
             .setCancelable(false) // Make the dialog modal
             .create()
+        cancelText.visibility = View.GONE
 
         val paidAmountTextView: TextView = dialogView.findViewById(R.id.receivedAmt)
         val requiredAmountTextView: TextView = dialogView.findViewById(R.id.difference)
@@ -480,6 +484,9 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         }
 
         dialogView.findViewById<Button>(R.id.btnCancel).setOnClickListener {
+            saveTransaction(receivedAmt, difference,  txid, initialTxid, fees, confirmations, chain, message, numericPrice, selectedCurrencyCode, websocketParams.address, "insufficient")
+            printReceipt(receivedAmt, totalAmount, difference, txid, fees, confirmations, chain)
+            saveLastIndex(addressIndex, managerType)
             dialog.dismiss()
             navigateToHome()
         }
@@ -535,7 +542,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 baseCurrencyTextView.visibility = TextView.VISIBLE
                 basePriceTextView.text = "Base Price: $numericPrice"
                 basePriceTextView.visibility = TextView.VISIBLE
-                txidTextView.text = "Transaction IDs: $initialTxid, $txid"
+                txidTextView.text = "Transaction IDs: $initialTxid\n $txid"
                 txidTextView.visibility = TextView.VISIBLE
                 feesTextView.text = "Fees: $formattedFees"
                 feesTextView.visibility = TextView.VISIBLE
@@ -555,8 +562,12 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
                 // Start repeated API calls
                 startRepeatedApiCalls()
+                if (initialTxid.isNotEmpty()) {
+                    saveTransaction(balance, previousReceivedAmt,  txid, initialTxid, fees, confirmations, chain, message, numericPrice, selectedCurrencyCode, websocketParams.address, "from insufficient")
+                } else {
+                    saveTransaction(balance, previousReceivedAmt,  txid, initialTxid, fees, confirmations, chain, message, numericPrice, selectedCurrencyCode, websocketParams.address, "paid")
+                }
 
-                saveTransaction(totalReceivedAmount, txid, fees, confirmations, chain, message, numericPrice, selectedCurrencyCode, websocketParams.address)
                 printButton.visibility = View.VISIBLE
             }
         }
@@ -682,7 +693,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         receiptDialog.show(supportFragmentManager, "ReceiptDialog")
     }
 
-    private fun saveTransaction(balance: Double? = null, txid: String? = null, fees: Double? = null, confirmations: Int = 0, chain: String, message: String? = null, numericPrice: String, selectedCurrencyCode: String, address: String) {
+    private fun saveTransaction(balance: Double? = null, balanceIn: Double? = null, txid: String? = null, txidIn: String? = null, fees: Double? = null, confirmations: Int = 0, chain: String, message: String? = null, numericPrice: String, selectedCurrencyCode: String, address: String, txtype: String) {
         val currentBalance = balance ?: balanceTextView.text.toString().replace("Balance: ", "").toDouble()
         val currentTxid = txid ?: txidTextView.text.toString().replace("Transaction ID: ", "")
         val currentFees = fees ?: feesTextView.text.toString().replace("Fees: ", "").toDouble()
@@ -692,16 +703,19 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
         val transaction = Transaction(
             balance = currentBalance,
+            balanceIn = balanceIn,
             txid = currentTxid,
+            txidIn = txidIn,
             fees = currentFees,
             confirmations = currentConfirmations,
             date = currentDate,
             time = currentTime,
             chain = chain,
-            message = message,  // Include the message here
+            message = message,
             numericPrice = numericPrice,
             selectedCurrencyCode = selectedCurrencyCode,
-            address = address
+            address = address,
+            txtype = txtype
         )
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -781,6 +795,48 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
             dialog.show()
         }
+    }
+
+    private fun printReceipt(receivedAmt: Double, totalAmount: Double, difference: Double, txid: String, fees: Double, confirmations: Int, chain: String) {
+        val receiptTitle = getMerchantName() ?: "Merchant Name"
+        val receiptAddress = getMechantAddress() ?: "Merchant Address"
+        val address = websocketParams.address
+        val deviceID = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+
+        val bluetoothConnection = BluetoothPrintersConnections.selectFirstPaired()
+        if (bluetoothConnection == null) {
+            Toast.makeText(this, "No paired Bluetooth printer found", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val printer = EscPosPrinter(bluetoothConnection, 203, 48f, 32)
+
+        printer.printFormattedText(
+            "[C]<font size='big'>$receiptTitle</font>\n" +
+                    "[C]$receiptAddress\n" +
+                    "[L]\n" +
+                    "[C]-------------------------------\n" +
+                    "[L]\n" +
+                    "[L]<b>Insufficient Payment</b>\n" +
+                    "[L]\n" +
+                    "[L]Received: $receivedAmt\n" +
+                    "[L]Total: $totalAmount\n" +
+                    "[L]Difference: $difference\n" +
+                    "[L]TXID: $txid\n" +
+                    "[L]Address: $address\n" +
+                    "[L]Fees: $fees\n" +
+                    "[L]Confirmations: $confirmations\n" +
+                    "[L]Chain: $chain\n" +
+                    "[L]Device ID: $deviceID\n" +
+                    "[L]Time: $time\n" +
+                    "[L]Date: $date\n" +
+                    "[L]\n" +
+                    "[C]-------------------------------\n" +
+                    "[L]\n" +
+                    "[C]Thank you for your payment!\n"
+        )
     }
 
 }

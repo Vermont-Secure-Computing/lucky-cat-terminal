@@ -20,7 +20,7 @@ class CustomWebSocketListener(
 
     interface PaymentStatusCallback {
         fun onPaymentStatusPaid(status: String, balance: Double, txid: String, fees: Double, confirmations: Int, feeStatus: String, chain: String, addressIndex: Int, managerType: String)
-        fun onInsufficientPayment(receivedAmt: Double, totalAmount: Double, difference: Double, txid: String)
+        fun onInsufficientPayment(receivedAmt: Double, totalAmount: Double, difference: Double, txid: String, fees: Double, confirmations: Int, addressIndex: Int, managerType: String)
         fun onPaymentError(error: String)
     }
 
@@ -54,7 +54,9 @@ class CustomWebSocketListener(
                 val totalAmount = jsonObject.getDouble("totalAmount")
                 val difference = jsonObject.getDouble("difference")
                 val txid = jsonObject.getString("txid")
-                callback.onInsufficientPayment(receivedAmt, totalAmount, difference, txid)
+                val fees = jsonObject.getDouble("fees")
+                val confirmations = jsonObject.getInt("confirmations")
+                callback.onInsufficientPayment(receivedAmt, totalAmount, difference, txid, fees, confirmations, addressIndex, managerType)
             }
             "paid" -> {
                 val balance = jsonObject.getDouble("balance")

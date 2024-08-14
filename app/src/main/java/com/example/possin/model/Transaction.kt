@@ -10,7 +10,9 @@ import kotlinx.parcelize.Parcelize
 data class Transaction(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val balance: Double,
+    val balanceIn: Double? = null,
     val txid: String,
+    val txidIn: String? = null,
     val fees: Double,
     val confirmations: Int,
     val date: String,
@@ -19,5 +21,6 @@ data class Transaction(
     val message: String? = null,
     val numericPrice: String,
     val selectedCurrencyCode: String,
-    val address: String
+    val address: String,
+    val txtype: String
 ) : Parcelable
