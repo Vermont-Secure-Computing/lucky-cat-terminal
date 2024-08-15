@@ -112,8 +112,13 @@ class ViewAllDetailActivity : AppCompatActivity() {
 
     private fun updateUI(transaction: Transaction) {
         Log.d("CONFIRMATION", transaction.confirmations.toString())
+        val merchAddress = getMerchantAddress()
+        if (merchAddress.isNullOrEmpty()) {
+            merchantAddress.visibility = TextView.GONE
+        } else {
+            merchantAddress.text = "Address: $merchAddress"
+        }
         merchantName.text = "Name: ${getMerchantName()}"
-        merchantAddress.text = "Address: ${getMerchantAddress()}"
         chainTextView.text = "Chain: ${transaction.chain}"
         balanceTextView.text = "Amount: ${transaction.balance}"
         baseCurrencyTextView.text = "Base Currency: ${transaction.selectedCurrencyCode}"
@@ -155,8 +160,8 @@ class ViewAllDetailActivity : AppCompatActivity() {
 
         // Pass data to the dialog fragment
         val args = Bundle()
-        args.putString("receiptTitle", "${merchantName.text}")
-        args.putString("receiptAddress", "${merchantAddress.text}")
+        args.putString("receiptTitle", "${getMerchantName()}")
+        args.putString("receiptAddress", "${getMerchantAddress()}")
         args.putString("receiptDetails", "Transaction Details")
         args.putString("receiptBalance", "${balanceTextView.text}")
         args.putString("receiptTxID", "${txidTextView.text}")

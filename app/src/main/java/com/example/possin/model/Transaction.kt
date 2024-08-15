@@ -14,7 +14,7 @@ data class Transaction(
     val txid: String,
     val txidIn: String? = null,
     val fees: Double,
-    val confirmations: Int,
+    var confirmations: Int,
     val date: String,
     val time: String,
     val chain: String,

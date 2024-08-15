@@ -19,4 +19,7 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions")
     fun getAllTransactions(): Flow<List<Transaction>>
+
+    @Query("SELECT * FROM transactions WHERE txid = :txid LIMIT 1")
+    suspend fun getTransactionByTxid(txid: String): Transaction?
 }

@@ -20,7 +20,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
+        setProperty("archivesBaseName", "LuckyCat-$versionName")
     }
 
     buildTypes {
@@ -39,6 +39,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
 
 }
 

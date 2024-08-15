@@ -34,6 +34,7 @@ class ReceiptDialogFragment : DialogFragment() {
     private lateinit var receiptChain: TextView
     private lateinit var receiptDeviceID: TextView
     private lateinit var printAgainButton: Button
+    private lateinit var homeButton: Button
     private lateinit var receiptLayout: LinearLayout
 
     override fun onCreateView(
@@ -57,6 +58,8 @@ class ReceiptDialogFragment : DialogFragment() {
         receiptDeviceID = view.findViewById(R.id.receiptDeviceID)
         printAgainButton = view.findViewById(R.id.printAgainButton)
         printAgainButton.visibility = View.GONE
+        homeButton = view.findViewById(R.id.homeButton)
+        homeButton.visibility = View.GONE
         receiptLayout = view.findViewById(R.id.receiptLayout)
 
         // Get data from arguments
@@ -114,6 +117,13 @@ class ReceiptDialogFragment : DialogFragment() {
 //        receiptTitle.text = "Owner's Copy"
         receiptLayout.alpha = 1f // Reset alpha
         receiptLayout.translationY = 0f // Reset translation
+
+        // Show the home again button
+        homeButton.visibility = View.VISIBLE
+        homeButton.setOnClickListener {
+            startActivity(Intent(activity, HomeActivity::class.java))
+            dismissAllowingStateLoss()
+        }
 
         // Show the print again button
         printAgainButton.visibility = View.VISIBLE

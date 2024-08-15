@@ -531,11 +531,18 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                     String.format("%.8f", convertFee(fees))
                 }
 
+                val merchAddress = getMechantAddress()
+
+                if (merchAddress.isNullOrEmpty()) {
+                    merchantAddress.visibility = TextView.GONE
+                } else {
+                    merchantAddress.text = address
+                    merchantAddress.visibility = TextView.VISIBLE
+                }
+
                 // Update the TextViews with the received data
                 merchantName.text = getMerchantName()
                 merchantName.visibility = TextView.VISIBLE
-                merchantAddress.text = getMechantAddress()
-                merchantAddress.visibility = TextView.VISIBLE
                 balanceTextView.text = "Amount: $formattedBalance"
                 balanceTextView.visibility = TextView.VISIBLE
                 baseCurrencyTextView.text = "Base Currency: $selectedCurrencyCode"
@@ -662,6 +669,14 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                             confirmationsTextView.text = "Confirmations: $confirmations"
                             for (i in 0 until confirmations.coerceAtMost(6)) {
                                 confirmationBlocks[i].setBackgroundColor(Color.GREEN)
+                            }
+                        }
+
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            val transaction = db.transactionDao().getTransactionByTxid(txid)
+                            transaction?.let {
+                                it.confirmations = confirmations
+                                db.transactionDao().update(it)
                             }
                         }
                     }
