@@ -94,6 +94,10 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     private lateinit var address: String
     private lateinit var currency: String
 
+    private lateinit var checkingTransactionsLayout: LinearLayout
+    private lateinit var checkingTransactionsGif: ImageView
+    private lateinit var checkingTransactionsText: TextView
+
     private lateinit var db: AppDatabase
 
     companion object {
@@ -187,6 +191,11 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             gatheringBlocksTextView.visibility = View.GONE
             showReceiptDialog(deviceId, numericPrice, selectedCurrencyCode, address)
         }
+
+        // Initialize the new views for the GIF and text
+        checkingTransactionsLayout = findViewById(R.id.checkingTransactionsLayout)
+        checkingTransactionsGif = findViewById(R.id.checkingTransactionsGif)
+        checkingTransactionsText = findViewById(R.id.checkingTransactionsText)
 
         confirmationBlocks = listOf(
             findViewById(R.id.block1),
@@ -350,6 +359,10 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     private fun initializeWebSocket(address: String, amount: String, chain: String, addressIndex: Int, managerType: String) {
         websocketParams = WebSocketParams(address, amount, chain, addressIndex, managerType, txid = null)
         connectWebSocket("checkBalance")
+
+        checkingTransactionsLayout.visibility = View.VISIBLE
+        val gifDrawable = GifDrawable(resources, R.raw.rotating_arc_gradient_thick)
+        checkingTransactionsGif.setImageDrawable(gifDrawable)
     }
 
     private fun connectWebSocket(type: String) {
@@ -510,6 +523,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 Log.d("BALANCE", balance.toString())
                 Log.d("FEES", fees.toString())
                 Log.d("FEE STATUS", feeStatus)
+
+                checkingTransactionsLayout.visibility = View.GONE
 
                 // Show the home button
                 homeText.visibility = View.VISIBLE
@@ -792,6 +807,12 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             val gifImageView = dialogView.findViewById<GifImageView>(R.id.gifImageView)
             val gifDrawable = GifDrawable(resources, R.raw.green_check_circle_animation_300x300)
 
+            // Set the ImageView size to make it smaller
+            val layoutParams = gifImageView.layoutParams
+            layoutParams.width = 200 // Set width to 200 pixels
+            layoutParams.height = 200 // Set height to 200 pixels
+            gifImageView.layoutParams = layoutParams
+
             gifImageView.setImageDrawable(gifDrawable)
 
             val mediaPlayer = MediaPlayer.create(this, R.raw.coins_received)
@@ -803,14 +824,22 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             // Dismiss the dialog and release the media player after the animation completes
             handler.postDelayed({
                 if (!isFinishing && !isDestroyed) {
-                    dialog.dismiss()
+                    // Replace GIF with PNG image
+                    gifImageView.setImageResource(R.drawable.green_check_circle_animation_300x300)
+
+                    // Show the dialog for an additional 2 seconds
+                    handler.postDelayed({
+                        dialog.dismiss()
+                        mediaPlayer.release()
+                    }, 1800) // 2 seconds
                 }
-                mediaPlayer.release()
             }, gifDuration.toLong())
 
             dialog.show()
         }
     }
+
+
 
     private fun printReceipt(receivedAmt: Double, totalAmount: Double, difference: Double, txid: String, fees: Double, confirmations: Int, chain: String) {
         val receiptTitle = getMerchantName() ?: "Merchant Name"

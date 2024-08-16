@@ -28,7 +28,7 @@ class PriceConfirmActivity : AppCompatActivity() {
             finish() // Navigate back to the previous activity
         }
 
-        val submitText: TextView = findViewById(R.id.submit_text)
+        val submitText: ImageView = findViewById(R.id.submit_text)
         submitText.setOnClickListener {
             val intent = Intent(this, CryptoOptionActivity::class.java)
             intent.putExtra("PRICE", price)

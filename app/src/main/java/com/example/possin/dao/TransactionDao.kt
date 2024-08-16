@@ -22,4 +22,8 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE txid = :txid LIMIT 1")
     suspend fun getTransactionByTxid(txid: String): Transaction?
+
+    @Query("SELECT * FROM transactions WHERE date BETWEEN :fromDate AND :toDate")
+    fun getTransactionsByDateRange(fromDate: String, toDate: String): Flow<List<Transaction>>
+
 }

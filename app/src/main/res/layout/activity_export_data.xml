@@ -6,16 +6,13 @@
     android:orientation="vertical"
     android:background="@color/customGray">
 
-    <!-- Header with logo and text -->
+    <!-- Header -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:background="#FFFFFF"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:background="#FFFFFF">
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
@@ -47,32 +44,46 @@
             app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:id="@+id/priceTextView"
-        android:layout_width="wrap_content"
+    <!-- Date Selectors and Submit Button -->
+    <EditText
+        android:id="@+id/fromDateEditText"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:textColor="#000000"
-        android:text="0.00"
-        android:layout_gravity="center"
-        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="24dp"
+        android:hint="Select From Date"
+        android:focusable="false"
+        android:clickable="true"
+        android:background="@drawable/edittext_background"
+        android:padding="16dp"
+        android:drawableEnd="@drawable/ic_calendar" />
+
+    <EditText
+        android:id="@+id/toDateEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:hint="Select To Date"
+        android:focusable="false"
+        android:clickable="true"
+        android:background="@drawable/edittext_background"
+        android:padding="16dp"
+        android:drawableEnd="@drawable/ic_calendar"
         android:layout_marginTop="16dp" />
 
-    <ScrollView
+    <Button
+        android:id="@+id/submitButton"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
-
-        <LinearLayout
-            android:id="@+id/buttonContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:background="@android:color/transparent">
-        </LinearLayout>
-
-    </ScrollView>
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:text="Export CSV"
+        android:layout_marginTop="24dp"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/darkerRed"
+        android:padding="16dp"
+        android:textSize="16sp" />
 
 </LinearLayout>

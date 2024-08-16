@@ -50,6 +50,7 @@ test-runner = "1.3.0"
 android-gif-drawable = "1.2.23"
 org-slf4j = "1.7.32"
 logback-classic = "1.2.7"
+lifecycle-viewmodel = "2.6.1"
 
 
 
@@ -105,6 +106,7 @@ test-runner = {group  = "androidx.test", name = "runner", version.ref = "test-ru
 android-gif-drawable = {group = "pl.droidsonroids.gif", name = "android-gif-drawable", version.ref = "android-gif-drawable"}
 org-slf4j = {group = "org.slf4j", name = "slf4j-api", version.ref = "org-slf4j"}
 logback-classic = {group = "ch.qos.logback", name = "logback-classic", version.ref = "logback-classic"}
+lifecycle-viewmodel = {group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle-viewmodel"}
 
 
 

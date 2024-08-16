@@ -132,8 +132,9 @@ class HomeActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        button6?.setOnClickListener {
-            // Handle button 6 click
+        button6.setOnClickListener {
+            val intent = Intent(this, ExportDataActivity::class.java)
+            startActivity(intent)
         }
     }
 

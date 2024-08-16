@@ -41,6 +41,8 @@
         <activity
             android:name=".POSActivity"
             android:exported="true"/>
+        <activity android:name=".ExportDataActivity"
+            android:exported="true"/>
         <activity
             android:name=".MainActivity"
             android:exported="true">

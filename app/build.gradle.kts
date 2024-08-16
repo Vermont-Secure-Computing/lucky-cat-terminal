@@ -75,6 +75,7 @@ dependencies {
     implementation(libs.android.gif.drawable)
     implementation(libs.org.slf4j)
     implementation(libs.logback.classic)
+    implementation(libs.lifecycle.viewmodel)
 
 
     implementation(libs.room.runtime)

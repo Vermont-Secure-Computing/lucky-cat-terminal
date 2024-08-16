@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.animation.ScaleAnimation
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -114,6 +113,8 @@ class CryptoOptionActivity : AppCompatActivity() {
             )
             setPadding(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8)) // Adjust padding as needed
             gravity = android.view.Gravity.CENTER
+            setBackgroundResource(R.drawable.button_selector) // Apply button background for feedback
+            setOnClickListener { onClick() } // Set click listener on the entire container
         }
 
         val imageButton = ImageButton(this).apply {
@@ -131,9 +132,7 @@ class CryptoOptionActivity : AppCompatActivity() {
                 targetSize / 2,
                 true
             )
-
             this.setImageBitmap(scaledBitmap)
-            setOnClickListener { onClick() }
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -142,36 +141,7 @@ class CryptoOptionActivity : AppCompatActivity() {
                 height = LinearLayout.LayoutParams.WRAP_CONTENT
                 setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
             }
-            setBackgroundResource(R.drawable.button_selector)
-
-            // Set press animation
-            setOnTouchListener { v, event ->
-                when (event.action) {
-                    android.view.MotionEvent.ACTION_DOWN -> {
-                        val scaleAnimation = ScaleAnimation(
-                            1f, 0.9f, 1f, 0.9f,
-                            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
-                            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f
-                        ).apply {
-                            duration = 150
-                            fillAfter = true
-                        }
-                        this.startAnimation(scaleAnimation)
-                    }
-                    android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
-                        val scaleAnimation = ScaleAnimation(
-                            0.9f, 1f, 0.9f, 1f,
-                            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
-                            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f
-                        ).apply {
-                            duration = 150
-                            fillAfter = true
-                        }
-                        this.startAnimation(scaleAnimation)
-                    }
-                }
-                false
-            }
+            background = null // Remove the button background since the entire container is clickable
         }
 
         val textLayout = LinearLayout(this).apply {
@@ -211,6 +181,7 @@ class CryptoOptionActivity : AppCompatActivity() {
 
         cardView.addView(cardContent)
         container.addView(cardView)
+
     }
 
     private fun dpToPx(dp: Int): Int {
