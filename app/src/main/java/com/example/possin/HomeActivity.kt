@@ -1,6 +1,5 @@
 package com.example.possin
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -8,14 +7,14 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.possin.adapter.TransactionAdapter
+import com.example.possin.adapter.TransactionDividerAdapter
 import com.example.possin.model.TransactionViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -29,7 +28,6 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var configPropertiesFile: File
     private lateinit var apiPropertiesFile: File
     private val transactionViewModel: TransactionViewModel by viewModels()
-    private lateinit var transactionsCardView: CardView
     private lateinit var cryptocurrencyNames: List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +43,6 @@ class HomeActivity : AppCompatActivity() {
         // Load cryptocurrency names from JSON file
         cryptocurrencyNames = loadCryptocurrencyNames()
 
-        transactionsCardView = findViewById(R.id.transactionsCardView)
         val seeAllTextView = findViewById<TextView>(R.id.seeAllTextView)
 
         // Set up buttons
@@ -53,28 +50,31 @@ class HomeActivity : AppCompatActivity() {
 
         // Set up RecyclerView
         val transactionsRecyclerView = findViewById<RecyclerView>(R.id.transactionsRecyclerView)
+        val noTransactionsTextView = findViewById<TextView>(R.id.noTransactionsTextView)
         transactionsRecyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Add custom divider item decoration
-//        val dividerItemDecoration = DividerItemDecoration(
-//            transactionsRecyclerView.context,
-//            (transactionsRecyclerView.layoutManager as LinearLayoutManager).orientation
-//        )
-//        ContextCompat.getDrawable(this, R.drawable.divider)?.let {
-//            dividerItemDecoration.setDrawable(it)
-//        }
-//        transactionsRecyclerView.addItemDecoration(dividerItemDecoration)
-
         transactionViewModel.allTransactions.observe(this, Observer { transactions ->
-            transactions?.let {
-                if (it.isEmpty()) {
-                    transactionsCardView.visibility = View.GONE
-                } else {
-                    transactionsCardView.visibility = View.VISIBLE
-                    val limitedTransactions = it.take(3) // Limit to 3 transactions
-                    val adapter = TransactionAdapter(this, limitedTransactions)
-                    transactionsRecyclerView.adapter = adapter
-                }
+            if (transactions.isNullOrEmpty()) {
+                // Show the "No transactions yet" message
+                noTransactionsTextView.visibility = View.VISIBLE
+                transactionsRecyclerView.visibility = View.GONE
+
+                // Disable the "See all" TextView
+                seeAllTextView.isEnabled = false
+                seeAllTextView.setTextColor(ContextCompat.getColor(this, R.color.grey)) // Set a color indicating it's disabled
+
+            } else {
+                // Hide the "No transactions yet" message and show the RecyclerView
+                noTransactionsTextView.visibility = View.GONE
+                transactionsRecyclerView.visibility = View.VISIBLE
+
+                // Enable the "See all" TextView
+                seeAllTextView.isEnabled = true
+                seeAllTextView.setTextColor(ContextCompat.getColor(this, R.color.tapeRed)) // Restore the original color
+
+                val limitedTransactions = transactions.take(3)
+                val adapter = TransactionDividerAdapter(this, limitedTransactions)
+                transactionsRecyclerView.adapter = adapter
             }
         })
 
@@ -205,6 +205,7 @@ class HomeActivity : AppCompatActivity() {
         return cryptocurrenciesWrapper.cryptocurrencies.map { it.name }
     }
 }
+
 
 data class CryptocurrenciesWrapper(
     val cryptocurrencies: List<CryptoCurrencyInfo>

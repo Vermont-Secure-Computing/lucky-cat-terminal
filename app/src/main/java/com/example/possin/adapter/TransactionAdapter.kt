@@ -35,7 +35,7 @@ class TransactionAdapter(private val context: Context, private val transactions:
         fun bind(transaction: Transaction) {
             chainTextView.text = transaction.chain
             dateTextView.text = transaction.date
-            balanceTextView.text = "Amount: ${transaction.balance}"
+            balanceTextView.text = "${transaction.balance}"
         }
     }
 }

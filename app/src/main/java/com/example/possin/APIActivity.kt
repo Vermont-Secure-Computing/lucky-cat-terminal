@@ -19,7 +19,7 @@ import java.util.Properties
 class APIActivity : AppCompatActivity() {
 
     private lateinit var apiKeyInput: EditText
-    private lateinit var submitTextView: ImageView
+    private lateinit var submitButton: Button
     private lateinit var backArrow: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,13 +29,13 @@ class APIActivity : AppCompatActivity() {
         window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
 
         apiKeyInput = findViewById(R.id.api_key_input)
-        submitTextView = findViewById(R.id.submit_text)
+        submitButton = findViewById(R.id.submit_button)
         backArrow = findViewById(R.id.back_arrow)
 
         // Load existing API key if it exists
         loadApiKey()
 
-        submitTextView.setOnClickListener {
+        submitButton.setOnClickListener {
             val apiKey = apiKeyInput.text.toString()
             if (apiKey.isNotEmpty()) {
                 saveApiKey(apiKey)

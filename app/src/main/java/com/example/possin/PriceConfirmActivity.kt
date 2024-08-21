@@ -2,6 +2,7 @@ package com.example.possin
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -28,8 +29,8 @@ class PriceConfirmActivity : AppCompatActivity() {
             finish() // Navigate back to the previous activity
         }
 
-        val submitText: ImageView = findViewById(R.id.submit_text)
-        submitText.setOnClickListener {
+        val submitButton: Button = findViewById(R.id.submit_button)
+        submitButton.setOnClickListener {
             val intent = Intent(this, CryptoOptionActivity::class.java)
             intent.putExtra("PRICE", price)
             intent.putExtra("CURRENCY_CODE", currencyCode)

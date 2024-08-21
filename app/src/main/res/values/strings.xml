@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Possin</string>
+    <string name="app_name">LCTerm</string>
     <string-array name="type_array">
         <item>address</item>
         <item>xpub</item>

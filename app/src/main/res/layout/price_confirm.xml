@@ -44,23 +44,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginStart="2dp" />
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:layout_marginRight="4dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <ImageView
-                android:id="@+id/submit_text"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:src="@drawable/check_broken_red"
-                android:contentDescription="Submit" />
-        </FrameLayout>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
@@ -81,11 +64,27 @@
         android:hint="Enter message (optional)"
         android:padding="8dp"
         android:backgroundTint="@color/customGray"
-        android:inputType="text"
+        android:inputType="textMultiLine"
+        android:maxLines="4"
+        android:minLines="3"
+        android:scrollbars="vertical"
+        android:gravity="top"
         android:layout_marginBottom="8dp"
         android:background="@drawable/rounded_edittext"
         android:textColor="@android:color/black"
         android:textColorHint="@android:color/darker_gray"
         android:layout_margin="20dp"/>
+
+    <!-- New Button for submission -->
+    <Button
+        android:id="@+id/submit_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Submit"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="@color/darkerRed"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:padding="12dp" />
 
 </LinearLayout>

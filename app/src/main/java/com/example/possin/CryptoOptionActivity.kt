@@ -226,7 +226,20 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "BTC", R.drawable.bitcoin_logo) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.bitcoin_logo, "BTC", index, feeStatus, status, "Bitcoin", numericPrice, selectedCurrencyCode)
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(
+                        address,
+                        formattedRate,
+                        R.drawable.bitcoin_logo,
+                        "BTC",
+                        index,
+                        feeStatus,
+                        status,
+                        "Bitcoin",
+                        numericPrice,
+                        selectedCurrencyCode
+                    )
+                }
             }
         } ?: run {
             Toast.makeText(this, "Bitcoin Manager not initialized", Toast.LENGTH_SHORT).show()
@@ -240,7 +253,20 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "LTC", R.drawable.litecoin_new_logo) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.litecoin_new_logo, "LTC", index, feeStatus, status, "Litecoin", numericPrice, selectedCurrencyCode)
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(
+                        address,
+                        formattedRate,
+                        R.drawable.litecoin_new_logo,
+                        "LTC",
+                        index,
+                        feeStatus,
+                        status,
+                        "Litecoin",
+                        numericPrice,
+                        selectedCurrencyCode
+                    )
+                }
             }
         } ?: run {
             Toast.makeText(this, "Litecoin Manager not initialized", Toast.LENGTH_SHORT).show()
@@ -254,7 +280,20 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "ETH", R.drawable.ethereum_logo) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.ethereum_logo, "ETH", index, feeStatus, status, "Ethereum", numericPrice, selectedCurrencyCode)
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(
+                        address,
+                        formattedRate,
+                        R.drawable.ethereum_logo,
+                        "ETH",
+                        index,
+                        feeStatus,
+                        status,
+                        "Ethereum",
+                        numericPrice,
+                        selectedCurrencyCode
+                    )
+                }
             }
         } ?: run {
             Toast.makeText(this, "Ethereum Manager not initialized", Toast.LENGTH_SHORT).show()
@@ -268,7 +307,20 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "DOGE", R.drawable.dogecoin_logo) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.dogecoin_logo, "DOGE", index, feeStatus, status, "Dogecoin", numericPrice, selectedCurrencyCode)
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(
+                        address,
+                        formattedRate,
+                        R.drawable.dogecoin_logo,
+                        "DOGE",
+                        index,
+                        feeStatus,
+                        status,
+                        "Dogecoin",
+                        numericPrice,
+                        selectedCurrencyCode
+                    )
+                }
             }
         } ?: run {
             Toast.makeText(this, "Dogecoin Manager not initialized", Toast.LENGTH_SHORT).show()
@@ -282,7 +334,20 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "TRON-NETWORK", R.drawable.tether_logo) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.tether_logo, "TRON-NETWORK", index, feeStatus, status, "Tron-network", numericPrice, selectedCurrencyCode)
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(
+                        address,
+                        formattedRate,
+                        R.drawable.tether_logo,
+                        "TRON-NETWORK",
+                        index,
+                        feeStatus,
+                        status,
+                        "Tron-network",
+                        numericPrice,
+                        selectedCurrencyCode
+                    )
+                }
             }
         } ?: run {
             Toast.makeText(this, "USDT Tron Manager not initialized", Toast.LENGTH_SHORT).show()
@@ -307,7 +372,20 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "DASH", R.drawable.dashcoin_logo) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.dashcoin_logo, "DASH", index, feeStatus, status, "Dash", numericPrice, selectedCurrencyCode)
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(
+                        address,
+                        formattedRate,
+                        R.drawable.dashcoin_logo,
+                        "DASH",
+                        index,
+                        feeStatus,
+                        status,
+                        "Dash",
+                        numericPrice,
+                        selectedCurrencyCode
+                    )
+                }
             }
         } ?: run {
             Toast.makeText(this, "Dash Manager not initialized", Toast.LENGTH_SHORT).show()
@@ -321,7 +399,20 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "BCH", R.drawable.bitcoin_cash) { feeStatus, status, formattedRate ->
-                startGenerateQRActivity(address, formattedRate, R.drawable.bitcoin_cash, "BCH", index, feeStatus, status, "Bitcoincash", numericPrice, selectedCurrencyCode)
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(
+                        address,
+                        formattedRate,
+                        R.drawable.bitcoin_cash,
+                        "BCH",
+                        index,
+                        feeStatus,
+                        status,
+                        "Bitcoincash",
+                        numericPrice,
+                        selectedCurrencyCode
+                    )
+                }
             }
         } ?: run {
             Toast.makeText(this, "Bitcoincash Manager not initialized", Toast.LENGTH_SHORT).show()
@@ -361,7 +452,7 @@ class CryptoOptionActivity : AppCompatActivity() {
                     }
                 } else {
                     Log.e("API", "Response not successful")
-                    Toast.makeText(this@CryptoOptionActivity, "Response not successful", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@CryptoOptionActivity, "Response not successful. Please check your setting or API key", Toast.LENGTH_SHORT).show()
                     onResult("", "", "")
                 }
             }

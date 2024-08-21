@@ -1,103 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#FFFFFF">
 
-    <!-- Header View -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- Header with Drop Shadow -->
+    <FrameLayout
+        android:id="@+id/header_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
-        android:elevation="4dp">
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
-
-        <ImageView
-            android:id="@+id/back_arrow"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/ic_back_arrow"
-            android:contentDescription="Back"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:clickable="true"
-            android:focusable="true" />
-
-        <TextView
-            android:id="@+id/confirm_price_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="API Key"
-            android:textSize="22sp"
-            android:textColor="@color/darkerRed"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_bias="0.5" />
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:layout_marginRight="4dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <ImageView
-                android:id="@+id/submit_text"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:src="@drawable/check_broken_red"
-                android:contentDescription="Submit" />
-        </FrameLayout>
+                android:id="@+id/back_arrow"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_back_arrow"
+                android:contentDescription="Back"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:clickable="true"
+                android:focusable="true" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/confirm_price_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="API Key"
+                android:textSize="22sp"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/darkerRed"
+                app:layout_constraintStart_toEndOf="@id/back_arrow"
+                app:layout_constraintTop_toTopOf="@id/back_arrow"
+                android:layout_marginStart="8dp" /> <!-- Added margin to the left of the TextView -->
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
 
     <!-- Confirmation Text -->
     <TextView
+        android:id="@+id/please_confirm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Please confirm your API key."
         android:textSize="16sp"
         android:textAlignment="center"
         android:textColor="#8B0000"
-        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/header_container"
+        android:layout_marginTop="32dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp" />
 
     <!-- Content -->
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/please_confirm"
+        app:layout_constraintBottom_toTopOf="@+id/poweredBySection"> <!-- Ensure content is above the Powered By section -->
 
-        <LinearLayout
+        <EditText
+            android:id="@+id/api_key_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"> <!-- Added padding -->
+            android:hint="Enter API key"
+            android:padding="8dp"
+            android:backgroundTint="@color/customGray"
+            android:inputType="text"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/rounded_edittext"/>
 
-            <EditText
-                android:id="@+id/api_key_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Enter API key"
-                android:padding="8dp"
-                android:backgroundTint="@color/customGray"
-                android:inputType="text"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
-        </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+        <!-- Submit Button -->
+        <Button
+            android:id="@+id/submit_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Submit"
+            android:layout_gravity="center_horizontal"
+            android:padding="12dp"
+            android:backgroundTint="@color/darkerRed"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+
+    <!-- Powered By Section at the Bottom -->
+    <LinearLayout
+        android:id="@+id/poweredBySection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="16dp"> <!-- Margin for spacing at the bottom -->
+
+        <TextView
+            android:id="@+id/poweredByText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Powered By"
+            android:textStyle="italic"
+            android:textSize="14sp"
+            android:textColor="@color/dark_gray"
+            android:layout_marginEnd="8dp" />
+
+        <ImageView
+            android:id="@+id/vermontImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/vermont"
+            android:contentDescription="Vermont Image" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
