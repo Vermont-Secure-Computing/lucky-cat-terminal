@@ -1,11 +1,23 @@
 package com.example.possin
 
+
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
+import android.view.Gravity
 import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.GridLayout
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -13,7 +25,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.possin.adapter.TransactionAdapter
 import com.example.possin.adapter.TransactionDividerAdapter
 import com.example.possin.model.TransactionViewModel
 import com.google.gson.Gson
@@ -29,6 +40,7 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var apiPropertiesFile: File
     private val transactionViewModel: TransactionViewModel by viewModels()
     private lateinit var cryptocurrencyNames: List<String>
+    private lateinit var setPinActivityLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +55,13 @@ class HomeActivity : AppCompatActivity() {
         // Load cryptocurrency names from JSON file
         cryptocurrencyNames = loadCryptocurrencyNames()
 
+        // Check if a pin is saved and prompt for it if found
+        val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        val userPin = sharedPreferences.getString("USER_PIN", null)
+
+
         val seeAllTextView = findViewById<TextView>(R.id.seeAllTextView)
+
 
         // Set up buttons
         setupButtons()
@@ -78,12 +96,23 @@ class HomeActivity : AppCompatActivity() {
             }
         })
 
+        setPinActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                // The pin has been set, update the userPin value
+                val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+                val userPin = sharedPreferences.getString("USER_PIN", null)
+                // Now you can use userPin where needed
+                setupButtons()
+            }
+        }
+
         seeAllTextView.setOnClickListener {
             // Handle the "See all" click event here
             // Navigate to ViewAllActivity
             val intent = Intent(this, ViewAllActivity::class.java)
             startActivity(intent)
         }
+
     }
 
     private fun setupButtons() {
@@ -93,6 +122,9 @@ class HomeActivity : AppCompatActivity() {
         val button4 = findViewById<ImageButton>(R.id.button4)
         val button5 = findViewById<ImageButton>(R.id.button5)
         val button6 = findViewById<ImageButton>(R.id.button6)
+
+        val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        val userPin = sharedPreferences.getString("USER_PIN", "")
 
         // Log to check if buttons are null
         Log.d("HomeActivity", "button1: $button1, button2: $button2, button3: $button3, button4: $button4, button5: $button5, button6: $button6")
@@ -113,8 +145,17 @@ class HomeActivity : AppCompatActivity() {
         }
 
         button2?.setOnClickListener {
-            val intent = Intent(this, APIActivity::class.java)
-            startActivity(intent)
+            if (userPin.isNullOrEmpty()) {
+                // No pin set, navigate to APIActivity directly
+                val intent = Intent(this, APIActivity::class.java)
+                startActivity(intent)
+            } else {
+                // Pin is set, ask the user to enter it
+                promptForPin(userPin) {
+                    val intent = Intent(this, APIActivity::class.java)
+                    startActivity(intent)
+                }
+            }
         }
 
         button3?.setOnClickListener {
@@ -123,13 +164,31 @@ class HomeActivity : AppCompatActivity() {
         }
 
         button4?.setOnClickListener {
-            val intent = Intent(this, MerchantActivity::class.java)
-            startActivity(intent)
+            if (userPin.isNullOrEmpty()) {
+                // No pin set, navigate to APIActivity directly
+                val intent = Intent(this, MerchantActivity::class.java)
+                startActivity(intent)
+            } else {
+                // Pin is set, ask the user to enter it
+                promptForPin(userPin) {
+                    val intent = Intent(this, MerchantActivity::class.java)
+                    startActivity(intent)
+                }
+            }
         }
 
         button5?.setOnClickListener {
-            val intent = Intent(this, XpubAddress::class.java)
-            startActivity(intent)
+            if (userPin.isNullOrEmpty()) {
+                // No pin set, navigate to APIActivity directly
+                val intent = Intent(this, XpubAddress::class.java)
+                startActivity(intent)
+            } else {
+                // Pin is set, ask the user to enter it
+                promptForPin(userPin) {
+                    val intent = Intent(this, XpubAddress::class.java)
+                    startActivity(intent)
+                }
+            }
         }
 
         button6.setOnClickListener {
@@ -137,6 +196,7 @@ class HomeActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
+
 
     private fun propertiesFilesExist(): Boolean {
         return merchantPropertiesFile.exists() && configPropertiesFile.exists()
@@ -204,7 +264,206 @@ class HomeActivity : AppCompatActivity() {
         inputStream.close()
         return cryptocurrenciesWrapper.cryptocurrencies.map { it.name }
     }
+
+//    private fun checkPinAndProceed(userPin: String?, onSuccess: () -> Unit) {
+//        if (userPin.isNullOrEmpty()) {
+//            Toast.makeText(this, "No Pin Set. Please Set a Pin First.", Toast.LENGTH_SHORT).show()
+//            startActivity(Intent(this, SetPinActivity::class.java))
+//        } else {
+//            // Show a dialog or another activity to input the pin
+//            val pinInput = EditText(this)
+//            pinInput.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
+//
+//            AlertDialog.Builder(this)
+//                .setTitle("Enter Pin")
+//                .setView(pinInput)
+//                .setPositiveButton("OK") { _, _ ->
+//                    if (pinInput.text.toString() == userPin) {
+//                        onSuccess()
+//                    } else {
+//                        Toast.makeText(this, "Incorrect Pin", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//                .setNegativeButton("Cancel", null)
+//                .show()
+//        }
+//    }
+
+    private fun promptForPin(userPin: String, onSuccess: () -> Unit) {
+        // Create a LinearLayout to hold the logo, "Enter Pin" text, pin circles, and keyboard
+        val mainLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        // Create and configure the ImageView for the logo
+        val logoImageView = ImageView(this).apply {
+            setImageResource(R.drawable.logo)
+            layoutParams = LinearLayout.LayoutParams(
+                48.dpToPx(), // Adjust size as needed
+                48.dpToPx()
+            ).apply {
+                setMargins(0, 8.dpToPx(), 0, 8.dpToPx()) // Add bottom margin
+            }
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+        }
+
+        // Add the logo to the main layout
+        mainLayout.addView(logoImageView)
+
+        // Create and configure the "Enter Pin" TextView
+        val enterPinTextView = TextView(this).apply {
+            text = "Enter Pin"
+            textSize = 18f
+            setTextColor(ContextCompat.getColor(this@HomeActivity, R.color.black))
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 0, 0, 16.dpToPx()) // Add bottom margin
+            }
+        }
+
+        // Add the "Enter Pin" TextView to the main layout
+        mainLayout.addView(enterPinTextView)
+
+        // Create a LinearLayout to hold the pin circles
+        val pinLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        // Create views for each PIN circle
+        val pinCircles = arrayOfNulls<View>(4)
+        for (i in pinCircles.indices) {
+            pinCircles[i] = View(this).apply {
+                layoutParams = LinearLayout.LayoutParams(24.dpToPx(), 24.dpToPx()).apply {
+                    setMargins(8.dpToPx(), 0, 8.dpToPx(), 0)
+                }
+                setBackgroundResource(R.drawable.circle_background)
+            }
+            pinLayout.addView(pinCircles[i])
+        }
+
+        // Add pinLayout to mainLayout
+        mainLayout.addView(pinLayout)
+
+        // Track user input
+        val enteredPin = StringBuilder()
+
+        // Create a GridLayout for the custom keyboard
+        val keyboardLayout = GridLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 24.dpToPx(), 0, 0)
+            }
+            rowCount = 4
+            columnCount = 3
+        }
+
+        // Add buttons 1-9, 0, and backspace to the keyboard
+        val buttonLabels = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫")
+        for (label in buttonLabels) {
+            val button = Button(this).apply {
+                text = label
+                layoutParams = GridLayout.LayoutParams().apply {
+                    width = 60.dpToPx()
+                    height = 60.dpToPx()
+                    setMargins(4.dpToPx(), 4.dpToPx(), 4.dpToPx(), 4.dpToPx())
+                }
+                textSize = 18f
+                setBackgroundResource(R.drawable.button_background) // Rounded button background
+                setTextColor(ContextCompat.getColor(this@HomeActivity, R.color.white))
+                isClickable = true
+                isFocusable = true
+            }
+
+            // Handle button clicks
+            button.setOnClickListener {
+                if (label == "⌫") {
+                    if (enteredPin.isNotEmpty()) {
+                        enteredPin.deleteCharAt(enteredPin.length - 1)
+                        updatePinCircles(enteredPin.length, pinCircles)
+                    }
+                } else if (label.isNotEmpty() && enteredPin.length < 4) {
+                    enteredPin.append(label)
+                    updatePinCircles(enteredPin.length, pinCircles)
+                }
+            }
+
+            // Add button to the keyboard layout
+            keyboardLayout.addView(button)
+        }
+
+        // Add keyboardLayout to mainLayout
+        mainLayout.addView(keyboardLayout)
+
+        // Show the custom dialog
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(null) // No title to keep "Enter Pin" as the only header text
+            .setView(mainLayout)
+            .setPositiveButton("OK") { _, _ ->
+                if (enteredPin.toString() == userPin) {
+                    onSuccess()
+                } else {
+                    Toast.makeText(this, "Incorrect Pin", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setCancelable(false)
+            .create()
+
+        dialog.setOnShowListener {
+            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+
+            // Change the color of the positive and negative buttons
+            positiveButton.setTextColor(ContextCompat.getColor(this, R.color.tapeRed))
+            negativeButton.setTextColor(ContextCompat.getColor(this, R.color.tapeRed))
+        }
+
+        dialog.show()
+    }
+
+    // Function to update the circles based on the number of digits entered
+    private fun updatePinCircles(pinLength: Int, pinCircles: Array<View?>) {
+        for (i in pinCircles.indices) {
+            if (i < pinLength) {
+                pinCircles[i]?.setBackgroundResource(R.drawable.filled_circle_background)
+            } else {
+                pinCircles[i]?.setBackgroundResource(R.drawable.circle_background)
+            }
+        }
+    }
+
+    // Extension function to convert dp to pixels
+    fun Int.dpToPx(): Int {
+        return (this * Resources.getSystem().displayMetrics.density).toInt()
+    }
+
+
+
+//    private fun navigateToAnotherActivity() {
+//        // Navigate to the other activity if no pin is set
+//        val intent = Intent(this, SomeOtherActivity::class.java)
+//        startActivity(intent)
+//        finish()
+//    }
 }
+
 
 
 data class CryptocurrenciesWrapper(

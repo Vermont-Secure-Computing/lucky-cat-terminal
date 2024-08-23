@@ -79,6 +79,25 @@
             android:orientation="vertical"
             android:padding="16dp"> <!-- Added padding -->
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end"
+                android:paddingBottom="16dp">
+
+                <TextView
+                    android:id="@+id/setPinTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Set Pin"
+                    android:textSize="18sp"
+                    android:textColor="@color/tapeRed"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingEnd="16dp" />
+            </LinearLayout>
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

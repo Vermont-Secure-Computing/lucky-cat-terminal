@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <!-- Header at the top -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="4dp">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <ImageView
+            android:id="@+id/back_arrow"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_back_arrow"
+            android:contentDescription="Back"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/confirm_price_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set Pin"
+            android:textSize="22sp"
+            android:textColor="@color/darkerRed"
+            app:layout_constraintStart_toEndOf="@+id/back_arrow"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="2dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Content below the header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:layout_marginTop="24dp"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/instructionTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter Your Pin"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:layout_marginBottom="16dp"
+            android:textStyle="bold"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- Circles representing each pin digit -->
+            <View
+                android:id="@+id/pinCircle1"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/circle_background"
+                android:layout_margin="8dp"/>
+
+            <View
+                android:id="@+id/pinCircle2"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/circle_background"
+                android:layout_margin="8dp"/>
+
+            <View
+                android:id="@+id/pinCircle3"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/circle_background"
+                android:layout_margin="8dp"/>
+
+            <View
+                android:id="@+id/pinCircle4"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/circle_background"
+                android:layout_margin="8dp"/>
+        </LinearLayout>
+
+        <GridLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:columnCount="3">
+
+            <!-- Number buttons for entering the PIN with margins -->
+            <Button
+                android:text="1"
+                android:onClick="onNumberClick"
+                android:backgroundTint="@color/darkerRed"
+                android:layout_margin="8dp"/>
+            <Button
+                android:text="2"
+                android:onClick="onNumberClick"
+                android:backgroundTint="@color/darkerRed"
+                android:layout_margin="8dp"/>
+            <Button
+                android:text="3"
+                android:onClick="onNumberClick"
+                android:backgroundTint="@color/darkerRed"
+                android:layout_margin="8dp"/>
+            <Button
+                android:text="4"
+                android:onClick="onNumberClick"
+                android:backgroundTint="@color/darkerRed"
+                android:layout_margin="8dp"/>
+            <Button
+                android:text="5"
+                android:onClick="onNumberClick"
+                android:backgroundTint="@color/darkerRed"
+                android:layout_margin="8dp"/>
+            <Button
+                android:text="6"
+                android:onClick="onNumberClick"
+                android:backgroundTint="@color/darkerRed"
+                android:layout_margin="8dp"/>
+            <Button
+                android:text="7"
+                android:onClick="onNumberClick"
+                android:backgroundTint="@color/darkerRed"
+                android:layout_margin="8dp"/>
+            <Button
+                android:text="8"
+                android:onClick="onNumberClick"
+                android:backgroundTint="@color/darkerRed"
+                android:layout_margin="8dp"/>
+            <Button
+                android:text="9"
+                android:onClick="onNumberClick"
+                android:backgroundTint="@color/darkerRed"
+                android:layout_margin="8dp"/>
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"/>
+            <Button
+                android:text="0"
+                android:onClick="onNumberClick"
+                android:backgroundTint="@color/darkerRed"
+                android:layout_margin="8dp"/>
+            <Button
+                android:text="⌫"
+                android:onClick="onBackspaceClick"
+                android:backgroundTint="@color/darkerRed"
+                android:layout_margin="8dp"/>
+        </GridLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

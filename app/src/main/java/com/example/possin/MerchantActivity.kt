@@ -1,6 +1,7 @@
 package com.example.possin
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -43,6 +44,21 @@ class MerchantActivity : AppCompatActivity() {
         editTextCountry = findViewById(R.id.edittext_country)
         editTextMerchantPhone = findViewById(R.id.edittext_merchant_phone)
         editTextMerchantEmail = findViewById(R.id.edittext_merchant_email)
+
+        val setPinTextView = findViewById<TextView>(R.id.setPinTextView)
+        // Check if a PIN is already set
+        val sharedPreferences = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        val userPin = sharedPreferences.getString("USER_PIN", null)
+
+        // If a PIN is already set, change the text to "Update Pin"
+        if (!userPin.isNullOrEmpty()) {
+            setPinTextView.text = "Update Pin"
+        }
+
+        setPinTextView.setOnClickListener {
+            val intent = Intent(this, SetPinActivity::class.java)
+            startActivity(intent)
+        }
 
         // Load the properties if they exist
         loadMerchantProperties()

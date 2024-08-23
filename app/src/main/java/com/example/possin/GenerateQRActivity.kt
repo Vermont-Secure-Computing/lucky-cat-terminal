@@ -97,6 +97,10 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     private lateinit var checkingTransactionsLayout: LinearLayout
     private lateinit var checkingTransactionsGif: ImageView
     private lateinit var checkingTransactionsText: TextView
+    private lateinit var addressTextView: TextView
+    private lateinit var addressTextViewAddress: TextView
+    private lateinit var amountTextViewAddress: TextView
+    private lateinit var amountTextViewAddressChain: TextView
 
     private lateinit var db: AppDatabase
 
@@ -153,10 +157,10 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             else -> "bitcoin:$address?amount=$formattedPrice"
         }
 
-        val addressTextView: TextView = findViewById(R.id.addressTextView)
-        val addressTextViewAddress: TextView = findViewById(R.id.addressTextViewAddress)
-        val amountTextViewAddress: TextView = findViewById(R.id.amountTextViewAddress)
-        val amountTextViewAddressChain: TextView = findViewById(R.id.amountTextViewAddressChain)
+        addressTextView = findViewById(R.id.addressTextView)
+        addressTextViewAddress = findViewById(R.id.addressTextViewAddress)
+        amountTextViewAddress = findViewById(R.id.amountTextViewAddress)
+        amountTextViewAddressChain = findViewById(R.id.amountTextViewAddressChain)
         addressTextView.text = "Address:"
         addressTextViewAddress.text = "$address"
         amountTextViewAddress.text = "Amount:"
@@ -524,6 +528,11 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 Log.d("FEES", fees.toString())
                 Log.d("FEE STATUS", feeStatus)
 
+                addressTextView.visibility = View.GONE
+                addressTextViewAddress.visibility = View.GONE
+                amountTextViewAddress.visibility = View.GONE
+                amountTextViewAddressChain.visibility = View.GONE
+
                 checkingTransactionsLayout.visibility = View.GONE
 
                 // Show the home button
@@ -773,7 +782,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     }
 
     private fun showHomeConfirmationDialog() {
-        val dialogView = layoutInflater.inflate(R.layout.cancel_dialog, null)
+        val dialogView = layoutInflater.inflate(R.layout.home_cancel_dialog, null)
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
             .create()
