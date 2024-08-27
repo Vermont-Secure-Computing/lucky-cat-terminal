@@ -76,14 +76,24 @@ class BitcoinCashManager(private val context: Context, private val xPub: String)
 
         fun isValidAddress(address: String): Boolean {
             val params: NetworkParameters = BitcoinCashMainNetParams.get()
+            var formattedAddress = address
+
+            // Check if the address starts with "bitcoincash:"
+            if (!formattedAddress.startsWith("bitcoincash:", true)) {
+                // Add "bitcoincash:" prefix if it's not present
+                formattedAddress = "bitcoincash:$formattedAddress"
+            }
+
             return try {
-                Address.fromString(params, address)
+                // Validate as a Bitcoin Cash address
+                Address.fromString(params, formattedAddress)
                 true
             } catch (e: Exception) {
-                // If it fails, try to validate as CashAddr
-                CashAddress.isValidAddress(address, params)
+                // If it fails, try to validate as CashAddr without the "bitcoincash:" prefix
+                CashAddress.isValidAddress(formattedAddress, params)
             }
         }
+
     }
 
     private val params: NetworkParameters = BitcoinCashMainNetParams.get()

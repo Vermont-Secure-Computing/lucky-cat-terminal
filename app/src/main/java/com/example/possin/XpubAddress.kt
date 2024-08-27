@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
+import java.io.File
 import java.util.Properties
 
 
@@ -212,6 +213,7 @@ class XpubAddress : AppCompatActivity() {
 
     private fun saveCryptocurrencyValues() {
         properties.remove("default_key")
+
         for (i in 0 until cryptocurrencyContainer.childCount) {
             val itemView = cryptocurrencyContainer.getChildAt(i)
             val nameTextView = itemView.findViewById<TextView>(R.id.crypto_name)
@@ -222,7 +224,15 @@ class XpubAddress : AppCompatActivity() {
             val cryptoName = nameTextView.text.toString()
             val inputType = typeSpinner.selectedItem.toString()
             val segwitLegacy = segwitLegacySpinner.selectedItem.toString()
-            val value = inputField.text.toString()
+            var value = inputField.text.toString()
+
+            // Check if inputType is "address" and cryptoName is "Bitcoincash"
+            if (inputType == "address" && cryptoName == "Bitcoincash") {
+                // Add "bitcoincash:" prefix if it's not present
+                if (!value.startsWith("bitcoincash:", true)) {
+                    value = "bitcoincash:$value"
+                }
+            }
 
             // Only save if value is not empty
             if (value.isNotEmpty()) {
@@ -234,9 +244,19 @@ class XpubAddress : AppCompatActivity() {
             }
         }
 
-        ConfigProperties.saveProperties(this, properties)
+        // Manually write properties to avoid colon escaping
+        val propertiesFile = File(filesDir, "config.properties")
+        propertiesFile.bufferedWriter().use { writer ->
+            properties.forEach { key, v ->
+                val value = v.toString().replace("\\", "") // Ensure no backslashes
+                writer.write("$key=$value\n")
+            }
+        }
+
         showSuccessModal()
     }
+
+
 
 
     private fun validateInput(editText: EditText, inputType: String, segwitLegacy: String, currency: String, errorTextView: TextView, submitText: TextView) {

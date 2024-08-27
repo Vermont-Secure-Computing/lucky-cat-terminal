@@ -99,6 +99,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     private lateinit var checkingTransactionsText: TextView
     private lateinit var addressTextView: TextView
     private lateinit var addressTextViewAddress: TextView
+    private lateinit var amountBaseCurrency: TextView
+    private lateinit var amountBaseCurrencyPrice: TextView
     private lateinit var amountTextViewAddress: TextView
     private lateinit var amountTextViewAddressChain: TextView
 
@@ -159,10 +161,14 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
         addressTextView = findViewById(R.id.addressTextView)
         addressTextViewAddress = findViewById(R.id.addressTextViewAddress)
+        amountBaseCurrency = findViewById(R.id.amountBaseCurrency)
+        amountBaseCurrencyPrice = findViewById(R.id.amountBaseCurrencyPrice)
         amountTextViewAddress = findViewById(R.id.amountTextViewAddress)
         amountTextViewAddressChain = findViewById(R.id.amountTextViewAddressChain)
         addressTextView.text = "Address:"
         addressTextViewAddress.text = "$address"
+        amountBaseCurrency.text = "Base Currency:"
+        amountBaseCurrencyPrice.text = "$numericPrice $selectedCurrencyCode"
         amountTextViewAddress.text = "Amount:"
         amountTextViewAddressChain.text = "$formattedPrice $currency"
 
@@ -532,6 +538,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 addressTextViewAddress.visibility = View.GONE
                 amountTextViewAddress.visibility = View.GONE
                 amountTextViewAddressChain.visibility = View.GONE
+                amountBaseCurrency.visibility = View.GONE
+                amountBaseCurrencyPrice.visibility = View.GONE
 
                 checkingTransactionsLayout.visibility = View.GONE
 
