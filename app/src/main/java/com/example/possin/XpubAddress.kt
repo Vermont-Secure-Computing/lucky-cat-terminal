@@ -228,6 +228,10 @@ class XpubAddress : AppCompatActivity() {
 
             // Check if inputType is "address" and cryptoName is "Bitcoincash"
             if (inputType == "address" && cryptoName == "Bitcoincash") {
+                // Skip saving if no value is entered
+                if (value.isEmpty()) {
+                    continue // Skip this entry if there's no value
+                }
                 // Add "bitcoincash:" prefix if it's not present
                 if (!value.startsWith("bitcoincash:", true)) {
                     value = "bitcoincash:$value"
