@@ -8,4 +8,5 @@
         <item>segwit</item>
         <item>legacy</item>
     </string-array>
+    <string name="neku_gif_description">Neku GIF animation</string>
 </resources>

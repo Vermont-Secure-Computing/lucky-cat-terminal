@@ -29,6 +29,7 @@ import com.example.possin.adapter.TransactionDividerAdapter
 import com.example.possin.model.TransactionViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import pl.droidsonroids.gif.GifDrawable
 import java.io.File
 import java.io.InputStreamReader
 import java.util.Properties
@@ -112,6 +113,10 @@ class HomeActivity : AppCompatActivity() {
             val intent = Intent(this, ViewAllActivity::class.java)
             startActivity(intent)
         }
+
+        val nekuGifView = findViewById<ImageView>(R.id.nekuGifView)
+        val gifDrawable = GifDrawable(resources, R.raw.neku)
+        nekuGifView.setImageDrawable(gifDrawable)
 
     }
 

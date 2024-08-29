@@ -47,18 +47,41 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:gravity="center"
                 android:paddingBottom="16dp">
 
-                <ImageButton
-                    android:id="@+id/button1"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:background="@drawable/rounded_button"
-                    android:src="@drawable/coin_payment"
-                    android:scaleType="centerInside"
-                    android:padding="16dp" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <ImageButton
+                        android:id="@+id/button1"
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:background="@drawable/rounded_button"
+                        android:src="@drawable/coin_payment"
+                        android:scaleType="centerInside"
+                        android:padding="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="payment"
+                        android:textSize="14sp"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/nekuGifView"
+                    android:layout_width="140dp"
+                    android:layout_height="140dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="@string/neku_gif_description" />
 
             </LinearLayout>
 
