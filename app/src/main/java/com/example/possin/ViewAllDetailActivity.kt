@@ -10,12 +10,22 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.example.possin.database.AppDatabase
 import com.example.possin.model.Transaction
+import com.example.possin.utils.PropertiesUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import org.json.JSONObject
 import java.io.File
+import java.io.IOException
 import java.util.Properties
 
 class ViewAllDetailActivity : AppCompatActivity() {
@@ -92,6 +102,8 @@ class ViewAllDetailActivity : AppCompatActivity() {
         printButton.setOnClickListener {
             showReceiptDialog()
         }
+
+        getConfirmations(transaction.chain, transaction.txid)
     }
 
     private fun getProperty(key: String): String? {
@@ -109,6 +121,48 @@ class ViewAllDetailActivity : AppCompatActivity() {
     fun getMerchantAddress(): String? {
         return getProperty("address")
     }
+
+    private fun getConfirmations(chain: String, txid: String) {
+        val url = "https://dogpay.mom/terminal/tx_confirmations/$chain/$txid"
+        val apiKey = PropertiesUtil.getProperty(this, "api_key")
+
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("x-api-key", apiKey ?: "")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    val responseData = response.body?.string()
+                    responseData?.let {
+                        val jsonObject = JSONObject(it)
+                        val confirmations = jsonObject.getInt("confirmations")
+
+                        // Update the UI on the main thread
+                        runOnUiThread {
+                            confirmationsTextView.text = "Confirmations: $confirmations"
+                        }
+
+                        // Update the transaction in the database
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            val transaction = db.transactionDao().getTransactionByTxid(txid)
+                            transaction?.let {
+                                it.confirmations = confirmations
+                                db.transactionDao().update(it)
+                            }
+                        }
+                    }
+                }
+            }
+        })
+    }
+
 
     private fun updateUI(transaction: Transaction) {
         Log.d("CONFIRMATION", transaction.confirmations.toString())
