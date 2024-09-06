@@ -21,6 +21,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,6 +30,8 @@ import com.example.possin.adapter.TransactionDividerAdapter
 import com.example.possin.model.TransactionViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import org.json.JSONArray
+import org.json.JSONObject
 import pl.droidsonroids.gif.GifDrawable
 import java.io.File
 import java.io.InputStreamReader
@@ -117,6 +120,8 @@ class HomeActivity : AppCompatActivity() {
         val nekuGifView = findViewById<ImageView>(R.id.nekuGifView)
         val gifDrawable = GifDrawable(resources, R.raw.neku)
         nekuGifView.setImageDrawable(gifDrawable)
+
+        populateCryptoContainer()
 
     }
 
@@ -453,6 +458,85 @@ class HomeActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun populateCryptoContainer() {
+        val cryptoContainer = findViewById<LinearLayout>(R.id.crypto_container)
+
+        // Load the config.properties file
+        val configPropertiesFile = File(filesDir, "config.properties")
+        val configProperties = Properties()
+
+        // Remove existing views from the container
+        cryptoContainer.removeAllViews()
+
+        // Check if config.properties file exists or if it contains only "default_key"
+        val isDefaultKeyOrFileMissing = if (configPropertiesFile.exists()) {
+            configProperties.load(configPropertiesFile.inputStream())
+            configProperties.size == 1 && configProperties.containsKey("default_key")
+        } else {
+            true // File is missing, so we treat it the same as having only "default_key"
+        }
+
+        // If the config file is missing or only contains "default_key", show a message
+        if (isDefaultKeyOrFileMissing) {
+            val messageView = TextView(this).apply {
+                text = "Accepted coins are not yet setup"
+                textSize = 16f
+                setTextColor(ContextCompat.getColor(this@HomeActivity, R.color.dark_gray))
+                gravity = Gravity.CENTER
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(16.dpToPx(), 16.dpToPx(), 16.dpToPx(), 16.dpToPx())
+                }
+            }
+
+            // Add the message to the crypto_container inside the CardView
+            cryptoContainer.addView(messageView)
+
+        } else {
+            // Load the JSON file from assets
+            val inputStream = assets.open("cryptocurrencies.json")
+            val json = inputStream.bufferedReader().use { it.readText() }
+
+            // Parse the JSON as a JSONObject
+            val jsonObject = JSONObject(json)
+
+            // Get the JSONArray from the JSONObject
+            val jsonArray = jsonObject.getJSONArray("cryptocurrencies")
+
+            // Add logos only for accepted coins
+            for (i in 0 until jsonArray.length()) {
+                val cryptoObject = jsonArray.getJSONObject(i)
+                val cryptoName = cryptoObject.getString("name") // e.g., "Dogecoin"
+                val cryptoLogo = cryptoObject.getString("logo")
+
+                // Check if this cryptocurrency is accepted in config.properties
+                val cryptoValueKey = "${cryptoName}_value"
+                val cryptoTypeKey = "${cryptoName}_type"
+
+                if (configProperties.containsKey(cryptoValueKey) && configProperties.containsKey(cryptoTypeKey)) {
+                    // If the cryptocurrency is accepted, add its logo
+
+                    // Create an ImageView for the logo, with smaller dimensions
+                    val logoView = ImageView(this).apply {
+                        val logoResId = resources.getIdentifier(cryptoLogo, "drawable", packageName)
+                        setImageResource(logoResId)
+                        layoutParams = LinearLayout.LayoutParams(40.dpToPx(), 40.dpToPx()).apply {
+                            setMargins(16.dpToPx(), 0, 16.dpToPx(), 0)
+                        }
+                        scaleType = ImageView.ScaleType.CENTER_INSIDE
+                    }
+
+                    // Add the ImageView to the cryptoContainer
+                    cryptoContainer.addView(logoView)
+                }
+            }
+        }
+    }
+
+
 
     // Extension function to convert dp to pixels
     fun Int.dpToPx(): Int {

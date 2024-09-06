@@ -44,47 +44,110 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <LinearLayout
+            <!-- Accepted Currency Title -->
+            <TextView
+                android:id="@+id/acceptedCurrencyTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Accepted Currency"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/darkerRed"/>
+
+            <!-- CardView to wrap the scrollable crypto_container -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:paddingBottom="16dp">
+                android:layout_marginTop="8dp"
+                card_view:cardCornerRadius="12dp"
+                card_view:cardElevation="6dp">
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
+                <!-- HorizontalScrollView for scrolling cryptocurrency logos -->
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center">
+                    android:padding="8dp"
+                    android:scrollbars="none">
 
-                    <ImageButton
-                        android:id="@+id/button1"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
-                        android:background="@drawable/rounded_button"
-                        android:src="@drawable/coin_payment"
-                        android:scaleType="centerInside"
-                        android:padding="16dp" />
-
-                    <TextView
+                    <LinearLayout
+                        android:id="@+id/crypto_container"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="payment"
-                        android:textSize="14sp"
+                        android:orientation="horizontal"
+                        android:gravity="center">
+                        <!-- Dynamically load ImageView for each cryptocurrency logo here -->
+                    </LinearLayout>
+
+                </HorizontalScrollView>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Card with Button and GIF -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                card_view:cardCornerRadius="12dp"
+                card_view:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:paddingBottom="16dp"
+                    android:background="@color/tapeRed">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <ImageButton
+                            android:id="@+id/button1"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:background="@drawable/rounded_button"
+                            android:src="@drawable/coin_payment"
+                            android:scaleType="centerInside"
+                            android:layout_marginTop="24dp"
+                            android:padding="16dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="accept payment"
+                            android:textSize="14sp"
+                            android:textColor="#ffffff"
+                            android:layout_marginTop="2dp"
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/nekuGifView"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_marginLeft="16dp"
                         android:layout_marginTop="8dp"
-                        android:gravity="center"/>
+                        android:contentDescription="@string/neku_gif_description" />
+
                 </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/nekuGifView"
-                    android:layout_width="140dp"
-                    android:layout_height="140dp"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginTop="8dp"
-                    android:contentDescription="@string/neku_gif_description" />
+            </androidx.cardview.widget.CardView>
 
-            </LinearLayout>
+            <TextView
+                android:id="@+id/settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Settings"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/darkerRed"/>
 
+            <!-- Card with buttons and transaction-related layout -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -98,7 +161,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Four-row GridLayout for the buttons -->
+                    <!-- GridLayout for the buttons -->
                     <androidx.gridlayout.widget.GridLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -106,6 +169,7 @@
                         app:columnCount="2"
                         app:orientation="horizontal">
 
+                        <!-- Button 2 -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -131,6 +195,7 @@
                                 android:layout_marginTop="4dp"/>
                         </LinearLayout>
 
+                        <!-- Button 4 -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -156,6 +221,7 @@
                                 android:layout_marginTop="4dp"/>
                         </LinearLayout>
 
+                        <!-- Button 5 -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -181,6 +247,7 @@
                                 android:layout_marginTop="4dp"/>
                         </LinearLayout>
 
+                        <!-- Button 6 -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -209,6 +276,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Transactions CardView -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/transactionsCardView"
                 android:layout_width="match_parent"
@@ -267,6 +335,8 @@
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <!-- Powered By Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -293,6 +363,8 @@
                     android:contentDescription="Vermont Image" />
 
             </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
+
 </LinearLayout>
