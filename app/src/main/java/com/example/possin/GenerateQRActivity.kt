@@ -568,7 +568,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 if (merchAddress.isNullOrEmpty()) {
                     merchantAddress.visibility = TextView.GONE
                 } else {
-                    merchantAddress.text = address
+                    merchantAddress.text = merchAddress
                     merchantAddress.visibility = TextView.VISIBLE
                 }
 
@@ -729,7 +729,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         args.putString("receiptTxID", "${txidTextView.text}")
         args.putString("receiptFees", "${feesTextView.text}")
         args.putString("receiptConfirmations", "${confirmationsTextView.text}")
-        args.putString("receiptChain", "${chain}")
+        args.putString("receiptChain", chain)
         args.putString("receiptDeviceID", deviceId)
         args.putString("receiptNumericPrice", "Base Price: $numericPrice")
         args.putString("receiptSelectedCurrencyCode", "Base Currency: $selectedCurrencyCode")

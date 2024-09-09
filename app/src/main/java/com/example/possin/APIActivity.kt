@@ -26,7 +26,7 @@ class APIActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_api)
 
-        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.darkerRed)
 
         apiKeyInput = findViewById(R.id.api_key_input)
         submitButton = findViewById(R.id.submit_button)

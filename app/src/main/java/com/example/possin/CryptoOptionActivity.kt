@@ -92,7 +92,16 @@ class CryptoOptionActivity : AppCompatActivity() {
         return cryptoList
     }
 
-    private fun addCardView(container: LinearLayout, imageResId: Int, isVisible: Boolean, crypto: CryptoCurrency, onClick: () -> Unit) {
+    private fun addCardView(
+        container: LinearLayout,
+        imageResId: Int,
+        isVisible: Boolean,
+        crypto: CryptoCurrency,
+        onClick: () -> Unit
+    ) {
+        // To store if the view has been clicked already
+        var isClicked = false
+
         val cardView = CardView(this).apply {
             radius = 16f
             cardElevation = 8f
@@ -102,6 +111,14 @@ class CryptoOptionActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply {
                 setMargins(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8)) // Increased left and right margins
+            }
+
+            // Set the click listener for the entire cardView
+            setOnClickListener {
+                if (!isClicked) {
+                    isClicked = true
+                    onClick()
+                }
             }
         }
 
@@ -114,7 +131,6 @@ class CryptoOptionActivity : AppCompatActivity() {
             setPadding(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8)) // Adjust padding as needed
             gravity = android.view.Gravity.CENTER
             setBackgroundResource(R.drawable.button_selector) // Apply button background for feedback
-            setOnClickListener { onClick() } // Set click listener on the entire container
         }
 
         val imageButton = ImageButton(this).apply {
@@ -142,6 +158,14 @@ class CryptoOptionActivity : AppCompatActivity() {
                 setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
             }
             background = null // Remove the button background since the entire container is clickable
+
+            // Set a click listener for the logo itself, with click prevention
+            setOnClickListener {
+                if (!isClicked) {
+                    isClicked = true
+                    onClick()
+                }
+            }
         }
 
         val textLayout = LinearLayout(this).apply {
@@ -181,7 +205,6 @@ class CryptoOptionActivity : AppCompatActivity() {
 
         cardView.addView(cardContent)
         container.addView(cardView)
-
     }
 
     private fun dpToPx(dp: Int): Int {

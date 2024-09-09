@@ -50,7 +50,7 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home)
 
-        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.darkerRed)
 
         merchantPropertiesFile = File(filesDir, "merchant.properties")
         configPropertiesFile = File(filesDir, "config.properties")

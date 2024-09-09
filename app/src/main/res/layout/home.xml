@@ -10,8 +10,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:background="#FFFFFF"
+        android:padding="4dp"
+        android:background="@color/tapeRed"
         android:elevation="4dp">
 
         <androidx.constraintlayout.widget.Guideline
@@ -19,13 +19,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
+            app:layout_constraintGuide_percent="0.7" />
 
         <ImageView
             android:id="@+id/logo_image"
-            android:layout_width="40dp"
+            android:layout_width="150dp"
             android:layout_height="40dp"
-            android:src="@drawable/logo"
+            android:src="@drawable/lcterm"
             app:layout_constraintEnd_toStartOf="@+id/guideline"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintTop_toTopOf="parent"

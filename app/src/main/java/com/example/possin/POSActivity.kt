@@ -10,6 +10,6 @@ class POSActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pos)
 
-        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.darkerRed)
     }
 }
