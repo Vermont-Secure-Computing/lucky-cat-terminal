@@ -30,7 +30,7 @@ class ExportDataActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_export_data)
 
-        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.darkerRed)
 
         // Initialize the TransactionDao
         val transactionDao = AppDatabase.getDatabase(application).transactionDao()

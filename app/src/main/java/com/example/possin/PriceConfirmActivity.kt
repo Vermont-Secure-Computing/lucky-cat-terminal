@@ -15,7 +15,7 @@ class PriceConfirmActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.price_confirm)
 
-        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.darkerRed)
 
         val price = intent.getStringExtra("PRICE") ?: "0.00"
         val currencyCode = intent.getStringExtra("CURRENCY_CODE") ?: "USD"
