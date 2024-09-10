@@ -1,0 +1,13 @@
+<!-- res/drawable/splash_background.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Background color -->
+    <item android:drawable="@color/tapeRed" />
+
+    <!-- Centered logo -->
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/for_splash" /> <!-- Your for_splash.xml logo image -->
+    </item>
+</layer-list>
