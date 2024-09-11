@@ -2,31 +2,34 @@ package com.example.possin
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.LinearLayout
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
-import com.example.possin.adapter.CryptocurrencyAdapter
-import java.io.File
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 
 class MainActivity : AppCompatActivity() {
 
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: CryptocurrencyAdapter
-    private lateinit var cryptocurrencies: List<Cryptocurrency>
-    private lateinit var filteredCryptocurrencies: MutableList<Cryptocurrency>
-    private lateinit var selectedCryptocurrencies: MutableList<Cryptocurrency>
-    private lateinit var selectedCryptocurrenciesContainer: LinearLayout
-    private lateinit var propertiesFile: File
-    private lateinit var merchantPropertiesFile: File
+//    private lateinit var recyclerView: RecyclerView
+//    private lateinit var adapter: CryptocurrencyAdapter
+//    private lateinit var cryptocurrencies: List<Cryptocurrency>
+//    private lateinit var filteredCryptocurrencies: MutableList<Cryptocurrency>
+//    private lateinit var selectedCryptocurrencies: MutableList<Cryptocurrency>
+//    private lateinit var selectedCryptocurrenciesContainer: LinearLayout
+//    private lateinit var propertiesFile: File
+//    private lateinit var merchantPropertiesFile: File
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Install the splash screen
+        installSplashScreen()
+
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        // Directly start HomeActivity without delay to see what's happening
         startActivity(Intent(this, HomeActivity::class.java))
+        finish() // Close MainActivity
+
+
 
 //        // Check if .properties file is empty or doesn't exist
 //        propertiesFile = File(filesDir, "config.properties")

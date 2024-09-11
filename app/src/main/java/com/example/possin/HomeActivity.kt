@@ -4,12 +4,10 @@ package com.example.possin
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.text.InputType
 import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
-import android.widget.EditText
 import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -21,7 +19,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,7 +27,6 @@ import com.example.possin.adapter.TransactionDividerAdapter
 import com.example.possin.model.TransactionViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.json.JSONArray
 import org.json.JSONObject
 import pl.droidsonroids.gif.GifDrawable
 import java.io.File
@@ -128,7 +124,7 @@ class HomeActivity : AppCompatActivity() {
     private fun setupButtons() {
         val button1 = findViewById<ImageButton>(R.id.button1)
         val button2 = findViewById<ImageButton>(R.id.button2)
-        val button3 = findViewById<ImageButton>(R.id.button3)
+//        val button3 = findViewById<ImageButton>(R.id.button3)
         val button4 = findViewById<ImageButton>(R.id.button4)
         val button5 = findViewById<ImageButton>(R.id.button5)
         val button6 = findViewById<ImageButton>(R.id.button6)
@@ -137,7 +133,7 @@ class HomeActivity : AppCompatActivity() {
         val userPin = sharedPreferences.getString("USER_PIN", "")
 
         // Log to check if buttons are null
-        Log.d("HomeActivity", "button1: $button1, button2: $button2, button3: $button3, button4: $button4, button5: $button5, button6: $button6")
+        Log.d("HomeActivity", "button1: $button1, button2: $button2, button4: $button4, button5: $button5, button6: $button6")
 
         button1?.setOnClickListener {
             if (!propertiesFilesExist()) {
@@ -168,10 +164,10 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        button3?.setOnClickListener {
-            val intent = Intent(this, BaseCurrency::class.java)
-            startActivity(intent)
-        }
+//        button3?.setOnClickListener {
+//            val intent = Intent(this, BaseCurrency::class.java)
+//            startActivity(intent)
+//        }
 
         button4?.setOnClickListener {
             if (userPin.isNullOrEmpty()) {

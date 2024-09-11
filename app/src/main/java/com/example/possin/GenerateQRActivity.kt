@@ -62,6 +62,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
     private lateinit var timerTextView: TextView
     private lateinit var gatheringBlocksTextView: TextView
+    private lateinit var transactionSeenTextView: TextView
+    private lateinit var checkImageView: ImageView
     private lateinit var countDownTimer: CountDownTimer
     private lateinit var qrCodeImageView: ImageView
     private lateinit var client: OkHttpClient
@@ -182,6 +184,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
         // Initialize the gathering blocks TextView
         gatheringBlocksTextView = findViewById(R.id.gatheringBlocksTextView)
+        transactionSeenTextView = findViewById(R.id.transactionSeenTextView)
+        checkImageView = findViewById(R.id.checkImageView)
 
         merchantPropertiesFile = File(filesDir, "merchant.properties")
 
@@ -545,6 +549,9 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
                 // Show the home button
                 homeText.visibility = View.VISIBLE
+
+                transactionSeenTextView.visibility = View.VISIBLE
+                checkImageView.visibility = View.VISIBLE
 
                 // Accumulate received amount
                 val totalReceivedAmount = previousReceivedAmt + balance

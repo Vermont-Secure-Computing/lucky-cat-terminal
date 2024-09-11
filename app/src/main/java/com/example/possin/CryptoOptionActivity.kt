@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
@@ -19,6 +20,7 @@ import com.example.possin.network.ConversionRequestBody
 import com.example.possin.network.RetrofitClient
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import pl.droidsonroids.gif.GifDrawable
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -43,12 +45,13 @@ class CryptoOptionActivity : AppCompatActivity() {
     private var bitcoincashManager: BitcoinCashManager? = null
     private lateinit var selectedCurrencyCode: String
     private lateinit var message: String
+    private var loadingDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.crypto_option)
 
-        window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.darkerRed)
 
         val price = intent.getStringExtra("PRICE") ?: "0.00"
         val priceTextView: TextView = findViewById(R.id.priceTextView)
@@ -81,6 +84,10 @@ class CryptoOptionActivity : AppCompatActivity() {
         backArrow.setOnClickListener {
             finish() // Navigate back to the previous activity
         }
+
+        val nekuGifView = findViewById<ImageView>(R.id.nekuGifImageView)
+        val gifDrawable = GifDrawable(resources, R.raw.neku)
+        nekuGifView.setImageDrawable(gifDrawable)
     }
 
     private fun loadCryptocurrenciesFromJson(): List<CryptoCurrency> {
@@ -90,6 +97,29 @@ class CryptoOptionActivity : AppCompatActivity() {
         val cryptoList = Gson().fromJson(jsonObject.getAsJsonArray("cryptocurrencies"), Array<CryptoCurrency>::class.java).toList()
         reader.close()
         return cryptoList
+    }
+
+    // Function to show the loading dialog with the GIF
+    private fun showLoadingDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_loading, null)
+        val gifImageView: ImageView = dialogView.findViewById(R.id.loadingGifImageView)
+        val gifDrawable = GifDrawable(resources, R.raw.rotating_arc_gradient_thick)
+        gifImageView.setImageDrawable(gifDrawable)
+
+        val builder = AlertDialog.Builder(this)
+        builder.setView(dialogView)
+        builder.setCancelable(false)
+
+        loadingDialog = builder.create()
+        loadingDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        loadingDialog?.window?.setDimAmount(0.5f)
+        loadingDialog?.show()
+    }
+
+    // Function to dismiss the loading dialog
+    private fun dismissLoadingDialog() {
+        loadingDialog?.dismiss()
+        loadingDialog = null
     }
 
     private fun addCardView(
@@ -230,6 +260,8 @@ class CryptoOptionActivity : AppCompatActivity() {
     }
 
     private fun handleCryptoClick(crypto: CryptoCurrency, price: String) {
+        showLoadingDialog()
+
         when (crypto.shortname) {
             "BTC" -> handleBTCClick(price)
             "LTC" -> handleLTCClick(price)
@@ -249,6 +281,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "BTC", R.drawable.bitcoin_logo) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
                     startGenerateQRActivity(
                         address,
@@ -265,6 +298,7 @@ class CryptoOptionActivity : AppCompatActivity() {
                 }
             }
         } ?: run {
+            dismissLoadingDialog()
             Toast.makeText(this, "Bitcoin Manager not initialized", Toast.LENGTH_SHORT).show()
         }
     }
@@ -276,6 +310,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "LTC", R.drawable.litecoin_new_logo) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
                     startGenerateQRActivity(
                         address,
@@ -292,6 +327,7 @@ class CryptoOptionActivity : AppCompatActivity() {
                 }
             }
         } ?: run {
+            dismissLoadingDialog()
             Toast.makeText(this, "Litecoin Manager not initialized", Toast.LENGTH_SHORT).show()
         }
     }
@@ -303,6 +339,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "ETH", R.drawable.ethereum_logo) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
                     startGenerateQRActivity(
                         address,
@@ -319,6 +356,7 @@ class CryptoOptionActivity : AppCompatActivity() {
                 }
             }
         } ?: run {
+            dismissLoadingDialog()
             Toast.makeText(this, "Ethereum Manager not initialized", Toast.LENGTH_SHORT).show()
         }
     }
@@ -330,6 +368,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "DOGE", R.drawable.dogecoin_logo) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
                     startGenerateQRActivity(
                         address,
@@ -346,6 +385,7 @@ class CryptoOptionActivity : AppCompatActivity() {
                 }
             }
         } ?: run {
+            dismissLoadingDialog()
             Toast.makeText(this, "Dogecoin Manager not initialized", Toast.LENGTH_SHORT).show()
         }
     }
@@ -357,6 +397,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "TRON-NETWORK", R.drawable.tether_logo) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
                     startGenerateQRActivity(
                         address,
@@ -373,6 +414,7 @@ class CryptoOptionActivity : AppCompatActivity() {
                 }
             }
         } ?: run {
+            dismissLoadingDialog()
             Toast.makeText(this, "USDT Tron Manager not initialized", Toast.LENGTH_SHORT).show()
         }
     }
@@ -395,6 +437,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "DASH", R.drawable.dashcoin_logo) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
                     startGenerateQRActivity(
                         address,
@@ -411,6 +454,7 @@ class CryptoOptionActivity : AppCompatActivity() {
                 }
             }
         } ?: run {
+            dismissLoadingDialog()
             Toast.makeText(this, "Dash Manager not initialized", Toast.LENGTH_SHORT).show()
         }
     }
@@ -422,6 +466,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "BCH", R.drawable.bitcoin_cash) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
                     startGenerateQRActivity(
                         address,
@@ -438,6 +483,7 @@ class CryptoOptionActivity : AppCompatActivity() {
                 }
             }
         } ?: run {
+            dismissLoadingDialog()
             Toast.makeText(this, "Bitcoincash Manager not initialized", Toast.LENGTH_SHORT).show()
         }
     }

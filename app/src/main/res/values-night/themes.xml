@@ -4,4 +4,15 @@
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
     </style>
+
+    <!-- Splash screen theme for Android 12+ -->
+    <style name="Theme.Possin.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Customize splash screen background color -->
+        <item name="windowSplashScreenBackground">@color/tapeRed</item>
+        <!-- Customize splash screen icon -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/for_splash</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/tapeRed</item>
+        <!-- Transition duration for the splash screen exit -->
+        <item name="windowSplashScreenAnimationDuration">300</item>
+    </style>
 </resources>

@@ -4,16 +4,28 @@ import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.example.possin.model.ApiResponse
+import com.example.possin.model.Details
+import com.example.possin.network.ApiService
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Locale
 import java.util.Properties
 
 class APIActivity : AppCompatActivity() {
@@ -21,6 +33,15 @@ class APIActivity : AppCompatActivity() {
     private lateinit var apiKeyInput: EditText
     private lateinit var submitButton: Button
     private lateinit var backArrow: ImageView
+    private lateinit var apiKeyTextView: TextView
+    private lateinit var subscriptionLevelTextView: TextView
+    private lateinit var activeStatusTextView: TextView
+    private lateinit var expiresAtTextView: TextView
+    private lateinit var hourlyCallsTextView: TextView
+    private lateinit var dailyCallsTextView: TextView
+    private lateinit var priceTextView: TextView
+
+    private lateinit var apiService: ApiService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,11 +49,30 @@ class APIActivity : AppCompatActivity() {
 
         window.statusBarColor = ContextCompat.getColor(this, R.color.darkerRed)
 
+        // Initialize UI elements
         apiKeyInput = findViewById(R.id.api_key_input)
         submitButton = findViewById(R.id.submit_button)
         backArrow = findViewById(R.id.back_arrow)
+        apiKeyTextView = findViewById(R.id.apiKeyTextView)
+        subscriptionLevelTextView = findViewById(R.id.subscriptionLevelTextView)
+        activeStatusTextView = findViewById(R.id.activeStatusTextView)
+        expiresAtTextView = findViewById(R.id.expiresAtTextView)
+        hourlyCallsTextView = findViewById(R.id.hourlyCallsTextView)
+        dailyCallsTextView = findViewById(R.id.dailyCallsTextView)
+        priceTextView = findViewById(R.id.priceTextView)
 
-        // Load existing API key if it exists
+        // Initially hide the API details views
+        hideApiDetails()
+
+        // Initialize Retrofit for API calls
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://dogpay.mom/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        apiService = retrofit.create(ApiService::class.java)
+
+        // Load existing API key if it exists and call the API
         loadApiKey()
 
         submitButton.setOnClickListener {
@@ -60,8 +100,75 @@ class APIActivity : AppCompatActivity() {
             val apiKey = properties.getProperty("api_key")
             if (!apiKey.isNullOrEmpty()) {
                 apiKeyInput.setText(apiKey)
+                // Show API details section since the API key is not null or empty
+                showApiDetails()
+                // Call the API to get details
+                callApiDetails(apiKey)
             }
         }
+    }
+
+    private fun callApiDetails(apiKey: String) {
+        val call = apiService.getApiDetails(apiKey)
+        call.enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                println(response.body())
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        displayApiDetails(it.details)
+                    }
+                } else {
+                    Toast.makeText(this@APIActivity, "Failed to get API details", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                Toast.makeText(this@APIActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun displayApiDetails(details: Details) {
+        // Update the TextViews with API response
+        apiKeyTextView.setText("API key: ${details.apiKey}")
+        subscriptionLevelTextView.setText("Subscription Level: ${details.subscriptionLevel}")
+        activeStatusTextView.setText("Active: ${details.active}")
+
+        if (details.expiresAt.isNullOrEmpty()) {
+            expiresAtTextView.setText("Expires At: No expiration")
+        } else {
+            // Convert expiresAt to a human-readable format
+            val inputDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            val outputDateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+            val date = inputDateFormat.parse(details.expiresAt)
+            expiresAtTextView.setText("Expires At: ${outputDateFormat.format(date)}")
+        }
+
+        hourlyCallsTextView.setText("Hourly Calls: ${details.hourlyCalls}")
+        dailyCallsTextView.setText("Daily Calls: ${details.dailyCalls}")
+        priceTextView.setText("Price: ${details.price}")
+    }
+
+    private fun hideApiDetails() {
+        // Initially hide the API details section
+        apiKeyTextView.visibility = View.GONE
+        subscriptionLevelTextView.visibility = View.GONE
+        activeStatusTextView.visibility = View.GONE
+        expiresAtTextView.visibility = View.GONE
+        hourlyCallsTextView.visibility = View.GONE
+        dailyCallsTextView.visibility = View.GONE
+        priceTextView.visibility = View.GONE
+    }
+
+    private fun showApiDetails() {
+        // Show the API details section when the API key is loaded
+        apiKeyTextView.visibility = View.VISIBLE
+        subscriptionLevelTextView.visibility = View.VISIBLE
+        activeStatusTextView.visibility = View.VISIBLE
+        expiresAtTextView.visibility = View.VISIBLE
+        hourlyCallsTextView.visibility = View.VISIBLE
+        dailyCallsTextView.visibility = View.VISIBLE
+        priceTextView.visibility = View.VISIBLE
     }
 
     private fun saveApiKey(apiKey: String) {
@@ -87,8 +194,6 @@ class APIActivity : AppCompatActivity() {
         }
         dialog.show()
     }
-
-
 
     private fun navigateToHome() {
         val intent = Intent(this, HomeActivity::class.java)

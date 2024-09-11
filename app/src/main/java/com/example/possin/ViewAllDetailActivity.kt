@@ -185,7 +185,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
         confirmationsTextView.text = "Confirmations: ${transaction.confirmations}"
         timeTextView.text = "Time: ${transaction.time}"
         messageTextView.text = if (transaction.message.isNullOrEmpty()) {
-            "No message"
+            ""
         } else {
             "Message: ${transaction.message}"
         }

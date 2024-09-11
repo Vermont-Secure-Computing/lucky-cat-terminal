@@ -1,9 +1,25 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme -->
     <style name="Base.Theme.Possin" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Customize your app's main theme here -->
+        <!-- Add any additional theme configurations -->
     </style>
 
+    <!-- Combined splash screen theme with Material3 -->
+    <style name="Theme.Possin.Splash" parent="Theme.SplashScreen">
+        <!-- Splash screen background color -->
+        <item name="windowSplashScreenBackground">@color/tapeRed</item>
+        <!-- Animated icon or logo for splash screen -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/for_splash</item>
+        <!-- Background color behind the icon -->
+        <item name="windowSplashScreenIconBackgroundColor">@color/tapeRed</item>
+        <!-- Animation duration for the splash screen exit -->
+        <item name="windowSplashScreenAnimationDuration">300</item>
+
+        <!-- Ensures that after the splash screen, the main theme is applied -->
+        <item name="postSplashScreenTheme">@style/Theme.Possin</item>
+    </style>
+
+    <!-- Main app theme -->
     <style name="Theme.Possin" parent="Base.Theme.Possin" />
 </resources>

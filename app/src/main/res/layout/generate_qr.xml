@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:background="#FFFFFF"
+        android:background="@color/tapeRed"
         android:elevation="8dp">
 
         <androidx.constraintlayout.widget.Guideline
@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.50121653" />
+            app:layout_constraintGuide_percent="0.7" />
 
         <TextView
             android:id="@+id/cancelText"
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:text="Cancel"
             android:textSize="20sp"
-            android:textColor="@color/tapeRed"
+            android:textColor="#ffffff"
             android:clickable="true"
             android:focusable="true"
             app:layout_constraintStart_toStartOf="parent"
@@ -37,9 +37,9 @@
 
         <ImageView
             android:id="@+id/logo_image"
-            android:layout_width="40dp"
+            android:layout_width="150dp"
             android:layout_height="40dp"
-            android:src="@drawable/logo"
+            android:src="@drawable/lcterm"
             android:contentDescription="Logo"
             app:layout_constraintEnd_toStartOf="@+id/guideline"
             app:layout_constraintHorizontal_bias="1.0"
@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             android:text="Home"
             android:textSize="20sp"
-            android:textColor="@color/tapeRed"
+            android:textColor="#ffffff"
             android:clickable="true"
             android:focusable="true"
             android:visibility="gone"
@@ -296,6 +296,35 @@
                     android:textColor="#000000"
                     android:layout_marginTop="5dp"
                     android:layout_gravity="center" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp">
+
+                <ImageView
+                    android:id="@+id/checkImageView"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/check"
+                    android:contentDescription="Check Icon"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/transactionSeenTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Transaction already seen on the blockchain."
+                    android:textSize="16sp"
+                    android:textColor="#21CD41"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <TextView
