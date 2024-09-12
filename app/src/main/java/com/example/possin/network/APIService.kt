@@ -19,4 +19,7 @@ interface ApiService {
     fun getApiDetails(
         @Header("x-api-key") apiKey: String
     ): Call<ApiResponse>
+
+    @GET("metrics")
+    fun getMetrics(): Call<String>
 }

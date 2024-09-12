@@ -308,7 +308,7 @@ class XpubAddress : AppCompatActivity() {
             errorTextView.text = ""
             submitText.isEnabled = allInputsValid()
             if (submitText.isEnabled) {
-                submitText.setTextColor(ContextCompat.getColor(this, R.color.tapeRed))
+                submitText.setTextColor(ContextCompat.getColor(this, R.color.white))
             } else {
                 submitText.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
             }

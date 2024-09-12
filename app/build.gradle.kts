@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.org.slf4j)
     implementation(libs.logback.classic)
     implementation(libs.lifecycle.viewmodel)
+    implementation(libs.retrofit.scalars)
 
 
     implementation(libs.room.runtime)
