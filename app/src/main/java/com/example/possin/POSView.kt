@@ -277,7 +277,24 @@ class POSView @JvmOverloads constructor(
     }
 
     private fun confirmPrice() {
-        // Implement your logic for confirming the price and starting the next activity
+        val decimalPlaces = if (currentCurrencyCode in listOf("BTC", "LTC", "DASH", "DOGE", "ETH", "USDT", "XMR", "LOG")) 6 else 2
+        if (currentInput.isNotEmpty()) {
+            if (!currentInput.contains(".")) {
+                currentInput += "." + "0".repeat(decimalPlaces)
+            } else {
+                val parts = currentInput.split(".")
+                if (parts.size == 1 || parts[1].isEmpty()) {
+                    currentInput += "0".repeat(decimalPlaces)
+                } else if (parts[1].length < decimalPlaces) {
+                    currentInput += "0".repeat(decimalPlaces - parts[1].length)
+                }
+            }
+
+            val intent = Intent(context, PriceConfirmActivity::class.java)
+            intent.putExtra("PRICE", "$currentCurrencySymbol$currentInput")
+            intent.putExtra("CURRENCY_CODE", currentCurrencyCode)
+            context.startActivity(intent)
+        }
     }
 
     private fun clearInput() {
