@@ -1,9 +1,17 @@
 package com.example.possin
 
-
+import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -33,6 +41,7 @@ import java.io.File
 import java.io.InputStreamReader
 import java.util.Properties
 
+
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var merchantPropertiesFile: File
@@ -41,6 +50,25 @@ class HomeActivity : AppCompatActivity() {
     private val transactionViewModel: TransactionViewModel by viewModels()
     private lateinit var cryptocurrencyNames: List<String>
     private lateinit var setPinActivityLauncher: ActivityResultLauncher<Intent>
+    private var wifiBluetoothReceiver: BroadcastReceiver? = null
+    private lateinit var wifiManager: WifiManager
+    private var bluetoothAdapter: BluetoothAdapter? = null
+    private var dialog: AlertDialog? = null
+
+
+    // Request permission result launcher
+    private val requestBluetoothPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // Bluetooth permission granted, request enabling Bluetooth
+            enableBluetooth()
+        } else {
+            // Permission denied
+            showPermissionDeniedDialog()
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,6 +146,39 @@ class HomeActivity : AppCompatActivity() {
         nekuGifView.setImageDrawable(gifDrawable)
 
         populateCryptoContainer()
+
+        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
+        // Initialize the BroadcastReceiver for Wi-Fi and Bluetooth state changes
+        wifiBluetoothReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val action = intent?.action
+                if (action == WifiManager.WIFI_STATE_CHANGED_ACTION) {
+                    val wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN)
+                    if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
+                        // Wi-Fi is enabled, dismiss the dialog
+                        dialog?.dismiss()
+                    }
+                } else if (action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+                    val bluetoothState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
+                    if (bluetoothState == BluetoothAdapter.STATE_ON) {
+                        // Bluetooth is enabled, dismiss the dialog
+                        dialog?.dismiss()
+                    }
+                }
+            }
+        }
+
+        // Register receiver for Wi-Fi and Bluetooth state changes
+        val wifiFilter = IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION)
+        val bluetoothFilter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+
+        registerReceiver(wifiBluetoothReceiver, wifiFilter)
+        registerReceiver(wifiBluetoothReceiver, bluetoothFilter)
+
+        // Initial check
+        checkWifiAndBluetooth()
 
     }
 
@@ -537,6 +598,109 @@ class HomeActivity : AppCompatActivity() {
     // Extension function to convert dp to pixels
     fun Int.dpToPx(): Int {
         return (this * Resources.getSystem().displayMetrics.density).toInt()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Re-check Wi-Fi and Bluetooth status when the user returns to the app
+        checkWifiAndBluetooth()
+    }
+
+    private fun checkWifiAndBluetooth() {
+        var shouldShowDialog = false
+        var serviceName = ""
+
+        // Check Wi-Fi status
+        if (!wifiManager.isWifiEnabled) {
+            shouldShowDialog = true
+            serviceName = "Wi-Fi"
+        }
+
+        // Check Bluetooth status
+        val isBluetoothEnabled = bluetoothAdapter?.isEnabled ?: false
+        if (!isBluetoothEnabled) {
+            shouldShowDialog = true
+            serviceName = if (serviceName.isEmpty()) "Bluetooth" else serviceName // Give priority to Wi-Fi if both are disabled
+        }
+
+        if (shouldShowDialog) {
+            // Show the dialog if either Wi-Fi or Bluetooth is off
+            showWifiBluetoothDialog(serviceName)
+        } else {
+            // Dismiss the dialog only if both services are enabled
+            dialog?.dismiss()
+        }
+    }
+
+    private fun showWifiBluetoothDialog(serviceName: String) {
+        if (dialog == null || !(dialog?.isShowing ?: false)) {
+            dialog = AlertDialog.Builder(this)
+                .setTitle("$serviceName is turned off")
+                .setMessage("Please enable $serviceName to continue using the app's features.")
+                .setPositiveButton("Enable $serviceName") { _, _ ->
+                    if (serviceName == "Wi-Fi") {
+                        // Open Wi-Fi settings
+                        startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
+                    } else if (serviceName == "Bluetooth") {
+                        // Check Bluetooth permission before enabling
+                        checkBluetoothPermission()
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+    }
+
+    // Check if Bluetooth permissions are granted
+    private fun checkBluetoothPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // For Android 12+ (API level 31)
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                // Permission granted, enable Bluetooth
+                enableBluetooth()
+            } else {
+                // Request Bluetooth connect permission
+                requestBluetoothPermissionLauncher.launch(Manifest.permission.BLUETOOTH_CONNECT)
+            }
+        } else {
+            // For Android versions lower than 12, directly enable Bluetooth
+            enableBluetooth()
+        }
+    }
+
+    // Function to enable Bluetooth with proper error handling
+    private fun enableBluetooth() {
+        try {
+            // Launch Bluetooth settings and wait for the result
+            startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+        } catch (e: SecurityException) {
+            // Handle the case where the Bluetooth permission is not granted
+            showPermissionDeniedDialog()
+        }
+    }
+
+    private fun showPermissionDeniedDialog() {
+        dialog = AlertDialog.Builder(this)
+            .setTitle("Bluetooth Permission Denied")
+            .setMessage("Bluetooth is required for this feature. Please enable the permission from settings.")
+            .setPositiveButton("Go to Settings") { _, _ ->
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                intent.data = android.net.Uri.parse("package:$packageName")
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        wifiBluetoothReceiver?.let {
+            unregisterReceiver(it)
+        }
     }
 
 
