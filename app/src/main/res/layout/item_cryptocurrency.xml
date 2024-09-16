@@ -106,6 +106,17 @@
                 android:contentDescription="Scanner Button" />
         </RelativeLayout>
 
+        <EditText
+            android:id="@+id/view_key_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter private view key"
+            android:background="@drawable/bordered_edit_text"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:inputType="text"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/error_text"
             android:layout_width="match_parent"

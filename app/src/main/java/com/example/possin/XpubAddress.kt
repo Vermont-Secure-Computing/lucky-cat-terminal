@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -117,6 +118,16 @@ class XpubAddress : AppCompatActivity() {
             val errorTextView = itemView.findViewById<TextView>(R.id.error_text)
             val scannerButton = itemView.findViewById<ImageButton>(R.id.scanner_button)
 
+            // Get the private view key field (initially hidden)
+            val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
+
+            // Show the view key field if the crypto is Monero
+            if (crypto.name == "Monero") {
+                viewKeyField.visibility = View.VISIBLE
+            } else {
+                viewKeyField.visibility = View.GONE
+            }
+
             val logoId = resources.getIdentifier(crypto.logo, "drawable", packageName)
             logoImageView.setImageResource(logoId)
             nameTextView.text = crypto.name
@@ -124,7 +135,13 @@ class XpubAddress : AppCompatActivity() {
             chainTextView.text = crypto.chain
 
             // Set up type spinner
-            val typeAdapter = ArrayAdapter.createFromResource(this, R.array.type_array, android.R.layout.simple_spinner_item)
+            val typeAdapter: ArrayAdapter<CharSequence> = if (crypto.name == "Monero") {
+                // For Monero, only show "address" option
+                ArrayAdapter.createFromResource(this, R.array.monero_type_array, android.R.layout.simple_spinner_item)
+            } else {
+                // For other cryptocurrencies, use the regular type array
+                ArrayAdapter.createFromResource(this, R.array.type_array, android.R.layout.simple_spinner_item)
+            }
             typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             typeSpinner.adapter = typeAdapter
 
@@ -204,10 +221,45 @@ class XpubAddress : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         val result: IntentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+
         if (result.contents != null) {
-            // Set the scanned value to the stored input field
-            currentInputField?.setText(result.contents)
-            currentInputField = null // Clear the reference after use
+            val scannedContent = result.contents
+
+            // Check if the scanned result is in the Monero wallet format
+            if (scannedContent.startsWith("monero_wallet:")) {
+                // Remove the "monero_wallet:" prefix
+                val uriWithoutPrefix = scannedContent.removePrefix("monero_wallet:")
+
+                // Split the string at the '?' to separate the wallet address and query parameters
+                val parts = uriWithoutPrefix.split("?")
+                if (parts.size == 2) {
+                    val walletAddress = parts[0] // The address part (before the ?)
+                    val queryParams = parts[1] // The query parameters (after the ?)
+
+                    // Extract the view key from the query parameters
+                    val queryMap = queryParams.split("&").associate {
+                        val (key, value) = it.split("=")
+                        key to value
+                    }
+
+                    val viewKey = queryMap["view_key"]
+
+                    // Set the values to the respective fields
+                    currentInputField?.setText(walletAddress)
+                    currentInputField = null // Clear the reference after use
+
+                    // Find the view key field in the current item and set the value
+                    if (viewKey != null) {
+                        val itemView = cryptocurrencyContainer.getChildAt(filteredCryptocurrencies.indexOfFirst { it.name == "Monero" })
+                        val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
+                        viewKeyField?.setText(viewKey)
+                    }
+                }
+            } else {
+                // Handle other scanned results (non-Monero)
+                currentInputField?.setText(result.contents)
+                currentInputField = null // Clear the reference after use
+            }
         }
     }
 
@@ -235,6 +287,15 @@ class XpubAddress : AppCompatActivity() {
                 // Add "bitcoincash:" prefix if it's not present
                 if (!value.startsWith("bitcoincash:", true)) {
                     value = "bitcoincash:$value"
+                }
+            }
+
+            // For Monero, save the private view key
+            if (cryptoName == "Monero") {
+                val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
+                val viewKey = viewKeyField.text.toString()
+                if (viewKey.isNotEmpty()) {
+                    properties.setProperty("view_key", viewKey)
                 }
             }
 
@@ -296,6 +357,16 @@ class XpubAddress : AppCompatActivity() {
             }
             "Bitcoincash" -> {
                 if (inputType == "xpub") BitcoinCashManager.isValidXpub(value) else BitcoinCashManager.isValidAddress(value)
+            }
+            "Monero" -> {
+                // Check both address and view key for Monero
+                val itemView = cryptocurrencyContainer.getChildAt(filteredCryptocurrencies.indexOfFirst { it.name == "Monero" })
+                val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
+                val viewKey = viewKeyField.text.toString()
+                Log.d("MONERO ADDRESS", MoneroManager.isValidAddress(value).toString())
+                Log.d("MONERO PRIVKEY", MoneroManager.isValidPrivateViewKey(viewKey).toString())
+
+                MoneroManager.isValidAddress(value) && MoneroManager.isValidPrivateViewKey(viewKey)
             }
             else -> false
         }

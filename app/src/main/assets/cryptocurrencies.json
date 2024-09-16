@@ -13,6 +13,12 @@
       "logo": "ethereum_logo"
     },
     {
+      "name": "Monero",
+      "shortname": "XMR",
+      "chain": "Monero",
+      "logo": "monero_logo"
+    },
+    {
       "name": "Litecoin",
       "shortname": "LTC",
       "chain": "Litecoin",

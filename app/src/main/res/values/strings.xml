@@ -4,6 +4,9 @@
         <item>address</item>
         <item>xpub</item>
     </string-array>
+    <string-array name="monero_type_array">
+        <item>address</item>
+    </string-array>
     <string-array name="segwit_legacy_array">
         <item>segwit</item>
         <item>legacy</item>
