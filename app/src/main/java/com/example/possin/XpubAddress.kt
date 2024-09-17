@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -295,7 +294,7 @@ class XpubAddress : AppCompatActivity() {
                 val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
                 val viewKey = viewKeyField.text.toString()
                 if (viewKey.isNotEmpty()) {
-                    properties.setProperty("view_key", viewKey)
+                    properties.setProperty("${cryptoName}_view_key", viewKey)
                 }
             }
 
@@ -359,14 +358,23 @@ class XpubAddress : AppCompatActivity() {
                 if (inputType == "xpub") BitcoinCashManager.isValidXpub(value) else BitcoinCashManager.isValidAddress(value)
             }
             "Monero" -> {
-                // Check both address and view key for Monero
                 val itemView = cryptocurrencyContainer.getChildAt(filteredCryptocurrencies.indexOfFirst { it.name == "Monero" })
                 val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
-                val viewKey = viewKeyField.text.toString()
-                Log.d("MONERO ADDRESS", MoneroManager.isValidAddress(value).toString())
-                Log.d("MONERO PRIVKEY", MoneroManager.isValidPrivateViewKey(viewKey).toString())
+                val viewKey = viewKeyField.text.toString().trim()
 
-                MoneroManager.isValidAddress(value) && MoneroManager.isValidPrivateViewKey(viewKey)
+                // Validate Monero address and private view key separately
+                val isAddressValid = MoneroManager.isValidAddress(value)
+                val isViewKeyValid = if (viewKey.isNotEmpty()) MoneroManager.isValidPrivateViewKey(viewKey) else true // Allow empty view key
+
+                // Display appropriate error messages
+                if (!isAddressValid) {
+                    errorTextView.text = "Invalid Monero address"
+                } else if (!isViewKeyValid) {
+                    errorTextView.text = "Invalid Monero private view key"
+                }
+
+                // Validation is true if the address is valid and the view key is either valid or not provided
+                isAddressValid && isViewKeyValid
             }
             else -> false
         }
