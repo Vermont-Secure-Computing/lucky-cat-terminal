@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.possin"
+    namespace = "com.vermont.possin"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.possin"
+        applicationId = "com.vermont.possin"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

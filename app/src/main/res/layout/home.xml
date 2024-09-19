@@ -33,7 +33,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -49,7 +48,7 @@
                 android:id="@+id/acceptedCurrencyTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Accepted Currency"
+                android:text="@string/accepted_currency"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/darkerRed"/>
@@ -118,7 +117,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="accept payment"
+                            android:text="@string/accept_payment"
                             android:textSize="14sp"
                             android:textColor="#ffffff"
                             android:layout_marginTop="2dp"
@@ -141,7 +140,7 @@
                 android:id="@+id/settings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Settings"
+                android:text="@string/settings"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp"
@@ -190,7 +189,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="api key"
+                                android:text="@string/api_key"
                                 android:textSize="14sp"
                                 android:layout_marginTop="4dp"/>
                         </LinearLayout>
@@ -216,7 +215,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="merchant info"
+                                android:text="@string/merchant_info"
                                 android:textSize="14sp"
                                 android:layout_marginTop="4dp"/>
                         </LinearLayout>
@@ -242,7 +241,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="coin settings"
+                                android:text="@string/coin_settings"
                                 android:textSize="14sp"
                                 android:layout_marginTop="4dp"/>
                         </LinearLayout>
@@ -268,7 +267,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="export"
+                                android:text="@string/export"
                                 android:textSize="14sp"
                                 android:layout_marginTop="4dp"/>
                         </LinearLayout>
@@ -301,7 +300,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Transactions"
+                            android:text="@string/transactions"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:textColor="#989696"/>
@@ -310,7 +309,7 @@
                             android:id="@+id/seeAllTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="See all"
+                            android:text="@string/see_all"
                             android:textSize="16sp"
                             android:textColor="@color/tapeRed"/>
                     </LinearLayout>
@@ -326,7 +325,7 @@
                         android:id="@+id/noTransactionsTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="No transactions yet.."
+                        android:text="@string/no_transactions_yet"
                         android:textSize="16sp"
                         android:textColor="@color/dark_gray"
                         android:gravity="center"
@@ -348,7 +347,7 @@
                     android:id="@+id/poweredByText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Powered By"
+                    android:text="@string/powered_by"
                     android:textStyle="italic"
                     android:textSize="14sp"
                     android:textColor="@color/dark_gray"

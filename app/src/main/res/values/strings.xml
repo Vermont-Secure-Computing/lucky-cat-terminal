@@ -12,4 +12,42 @@
         <item>legacy</item>
     </string-array>
     <string name="neku_gif_description">Neku GIF animation</string>
+    <string name="accepted_currency">Accepted Currency</string>
+    <string name="accept_payment">Accept Payment</string>
+    <string name="settings">Settings</string>
+    <string name="api_key">API Key</string>
+    <string name="merchant_info">Merchant Info</string>
+    <string name="coin_settings">Coin Settings</string>
+    <string name="export">Export</string>
+    <string name="transactions">Transactions</string>
+    <string name="see_all">See All</string>
+    <string name="no_transactions_yet">No transactions yet..</string>
+    <string name="powered_by">Powered By</string>
+    <string name="incomplete_profile">Incomplete Profile</string>
+    <string name="please_fill_up_your_merchant_profile_xpub_and_address.">Please fill up your merchant profile, xpub, and address.</string>
+    <string name="ok">OK</string>
+    <string name="enter_pin">Enter Pin</string>
+    <string name="incorrect_pin">Incorrect Pin</string>
+    <string name="cancel">Cancel</string>
+    <string name="accepted_coins_are_not_yet_setup">Accepted coins are not yet setup</string>
+    <string name="is_turned_off">is turned off</string>
+    <string name="please_enable">Please enable</string>
+    <string name="to_continue_using_the_apps_features">to continue using the app\'s features.</string>
+    <string name="enable">Enable</string>
+    <string name="bluetooth_permission_denied">Bluetooth Permission Denied</string>
+    <string name="bluetooth_is_required_for_this_feature_please_enable_the_permission_from_settings">Bluetooth is required for this feature. Please enable the permission from settings.</string>
+    <string name="go_to_settings">Go to Settings</string>
+    <string name="please_confirm_your_API_key">Please confirm your API key.</string>
+    <string name="enter_API_key">Enter API key</string>
+    <string name="submit">submit</string>
+    <string name="api_key_colon">API Key: </string>
+    <string name="subscription_level">Subscription Level: </string>
+    <string name="active_colon">Active: </string>
+    <string name="expires_at">Expires At: </string>
+    <string name="hourly_calls">Hourly Calls: </string>
+    <string name="daily_calls">Daily Calls: </string>
+    <string name="price">Price: </string>
+    <string name="API_key_cannot_be_empty">API key cannot be empty</string>
+    <string name="failed_to_get_API_details">Failed to get API details</string>
+    <string name="error_colon">Error:</string>
 </resources>

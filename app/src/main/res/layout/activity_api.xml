@@ -51,7 +51,7 @@
         android:id="@+id/please_confirm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Please confirm your API key."
+        android:text="@string/please_confirm_your_API_key"
         android:textSize="16sp"
         android:textAlignment="center"
         android:textColor="#8B0000"
@@ -73,7 +73,7 @@
             android:id="@+id/api_key_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter API key"
+            android:hint="@string/enter_API_key"
             android:padding="8dp"
             android:backgroundTint="@color/customGray"
             android:inputType="text"
@@ -85,7 +85,7 @@
             android:id="@+id/submit_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Submit"
+            android:text="@string/submit"
             android:layout_gravity="center_horizontal"
             android:padding="12dp"
             android:backgroundTint="@color/darkerRed"
@@ -103,49 +103,50 @@
                 android:id="@+id/apiKeyTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="API Key: "
+                android:text="@string/api_key_colon"
                 android:textSize="16sp" />
+
 
             <TextView
                 android:id="@+id/subscriptionLevelTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Subscription Level: "
+                android:text="@string/subscription_level"
                 android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/activeStatusTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Active: "
+                android:text="@string/active_colon"
                 android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/expiresAtTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Expires At: "
+                android:text="@string/expires_at"
                 android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/hourlyCallsTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hourly Calls: "
+                android:text="@string/hourly_calls"
                 android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/dailyCallsTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Daily Calls: "
+                android:text="@string/daily_calls"
                 android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/priceTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Price: "
+                android:text="@string/price"
                 android:textSize="16sp" />
         </LinearLayout>
     </LinearLayout>
@@ -168,7 +169,7 @@
             android:id="@+id/poweredByText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Powered By"
+            android:text="@string/powered_by"
             android:textStyle="italic"
             android:textSize="14sp"
             android:textColor="@color/dark_gray"
