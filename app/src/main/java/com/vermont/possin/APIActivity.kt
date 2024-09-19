@@ -130,23 +130,34 @@ class APIActivity : AppCompatActivity() {
 
     private fun displayApiDetails(details: Details) {
         // Update the TextViews with API response
-        apiKeyTextView.setText("${R.string.api_key_colon} ${details.apiKey}")
-        subscriptionLevelTextView.setText("${R.string.subscription_level} ${details.subscriptionLevel}")
-        activeStatusTextView.setText("${R.string.active_colon} ${details.active}")
+        val apiKeyText = getString(R.string.api_key_colon, details.apiKey)
+        apiKeyTextView.text = apiKeyText
+        val subscriptionLevel = getString(R.string.subscription_level, details.subscriptionLevel)
+        subscriptionLevelTextView.text = subscriptionLevel
+        val isActiveEnabled = details.active
+        val featureStatusText = getString(
+            R.string.active_colon,
+            if (isActiveEnabled) "true" else "false"
+        )
+        activeStatusTextView.text = featureStatusText
 
         if (details.expiresAt.isNullOrEmpty()) {
-            expiresAtTextView.setText("${R.string.expires_at} No expiration")
+            val expiresAt = getString(R.string.expires_at, "No expiration")
+            expiresAtTextView.text = expiresAt
         } else {
             // Convert expiresAt to a human-readable format
             val inputDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
             val outputDateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
             val date = inputDateFormat.parse(details.expiresAt)
-            expiresAtTextView.setText("${R.string.expires_at} ${outputDateFormat.format(date)}")
+            val expiresAt = getString(R.string.expires_at, outputDateFormat.format(date))
+            expiresAtTextView.text = expiresAt
         }
-
-        hourlyCallsTextView.setText("${R.string.hourly_calls} ${details.hourlyCalls}")
-        dailyCallsTextView.setText("${R.string.daily_calls} ${details.dailyCalls}")
-        priceTextView.setText("${R.string.price} ${details.price}")
+        val hourlyCalls = getString(R.string.hourly_calls, details.hourlyCalls)
+        hourlyCallsTextView.text = hourlyCalls
+        val dailyCalls = getString(R.string.daily_calls, details.dailyCalls)
+        dailyCallsTextView.text = dailyCalls
+        val price = getString(R.string.price, details.price)
+        priceTextView.text = price
     }
 
     private fun hideApiDetails() {
