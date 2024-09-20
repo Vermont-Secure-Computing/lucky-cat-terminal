@@ -52,7 +52,7 @@ class MerchantActivity : AppCompatActivity() {
 
         // If a PIN is already set, change the text to "Update Pin"
         if (!userPin.isNullOrEmpty()) {
-            setPinTextView.text = R.string.update_pin.toString()
+            setPinTextView.text = getString(R.string.update_pin)
         }
 
         setPinTextView.setOnClickListener {

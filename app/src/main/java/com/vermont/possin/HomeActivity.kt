@@ -527,13 +527,13 @@ class HomeActivity : AppCompatActivity() {
             configProperties.load(configPropertiesFile.inputStream())
             configProperties.size == 1 && configProperties.containsKey("default_key")
         } else {
-            true // File is missing, so we treat it the same as having only "default_key"
+            true
         }
 
         // If the config file is missing or only contains "default_key", show a message
         if (isDefaultKeyOrFileMissing) {
             val messageView = TextView(this).apply {
-                text = R.string.accepted_coins_are_not_yet_setup.toString()
+                text = getString(R.string.accepted_coins_are_not_yet_setup)
                 textSize = 16f
                 setTextColor(ContextCompat.getColor(this@HomeActivity, R.color.dark_gray))
                 gravity = Gravity.CENTER
@@ -562,7 +562,7 @@ class HomeActivity : AppCompatActivity() {
             // Add logos only for accepted coins
             for (i in 0 until jsonArray.length()) {
                 val cryptoObject = jsonArray.getJSONObject(i)
-                val cryptoName = cryptoObject.getString("name") // e.g., "Dogecoin"
+                val cryptoName = cryptoObject.getString("name")
                 val cryptoLogo = cryptoObject.getString("logo")
 
                 // Check if this cryptocurrency is accepted in config.properties

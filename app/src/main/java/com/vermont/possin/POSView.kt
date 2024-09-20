@@ -90,7 +90,7 @@ class POSView @JvmOverloads constructor(
         if (errorTextView == null) {
             // Create the TextView with the error message
             val localErrorTextView = TextView(context).apply {
-                text = R.string.server_is_not_available.toString()
+                text = context.getString(R.string.accepted_coins_are_not_yet_setup)
                 setTextColor(ContextCompat.getColor(context, R.color.tapeRed))
                 textSize = 16f
                 gravity = Gravity.CENTER

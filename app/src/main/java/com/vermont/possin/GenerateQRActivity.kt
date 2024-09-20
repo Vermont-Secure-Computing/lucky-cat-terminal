@@ -120,8 +120,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
         db = AppDatabase.getDatabase(this)
 
-        address = intent.getStringExtra("ADDRESS") ?: R.string.no_address_provided.toString()
-        val price = intent.getStringExtra("PRICE") ?: R.string.no_price_provided.toString()
+        address = intent.getStringExtra("ADDRESS") ?: getString(R.string.no_address_provided)
+        val price = intent.getStringExtra("PRICE") ?: getString(R.string.no_price_provided)
         val logoResId = intent.getIntExtra("LOGO_RES_ID", R.drawable.bitcoin_logo)
         currency = intent.getStringExtra("CURRENCY") ?: "BTC"
         chain = currency
@@ -522,9 +522,6 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             if (::qrCodeImageView.isInitialized) {
                 qrCodeImageView.setImageBitmap(null)
                 closeWebSocket()
-                Log.d("BALANCE", balance.toString())
-                Log.d("FEES", fees.toString())
-                Log.d("FEE STATUS", feeStatus)
 
                 addressTextView.visibility = View.GONE
                 addressTextViewAddress.visibility = View.GONE

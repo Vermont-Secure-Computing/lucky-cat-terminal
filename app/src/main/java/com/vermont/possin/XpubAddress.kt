@@ -206,7 +206,7 @@ class XpubAddress : AppCompatActivity() {
                 currentInputField = inputField // Store the current input field
                 val integrator = IntentIntegrator(this@XpubAddress)
                 integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
-                integrator.setPrompt(R.string.scan_a_barcode_or_QR_code.toString())
+                integrator.setPrompt(getString(R.string.scan_a_barcode_or_QR_code))
                 integrator.setCameraId(0)  // Use a specific camera of the device
                 integrator.setBeepEnabled(true)
                 integrator.setBarcodeImageEnabled(true)
@@ -368,9 +368,9 @@ class XpubAddress : AppCompatActivity() {
 
                 // Display appropriate error messages
                 if (!isAddressValid) {
-                    errorTextView.text = R.string.invalid_monero_address.toString()
+                    errorTextView.text = getString(R.string.invalid_monero_address)
                 } else if (!isViewKeyValid) {
-                    errorTextView.text = R.string.invalid_Monero_private_view_key.toString()
+                    errorTextView.text = getString(R.string.invalid_Monero_private_view_key)
                 }
 
                 // Validation is true if the address is valid and the view key is either valid or not provided
