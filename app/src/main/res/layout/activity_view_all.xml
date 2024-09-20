@@ -51,12 +51,12 @@
         android:id="@+id/header_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Transactions"
+        android:text="@string/transactions"
         android:textSize="20sp"
         android:textColor="#989696"
         android:textStyle="bold"
         android:layout_marginTop="16dp"
-        android:layout_marginLeft="2dp"/>
+        android:layout_marginStart="8dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/transactionsRecyclerView"

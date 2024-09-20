@@ -56,7 +56,7 @@
                 android:id="@+id/submit_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Submit"
+                android:text="@string/submit"
                 android:textSize="18sp"
                 android:textColor="#ffffff"
                 android:clickable="true"
@@ -80,7 +80,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Search cryptocurrencies"
+            android:hint="@string/search_cryptocurrencies"
             android:padding="8dp"
             android:background="@drawable/bordered_edit_text"
             android:drawablePadding="8dp" />

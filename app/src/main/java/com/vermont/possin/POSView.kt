@@ -90,7 +90,7 @@ class POSView @JvmOverloads constructor(
         if (errorTextView == null) {
             // Create the TextView with the error message
             val localErrorTextView = TextView(context).apply {
-                text = "Server is not available"
+                text = R.string.server_is_not_available.toString()
                 setTextColor(ContextCompat.getColor(context, R.color.tapeRed))
                 textSize = 16f
                 gravity = Gravity.CENTER
@@ -105,7 +105,7 @@ class POSView @JvmOverloads constructor(
 
             // Create the Refresh Button if it's not already created
             refreshButton = Button(context).apply {
-                text = "Refresh"
+                text = R.string.refresh.toString()
                 id = View.generateViewId()  // Assign a unique ID to the refresh button
                 layoutParams = ConstraintLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.WRAP_CONTENT,
@@ -182,7 +182,6 @@ class POSView @JvmOverloads constructor(
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     showServerError()
-                    println("Exception: ${e.message}")  // Log the exception
                 }
             }
         }

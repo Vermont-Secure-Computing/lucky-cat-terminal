@@ -15,11 +15,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.vermont.possin.model.ConversionResponse
 import com.vermont.possin.network.ConversionRequestBody
 import com.vermont.possin.network.RetrofitClient
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import pl.droidsonroids.gif.GifDrawable
 import retrofit2.Call
 import retrofit2.Callback
@@ -299,7 +299,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             }
         } ?: run {
             dismissLoadingDialog()
-            Toast.makeText(this, "Bitcoin Manager not initialized", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.bitcoin_manager_not_initialized, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -328,7 +328,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             }
         } ?: run {
             dismissLoadingDialog()
-            Toast.makeText(this, "Litecoin Manager not initialized", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.litecoin_manager_not_initialized, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -357,7 +357,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             }
         } ?: run {
             dismissLoadingDialog()
-            Toast.makeText(this, "Ethereum Manager not initialized", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.ethereum_manager_not_initialized, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -386,7 +386,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             }
         } ?: run {
             dismissLoadingDialog()
-            Toast.makeText(this, "Dogecoin Manager not initialized", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.dogecoin_manager_not_initialized, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -415,7 +415,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             }
         } ?: run {
             dismissLoadingDialog()
-            Toast.makeText(this, "USDT Tron Manager not initialized", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.usdt_manager_not_initialized, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -428,7 +428,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             }
 
             if (addressIndexPair == null) {
-                Toast.makeText(this, "Failed to derive Dash address", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.failed_to_derive_dash_address, Toast.LENGTH_SHORT).show()
                 return
             }
 
@@ -455,7 +455,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             }
         } ?: run {
             dismissLoadingDialog()
-            Toast.makeText(this, "Dash Manager not initialized", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.dash_manager_not_initialized, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -484,7 +484,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             }
         } ?: run {
             dismissLoadingDialog()
-            Toast.makeText(this, "Bitcoincash Manager not initialized", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.bitcoincash_manager_not_initialized, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -508,11 +508,11 @@ class CryptoOptionActivity : AppCompatActivity() {
                         if (it.success) {
                             val formattedRate = formatConversionRate(it.conversionRate)
                             Log.d("API", "Conversion rate: $formattedRate")
-                            Toast.makeText(this@CryptoOptionActivity, "Conversion rate: $formattedRate", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@CryptoOptionActivity, getString(R.string.conversion_rate, formattedRate), Toast.LENGTH_SHORT).show()
                             onResult(feeStatus, status, formattedRate)  // Pass the values to the callback
                         } else {
                             Log.e("API", "Conversion failed")
-                            Toast.makeText(this@CryptoOptionActivity, "Conversion failed", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@CryptoOptionActivity, R.string.conversion_failed, Toast.LENGTH_SHORT).show()
                             onResult(feeStatus, status, "")
                         }
                     } ?: run {
@@ -521,14 +521,14 @@ class CryptoOptionActivity : AppCompatActivity() {
                     }
                 } else {
                     Log.e("API", "Response not successful")
-                    Toast.makeText(this@CryptoOptionActivity, "Response not successful. Please check your setting or API key", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@CryptoOptionActivity, R.string.response_not_successful_Please_check_your_setting_or_API_key, Toast.LENGTH_SHORT).show()
                     onResult("", "", "")
                 }
             }
 
             override fun onFailure(call: Call<ConversionResponse>, t: Throwable) {
                 Log.e("API", "API call failed", t)
-                Toast.makeText(this@CryptoOptionActivity, "API call failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@CryptoOptionActivity, R.string.API_call_failed, Toast.LENGTH_SHORT).show()
                 onResult("", "", "")
             }
         })

@@ -86,7 +86,7 @@ class ExportDataActivity : AppCompatActivity() {
             if (fromDate.isNotEmpty() && toDate.isNotEmpty()) {
                 viewModel.exportTransactions(this@ExportDataActivity, fromDate, toDate, "transactions_export")
             } else {
-                Toast.makeText(this@ExportDataActivity, "Please select both dates", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ExportDataActivity, R.string.please_select_both_dates, Toast.LENGTH_SHORT).show()
             }
         }
 

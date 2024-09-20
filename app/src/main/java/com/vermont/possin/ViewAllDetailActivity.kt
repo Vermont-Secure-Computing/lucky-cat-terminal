@@ -170,32 +170,32 @@ class ViewAllDetailActivity : AppCompatActivity() {
         if (merchAddress.isNullOrEmpty()) {
             merchantAddress.visibility = TextView.GONE
         } else {
-            merchantAddress.text = "Address: $merchAddress"
+            merchantAddress.text = getString(R.string.merchantAddress, merchAddress)
         }
-        merchantName.text = "Name: ${getMerchantName()}"
-        chainTextView.text = "Chain: ${transaction.chain}"
-        balanceTextView.text = "Amount: ${transaction.balance}"
-        baseCurrencyTextView.text = "Base Currency: ${transaction.selectedCurrencyCode}"
-        basePriceTextView.text = "Base Price: ${transaction.numericPrice}"
-        dateTextView.text = "Date: ${transaction.date}"
-        txidTextView.text = "TxID: ${transaction.txid}"
-        receivingAddress.text = "Address: ${transaction.address}"
-        feesTextView.text = "Fees: ${transaction.fees}"
-        txType.text = "Type: ${transaction.txtype}"
-        confirmationsTextView.text = "Confirmations: ${transaction.confirmations}"
-        timeTextView.text = "Time: ${transaction.time}"
+        merchantName.text = getString(R.string.merchantName, getMerchantName())
+        chainTextView.text = getString(R.string.chainText, transaction.chain)
+        balanceTextView.text = getString(R.string.balance, transaction.balance)
+        baseCurrencyTextView.text = getString(R.string.baseCurrency, transaction.selectedCurrencyCode)
+        basePriceTextView.text = getString(R.string.basePrice, transaction.numericPrice)
+        dateTextView.text = getString(R.string.dateText, transaction.date)
+        txidTextView.text = getString(R.string.txidText, transaction.txid)
+        receivingAddress.text = getString(R.string.receivingAddress, transaction.address)
+        feesTextView.text = getString(R.string.feesText, transaction.fees)
+        txType.text = getString(R.string.txType, transaction.txtype)
+        confirmationsTextView.text = getString(R.string.confirmationsText, transaction.confirmations)
+        timeTextView.text = getString(R.string.timeText, transaction.time)
         messageTextView.text = if (transaction.message.isNullOrEmpty()) {
             ""
         } else {
-            "Message: ${transaction.message}"
+            getString(R.string.messageText, transaction.message)
         }
 
         if (transaction.balanceIn != 0.0) {
             previousBalanceInTextView.visibility = View.VISIBLE
             if (transaction.txtype == "insufficient") {
-                previousBalanceInTextView.text = "Difference: ${transaction.balanceIn}"
+                previousBalanceInTextView.text = getString(R.string.difference, transaction.balanceIn)
             } else {
-                previousBalanceInTextView.text = "Previous Receive: ${transaction.balanceIn}"
+                previousBalanceInTextView.text = getString(R.string.previous_receive, transaction.balanceIn)
             }
         } else {
             previousBalanceInTextView.visibility = View.GONE
@@ -203,7 +203,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
 
         if (transaction.txidIn != "") {
             previousTxidInTextView.visibility = View.VISIBLE
-            previousTxidInTextView.text = "Previous TXID: ${transaction.txidIn}"
+            previousTxidInTextView.text = getString(R.string.previousTxidIn, transaction.txidIn)
         } else {
             previousTxidInTextView.visibility = View.GONE
         }
@@ -216,7 +216,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
         val args = Bundle()
         args.putString("receiptTitle", "${getMerchantName()}")
         args.putString("receiptAddress", "${getMerchantAddress()}")
-        args.putString("receiptDetails", "Transaction Details")
+        args.putString("receiptDetails", R.string.transaction_details.toString())
         args.putString("receiptBalance", "${balanceTextView.text}")
         args.putString("receiptTxID", "${txidTextView.text}")
         args.putString("receivingAddress", "${receivingAddress.text}")
@@ -234,7 +234,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
     fun performPrint() {
         val bluetoothConnection = BluetoothPrintersConnections.selectFirstPaired()
         if (bluetoothConnection == null) {
-            Toast.makeText(this, "No paired Bluetooth printer found", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.no_paired_Bluetooth_printer_found, Toast.LENGTH_SHORT).show()
             return
         }
         try {
@@ -246,7 +246,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
                             "[L]\n" +
                             "[C]-------------------------------\n" +
                             "[L]\n" +
-                            "[L]<b>Transaction Details</b>\n" +
+                            "[L]<b>${R.string.transaction_details}</b>\n" +
                             "[L]\n" +
                             "[L]${balanceTextView.text}\n" +
                             "[L]${txidTextView.text}\n" +

@@ -52,7 +52,7 @@ class MerchantActivity : AppCompatActivity() {
 
         // If a PIN is already set, change the text to "Update Pin"
         if (!userPin.isNullOrEmpty()) {
-            setPinTextView.text = "Update Pin"
+            setPinTextView.text = R.string.update_pin.toString()
         }
 
         setPinTextView.setOnClickListener {
@@ -73,7 +73,7 @@ class MerchantActivity : AppCompatActivity() {
         val submitText = findViewById<TextView>(R.id.submit_text)
         submitText.setOnClickListener {
             if (editTextBusinessName.text.toString().isEmpty()) {
-                Toast.makeText(this, "Business name is required", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.business_name_is_required, Toast.LENGTH_SHORT).show()
             } else {
                 saveMerchantProperties()
                 showSuccessDialog()

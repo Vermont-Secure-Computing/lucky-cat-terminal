@@ -30,13 +30,13 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
+import com.google.zxing.common.BitMatrix
 import com.vermont.possin.database.AppDatabase
 import com.vermont.possin.model.Transaction
 import com.vermont.possin.utils.PropertiesUtil
 import com.vermont.possin.websocket.CustomWebSocketListener
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.MultiFormatWriter
-import com.google.zxing.common.BitMatrix
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.Call
@@ -120,8 +120,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
         db = AppDatabase.getDatabase(this)
 
-        address = intent.getStringExtra("ADDRESS") ?: "No address provided"
-        val price = intent.getStringExtra("PRICE") ?: "No price provided"
+        address = intent.getStringExtra("ADDRESS") ?: R.string.no_address_provided.toString()
+        val price = intent.getStringExtra("PRICE") ?: R.string.no_price_provided.toString()
         val logoResId = intent.getIntExtra("LOGO_RES_ID", R.drawable.bitcoin_logo)
         currency = intent.getStringExtra("CURRENCY") ?: "BTC"
         chain = currency
@@ -137,9 +137,6 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
         message = intent.getStringExtra("MESSAGE") ?: ""
 
-        Log.d("CURRENCY", currency)
-        Log.d("PRICE", price)
-
 
         val formattedPrice = if (currency == "TRON") {
             BigDecimal(price).setScale(6, RoundingMode.HALF_UP).toPlainString()
@@ -147,9 +144,6 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             price
         }
 
-        Log.d("DogeAddress", address)
-        Log.d("DogeChain", currency)
-        Log.d("Price", formattedPrice)
 
         val uri = when (currency) {
             "LTC" -> "litecoin:$address?amount=$formattedPrice"
@@ -225,7 +219,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         requestBluetoothPermissions()
 
         // Start the 30-minute countdown timer
-        startTimer(30 * 60 * 1000) // 10 minutes in milliseconds
+        startTimer() // 10 minutes in milliseconds
 
         // Initialize WebSocket connection
         initializeWebSocket(address, formattedPrice, currency, addressIndex, managerType)
@@ -291,17 +285,18 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 // Permission granted, proceed with your operation
             } else {
-                Toast.makeText(this, "Bluetooth permissions are required for this app", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.bluetooth_permissions_are_required_for_this_app, Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun startTimer(milliseconds: Long) {
+    private fun startTimer() {
+        val milliseconds = 30 * 60 * 1000L
         countDownTimer = object : CountDownTimer(milliseconds, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 val minutes = millisUntilFinished / 1000 / 60
                 val seconds = millisUntilFinished / 1000 % 60
-                timerTextView.text = String.format("%02d:%02d", minutes, seconds)
+                timerTextView.text = String.format(Locale.US, "%02d:%02d", minutes, seconds)
             }
 
             override fun onFinish() {
@@ -380,14 +375,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
     }
 
     private fun connectWebSocket(type: String) {
-        Log.d("WebSocket body", websocketParams.address)
-        Log.d("WebSocket body", websocketParams.amount)
-        Log.d("WebSocket body", websocketParams.chain)
-        Log.d("WebSocket body", websocketParams.addressIndex.toString())
-        Log.d("WebSocket body", websocketParams.managerType)
-
         val apiKey = PropertiesUtil.getProperty(this, "api_key")
-        Log.d("API", apiKey.toString())
 
         client = OkHttpClient()
 
@@ -426,7 +414,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
 
     private fun startGatheringBlocksAnimation() {
-        val initialText = "Gathering Blocks"
+        val initialText = R.string.gathering_blocks
         val dots = listOf("", ".", "..", "...")
         var dotIndex = 0
         handler.post(object : Runnable {
