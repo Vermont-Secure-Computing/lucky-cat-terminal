@@ -11,6 +11,10 @@
         <item>segwit</item>
         <item>legacy</item>
     </string-array>
+    <string-array name="locale_array">
+        <item>EN</item>
+        <item>ZH</item>
+    </string-array>
     <string name="neku_gif_description">Neku GIF animation</string>
     <string name="accepted_currency">Accepted Currency</string>
     <string name="accept_payment">Accept Payment</string>
@@ -120,4 +124,22 @@
     <string name="no_price_provided">No price provided</string>
     <string name="bluetooth_permissions_are_required_for_this_app">Bluetooth permissions are required for this app</string>
     <string name="gathering_blocks">Gathering Blocks</string>
+    <string name="paid_amount">Paid Amount: %1$f</string>
+    <string name="required_amount">Required Amount: %1$f</string>
+    <string name="total_amount">Total Amount: %1$f</string>
+    <string name="TXID">TXID: %1$s</string>
+    <string name="received">Received: %1$f %2$s</string>
+    <string name="amount">Amount: %1$s</string>
+    <string name="base_currency">Base Currency: %1$s</string>
+    <string name="base_price">Base Price: %1$s</string>
+    <string name="transaction_ids">Transaction IDs: %1$s\n%2$s</string>
+    <string name="transaction_id">Transaction ID: %1$s</string>
+    <string name="fees">Fees: %1$s</string>
+    <string name="confirmations">Confirmations: %1$d</string>
+    <string name="payment_error">Payment Error: %1$s</string>
+    <string name="are_you_sure_you_want_to_stop_the_process">Are you sure you want to stop the process?</string>
+    <string name="cancel_process">Cancel Process</string>
+    <string name="continue_print">Continue</string>
+    <string name="are_you_sure_you_dont_want_to_print">Are you sure you don\'t want to print?</string>
+    <string name="cancel_printing">Cancel Printing</string>
 </resources>

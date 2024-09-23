@@ -9,7 +9,7 @@
         android:id="@+id/cancelDialogMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Are you sure you dont want to print?"
+        android:text="@string/are_you_sure_you_dont_want_to_print"
         android:textSize="18sp"
         android:layout_marginBottom="16dp" />
 
@@ -20,18 +20,18 @@
         android:gravity="end">
 
         <Button
+            android:id="@+id/btnOkay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel_printing"
+            android:backgroundTint="@color/darkerRed" />
+
+        <Button
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/darkerRed"
-            android:text="Close" />
-
-        <Button
-            android:id="@+id/btnOkay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Okay"
-            android:backgroundTint="@color/darkerRed"
+            android:text="@string/continue_print"
             android:layout_marginStart="8dp" />
     </LinearLayout>
 </LinearLayout>

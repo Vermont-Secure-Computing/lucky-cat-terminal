@@ -9,7 +9,7 @@
         android:id="@+id/cancelDialogMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Are you sure you want to stop the proccess?"
+        android:text="@string/are_you_sure_you_want_to_stop_the_process"
         android:textSize="18sp"
         android:layout_marginBottom="16dp" />
 
@@ -20,18 +20,19 @@
         android:gravity="end">
 
         <Button
+            android:id="@+id/btnOkay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel_process"
+            android:backgroundTint="@color/darkerRed"/>
+
+        <Button
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/darkerRed"
-            android:text="Close" />
-
-        <Button
-            android:id="@+id/btnOkay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Okay"
-            android:backgroundTint="@color/darkerRed"
+            android:text="@string/continue_print"
             android:layout_marginStart="8dp" />
+
     </LinearLayout>
 </LinearLayout>

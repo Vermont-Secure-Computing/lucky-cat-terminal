@@ -414,7 +414,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
 
     private fun startGatheringBlocksAnimation() {
-        val initialText = R.string.gathering_blocks
+        val initialText = getString(R.string.gathering_blocks)
         val dots = listOf("", ".", "..", "...")
         var dotIndex = 0
         handler.post(object : Runnable {
@@ -469,13 +469,13 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         val totalAmountTextView: TextView = dialogView.findViewById(R.id.totalAmount)
         val TXIDTextView: TextView = dialogView.findViewById(R.id.txidTextView)
 
-        paidAmountTextView.text = "Paid Amount: $receivedAmt"
-        requiredAmountTextView.text = "Required Amount: $difference"
-        totalAmountTextView.text = "Total Amount: $totalAmount"
-        TXIDTextView.text = "TXID: $txid"
+        paidAmountTextView.text = getString(R.string.paid_amount, receivedAmt)
+        requiredAmountTextView.text = getString(R.string.required_amount, difference)
+        totalAmountTextView.text = getString(R.string.total_amount, totalAmount)
+        TXIDTextView.text = getString(R.string.TXID, txid)
 
         val amountTextViewAddressChain: TextView = findViewById(R.id.amountTextViewAddressChain)
-        amountTextViewAddressChain.text = "Received: $difference $currency"
+        amountTextViewAddressChain.text = getString(R.string.received, difference, currency)
 
         dialogView.findViewById<Button>(R.id.btnRetry).setOnClickListener {
             dialog.dismiss()
@@ -488,6 +488,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 "DOGE" -> "dogecoin:$address?amount=$difference"
                 "ETH" -> "ethereum:$address?amount=$difference"
                 "TRON-NETWORK" -> "tron:$address?amount=$difference"
+                "DASH" -> "dash:$address?amount=$difference"
+                "BCH" -> "bitcoincash:$address?amount=$difference"
                 else -> "bitcoin:$address?amount=$difference"
             }
 
@@ -567,17 +569,21 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 // Update the TextViews with the received data
                 merchantName.text = getMerchantName()
                 merchantName.visibility = TextView.VISIBLE
-                balanceTextView.text = "Amount: $formattedBalance"
+                balanceTextView.text = getString(R.string.amount, formattedBalance)
                 balanceTextView.visibility = TextView.VISIBLE
-                baseCurrencyTextView.text = "Base Currency: $selectedCurrencyCode"
+                baseCurrencyTextView.text = getString(R.string.baseCurrency, selectedCurrencyCode)
                 baseCurrencyTextView.visibility = TextView.VISIBLE
-                basePriceTextView.text = "Base Price: $numericPrice"
+                basePriceTextView.text = getString(R.string.base_price, numericPrice)
                 basePriceTextView.visibility = TextView.VISIBLE
-                txidTextView.text = "Transaction IDs: $initialTxid\n $txid"
+                if (initialTxid != "") {
+                    txidTextView.text = getString(R.string.transaction_ids, initialTxid, txid)
+                } else {
+                    txidTextView.text = getString(R.string.transaction_id, txid)
+                }
                 txidTextView.visibility = TextView.VISIBLE
-                feesTextView.text = "Fees: $formattedFees"
+                feesTextView.text = getString(R.string.fees, formattedFees)
                 feesTextView.visibility = TextView.VISIBLE
-                confirmationsTextView.text = "Confirmations: $confirmations"
+                confirmationsTextView.text = getString(R.string.confirmations, confirmations)
                 confirmationsTextView.visibility = TextView.VISIBLE
                 confirmationsLayout.visibility = View.VISIBLE
 
@@ -607,7 +613,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
 
     override fun onPaymentError(error: String) {
         runOnUiThread {
-            Toast.makeText(this, "Payment Error: $error", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.payment_error, Toast.LENGTH_LONG).show()
             // Handle error appropriately, such as showing a dialog or retrying the connection
         }
     }
@@ -643,6 +649,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             "Ethereum" -> EthereumManager.PREFS_NAME
             "Dogecoin" -> DogecoinManager.PREFS_NAME
             "Tron-network" -> TronManager.PREFS_NAME
+            "Dash" -> DashManager.PREFS_NAME
+            "Bitcoincash" -> BitcoinManager.PREFS_NAME
             else -> BitcoinManager.PREFS_NAME
         }
     }
@@ -654,6 +662,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             "Ethereum" -> EthereumManager.LAST_INDEX_KEY
             "Dogecoin" -> DogecoinManager.LAST_INDEX_KEY
             "Tron-network" -> TronManager.LAST_INDEX_KEY
+            "Dash" -> DashManager.LAST_INDEX_KEY
+            "Bitcoincash" -> BitcoinCashManager.LAST_INDEX_KEY
             else -> BitcoinManager.LAST_INDEX_KEY
         }
     }
@@ -690,7 +700,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                         val confirmations = jsonObject.getInt("confirmations")
 
                         runOnUiThread {
-                            confirmationsTextView.text = "Confirmations: $confirmations"
+                            confirmationsTextView.text = getString(R.string.confirmations, confirmations)
                             for (i in 0 until confirmations.coerceAtMost(6)) {
                                 confirmationBlocks[i].setBackgroundColor(Color.GREEN)
                             }

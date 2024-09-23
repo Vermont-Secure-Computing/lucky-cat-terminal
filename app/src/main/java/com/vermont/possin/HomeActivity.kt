@@ -14,11 +14,14 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.Gravity
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -38,6 +41,7 @@ import org.json.JSONObject
 import pl.droidsonroids.gif.GifDrawable
 import java.io.File
 import java.io.InputStreamReader
+import java.util.Locale
 import java.util.Properties
 
 
@@ -178,6 +182,43 @@ class HomeActivity : AppCompatActivity() {
 
         // Initial check
         checkWifiAndBluetooth()
+
+        // Initialize the locale spinner
+        val localeSpinner = findViewById<Spinner>(R.id.localeSpinner)
+
+        val adapter = ArrayAdapter.createFromResource(
+            this,
+            R.array.locale_array,
+            R.layout.spinner_locale
+        )
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        localeSpinner.adapter = adapter
+
+        // Set the selected item based on the current locale
+        val currentLocale = resources.configuration.locale.language
+        localeSpinner.setSelection(if (currentLocale == "zh") 1 else 0)
+
+        // Set a listener for locale selection
+        localeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                val selectedLocale = when (position) {
+                    0 -> "en" // English (US)
+                    1 -> "zh" // Chinese
+                    else -> Locale.getDefault().language
+                }
+
+                // Only set the locale if the selected one is different from the current one
+                if (resources.configuration.locale.language != selectedLocale) {
+                    setLocale(selectedLocale)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // No action needed
+            }
+        }
 
     }
 
@@ -699,14 +740,18 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    private fun setLocale(localeCode: String) {
+        val locale = Locale(localeCode)
+        Locale.setDefault(locale)
+        val config = resources.configuration
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
 
-
-//    private fun navigateToAnotherActivity() {
-//        // Navigate to the other activity if no pin is set
-//        val intent = Intent(this, SomeOtherActivity::class.java)
-//        startActivity(intent)
-//        finish()
-//    }
+        // Restart the activity to apply the locale change
+        val refreshIntent = Intent(this, HomeActivity::class.java)
+        startActivity(refreshIntent)
+        finish() // Close the current activity so that the new one takes its place
+    }
 }
 
 

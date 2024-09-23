@@ -33,6 +33,7 @@ class APIActivity : AppCompatActivity() {
     private lateinit var apiKeyInput: EditText
     private lateinit var submitButton: Button
     private lateinit var backArrow: ImageView
+    private lateinit var apiDetailsSection: View // Parent View for the API details section
     private lateinit var apiKeyTextView: TextView
     private lateinit var subscriptionLevelTextView: TextView
     private lateinit var activeStatusTextView: TextView
@@ -53,6 +54,7 @@ class APIActivity : AppCompatActivity() {
         apiKeyInput = findViewById(R.id.api_key_input)
         submitButton = findViewById(R.id.submit_button)
         backArrow = findViewById(R.id.back_arrow)
+        apiDetailsSection = findViewById(R.id.api_details_section) // Parent view for all details
         apiKeyTextView = findViewById(R.id.apiKeyTextView)
         subscriptionLevelTextView = findViewById(R.id.subscriptionLevelTextView)
         activeStatusTextView = findViewById(R.id.activeStatusTextView)
@@ -61,7 +63,7 @@ class APIActivity : AppCompatActivity() {
         dailyCallsTextView = findViewById(R.id.dailyCallsTextView)
         priceTextView = findViewById(R.id.priceTextView)
 
-        // Initially hide the API details views
+        // Initially hide the API details section
         hideApiDetails()
 
         // Initialize Retrofit for API calls
@@ -100,11 +102,15 @@ class APIActivity : AppCompatActivity() {
             val apiKey = properties.getProperty("api_key")
             if (!apiKey.isNullOrEmpty()) {
                 apiKeyInput.setText(apiKey)
-                // Show API details section since the API key is not null or empty
-                showApiDetails()
                 // Call the API to get details
                 callApiDetails(apiKey)
+            } else {
+                // Hide the API details if API key is empty
+                hideApiDetails()
             }
+        } else {
+            // Hide the API details if the file does not exist
+            hideApiDetails()
         }
     }
 
@@ -112,17 +118,21 @@ class APIActivity : AppCompatActivity() {
         val call = apiService.getApiDetails(apiKey)
         call.enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                println(response.body())
-                if (response.isSuccessful) {
+                if (response.isSuccessful && response.body() != null) {
                     response.body()?.let {
-                        displayApiDetails(it.details)
+                        displayApiDetails(it.details) // Show the details only on success
+                        showApiDetails()  // Show the details section when successful
                     }
                 } else {
+                    // If the response is not successful, hide the details and show error
+                    hideApiDetails()
                     Toast.makeText(this@APIActivity, R.string.failed_to_get_API_details, Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                // On failure, hide the details and show error
+                hideApiDetails()
                 Toast.makeText(this@APIActivity, "${R.string.error_colon} ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
@@ -161,25 +171,13 @@ class APIActivity : AppCompatActivity() {
     }
 
     private fun hideApiDetails() {
-        // Initially hide the API details section
-        apiKeyTextView.visibility = View.GONE
-        subscriptionLevelTextView.visibility = View.GONE
-        activeStatusTextView.visibility = View.GONE
-        expiresAtTextView.visibility = View.GONE
-        hourlyCallsTextView.visibility = View.GONE
-        dailyCallsTextView.visibility = View.GONE
-        priceTextView.visibility = View.GONE
+        // Hide the entire API details section
+        apiDetailsSection.visibility = View.GONE
     }
 
     private fun showApiDetails() {
-        // Show the API details section when the API key is loaded
-        apiKeyTextView.visibility = View.VISIBLE
-        subscriptionLevelTextView.visibility = View.VISIBLE
-        activeStatusTextView.visibility = View.VISIBLE
-        expiresAtTextView.visibility = View.VISIBLE
-        hourlyCallsTextView.visibility = View.VISIBLE
-        dailyCallsTextView.visibility = View.VISIBLE
-        priceTextView.visibility = View.VISIBLE
+        // Show the entire API details section
+        apiDetailsSection.visibility = View.VISIBLE
     }
 
     private fun saveApiKey(apiKey: String) {
@@ -213,3 +211,4 @@ class APIActivity : AppCompatActivity() {
         finish()
     }
 }
+

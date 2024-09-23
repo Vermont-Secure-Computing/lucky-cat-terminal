@@ -146,7 +146,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
 
                         // Update the UI on the main thread
                         runOnUiThread {
-                            confirmationsTextView.text = "Confirmations: $confirmations"
+                            confirmationsTextView.text = getString(R.string.confirmations, confirmations)
                         }
 
                         // Update the transaction in the database

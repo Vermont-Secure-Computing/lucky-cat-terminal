@@ -18,7 +18,10 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
-
+import java.io.File
+import java.io.FileInputStream
+import java.util.Locale
+import java.util.Properties
 
 class ReceiptDialogFragment : DialogFragment() {
 
@@ -38,6 +41,7 @@ class ReceiptDialogFragment : DialogFragment() {
     private lateinit var homeButton: Button
     private lateinit var receiptLayout: LinearLayout
     private var cleanedTxid: String = ""
+    private lateinit var merchantProperties: Properties
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,6 +50,7 @@ class ReceiptDialogFragment : DialogFragment() {
         dialog?.window?.setBackgroundDrawableResource(android.R.color.darker_gray)
         val view = inflater.inflate(R.layout.fragment_receipt_dialog, container, false)
 
+        // Initialize views
         receiptTitle = view.findViewById(R.id.receiptTitle)
         receiptAddress = view.findViewById(R.id.receiptAddress)
         receiptDetails = view.findViewById(R.id.receiptDetails)
@@ -59,16 +64,15 @@ class ReceiptDialogFragment : DialogFragment() {
         receiptChain = view.findViewById(R.id.receiptChain)
         receiptDeviceID = view.findViewById(R.id.receiptDeviceID)
         printAgainButton = view.findViewById(R.id.printAgainButton)
-        printAgainButton.visibility = View.GONE
         homeButton = view.findViewById(R.id.homeButton)
-        homeButton.visibility = View.GONE
         receiptLayout = view.findViewById(R.id.receiptLayout)
+
+        // Load merchant properties
+        loadMerchantProperties()
 
         // Get data from arguments
         val args = arguments
         receiptTitle.text = args?.getString("receiptTitle")
-        receiptAddress.text = args?.getString("receiptAddress")
-        receiptDetails.text = args?.getString("receiptDetails")
         receiptBalance.text = args?.getString("receiptBalance")
         receiptBaseCurrency.text = args?.getString("receiptSelectedCurrencyCode")
         receiptBasePrice.text = args?.getString("receiptNumericPrice")
@@ -78,12 +82,11 @@ class ReceiptDialogFragment : DialogFragment() {
         receiptChain.text = args?.getString("receiptChain")
         receiptDeviceID.text = args?.getString("receiptDeviceID")
         receivingAddress.text = args?.getString("receivingAddress")
+
         val receiptTxID1 = args?.getString("receiptTxID") ?: ""
         cleanedTxid = receiptTxID1.replace(Regex(".*\\s"), "")
 
-
         performPrintCopies(1, "Customer Copy")
-
 
         startPrintAnimation(receiptLayout, ::onFirstAnimationEnd)
 
@@ -95,6 +98,16 @@ class ReceiptDialogFragment : DialogFragment() {
         val width = ViewGroup.LayoutParams.MATCH_PARENT
         val height = ViewGroup.LayoutParams.MATCH_PARENT
         dialog?.window?.setLayout(width, height)
+    }
+
+    private fun loadMerchantProperties() {
+        merchantProperties = Properties()
+        val file = File(requireContext().filesDir, "merchant.properties")
+        if (file.exists()) {
+            FileInputStream(file).use {
+                merchantProperties.load(it)
+            }
+        }
     }
 
     private fun startPrintAnimation(view: View, onAnimationEnd: () -> Unit) {
@@ -117,22 +130,17 @@ class ReceiptDialogFragment : DialogFragment() {
     }
 
     private fun onFirstAnimationEnd() {
-        // Show the Owner's Copy
-//        receiptTitle.text = "Owner's Copy"
         receiptLayout.alpha = 1f // Reset alpha
         receiptLayout.translationY = 0f // Reset translation
 
-        // Show the home again button
         homeButton.visibility = View.VISIBLE
         homeButton.setOnClickListener {
             startActivity(Intent(activity, HomeActivity::class.java))
             dismissAllowingStateLoss()
         }
 
-        // Show the print again button
         printAgainButton.visibility = View.VISIBLE
         printAgainButton.setOnClickListener {
-            // Delay the printing for 1 second
             Handler(Looper.getMainLooper()).postDelayed({
                 performPrintCopies(1, "Owner's Copy")
             }, 1050)
@@ -145,40 +153,118 @@ class ReceiptDialogFragment : DialogFragment() {
         }
     }
 
+    private fun getUSString(resourceId: Int, vararg formatArgs: Any): String {
+        val config = resources.configuration
+        val originalLocale = config.locale
+        config.setLocale(Locale.US)
+        val localizedContext = requireContext().createConfigurationContext(config)
+        val localizedResources = localizedContext.resources
+        val result = localizedResources.getString(resourceId, *formatArgs)
+        config.setLocale(originalLocale) // Restore original locale
+        return result
+    }
 
     private fun performPrintCopies(copies: Int, copyType: String, onComplete: () -> Unit = {}) {
         val bluetoothConnection = BluetoothPrintersConnections.selectFirstPaired()
         if (bluetoothConnection == null) {
-            Toast.makeText(activity, "No paired Bluetooth printer found", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, R.string.no_paired_Bluetooth_printer_found, Toast.LENGTH_SHORT).show()
             return
         }
         try {
             val printer = EscPosPrinter(bluetoothConnection, 203, 48f, 32)
+            val receiptContent = StringBuilder()
+
+            // Add required fields
+            receiptContent.append("[C]<font size='big'>${receiptTitle.text}</font>\n")
+
+            // Add optional fields from merchant.properties
+            val address = merchantProperties.getProperty("address", "")
+            val city = merchantProperties.getProperty("city", "")
+            val state = merchantProperties.getProperty("state", "")
+            val zipCode = merchantProperties.getProperty("zip_code", "")
+            val country = merchantProperties.getProperty("country", "")
+            val phone = merchantProperties.getProperty("phone", "")
+            val email = merchantProperties.getProperty("email", "")
+
+            if (address.isNotEmpty()) {
+                receiptContent.append("[L]Address: $address\n")
+            }
+            if (city.isNotEmpty()) {
+                receiptContent.append("[L]City: $city\n")
+            }
+            if (state.isNotEmpty()) {
+                receiptContent.append("[L]State: $state\n")
+            }
+            if (zipCode.isNotEmpty()) {
+                receiptContent.append("[L]Zip Code: $zipCode\n")
+            }
+            if (country.isNotEmpty()) {
+                receiptContent.append("[L]Country: $country\n")
+            }
+            if (phone.isNotEmpty()) {
+                receiptContent.append("[L]Phone: $phone\n")
+            }
+            if (email.isNotEmpty()) {
+                receiptContent.append("[L]Email: $email\n")
+            }
+
+            receiptContent.append("[C]-------------------------------\n")
+            receiptContent.append("[L]<b>Transaction Details</b>\n")
+
+            // Add transaction details
+            if (receiptBalance.text.isNotEmpty()) {
+                val amountValue = receiptBalance.text.split(":").getOrNull(1)?.trim() ?: receiptBalance.text
+                receiptContent.append("[L]${getUSString(R.string.amount, amountValue)}\n")
+            }
+
+            if (receiptBaseCurrency.text.isNotEmpty()) {
+                val baseCurrencyValue = receiptBaseCurrency.text.split(":").getOrNull(1)?.trim() ?: receiptBaseCurrency.text
+                receiptContent.append("[L]${getUSString(R.string.base_currency, baseCurrencyValue)}\n")
+            }
+
+            if (receiptBasePrice.text.isNotEmpty()) {
+                val basePriceValue = receiptBasePrice.text.split(":").getOrNull(1)?.trim() ?: receiptBasePrice.text
+                receiptContent.append("[L]${getUSString(R.string.base_price, basePriceValue)}\n")
+            }
+
+            if (receiptTxID.text.isNotEmpty()) {
+                val txIDValue = receiptTxID.text.split(":").getOrNull(1)?.trim() ?: receiptTxID.text
+                receiptContent.append("[L]${getUSString(R.string.transaction_id, txIDValue)}\n")
+                receiptContent.append("[C]<qrcode size='20'>$cleanedTxid</qrcode>\n")
+            }
+
+            if (receivingAddress.text.isNotEmpty()) {
+                val addressValue = receivingAddress.text.split(":").getOrNull(1)?.trim() ?: receivingAddress.text
+                receiptContent.append("[L]${getUSString(R.string.receivingAddress, addressValue)}\n")
+            }
+
+            if (receiptFees.text.isNotEmpty()) {
+                val feesValue = receiptFees.text.split(":").getOrNull(1)?.trim() ?: receiptFees.text
+                receiptContent.append("[L]${getUSString(R.string.fees, feesValue)}\n")
+            }
+//
+            if (receiptConfirmations.text.isNotEmpty()) {
+                val confirmationsValue = receiptConfirmations.text.split(":").getOrNull(1)?.trim()?.toIntOrNull() ?: 0
+                receiptContent.append("[L]${getUSString(R.string.confirmations, confirmationsValue)}\n")
+            }
+//
+            if (receiptChain.text.isNotEmpty()) {
+                val chainValue = receiptChain.text.split(":").getOrNull(1)?.trim() ?: receiptChain.text
+                receiptContent.append("[L]${getUSString(R.string.chainText, chainValue)}\n")
+            }
+
+            if (receiptDeviceID.text.isNotEmpty()) {
+                receiptContent.append("[L]Device ID: ${receiptDeviceID.text}\n")
+            }
+
+            receiptContent.append("[C]-------------------------------\n")
+            receiptContent.append("[C]$copyType\n")
+            receiptContent.append("[L]\n")
+            receiptContent.append("[C]Thank you for your payment!\n")
+
+            // Print the receipt
             for (i in 1..copies) {
-                printer.printFormattedText(
-                    "[C]<font size='big'>${receiptTitle.text}</font>\n" +
-                            "[C]${receiptAddress.text}\n" +
-                            "[L]\n" +
-                            "[C]-------------------------------\n" +
-                            "[L]\n" +
-                            "[L]<b>Transaction Details</b>\n" +
-                            "[L]\n" +
-                            "[L]${receiptBalance.text}\n" +
-                            "[L]${receiptBaseCurrency.text}\n" +
-                            "[L]${receiptBasePrice.text}\n" +
-                            "[L]${receiptTxID.text}\n" +
-                            "[C]<qrcode size='20'>$cleanedTxid</qrcode>\n" +
-                            "[L]${receivingAddress.text}\n" +
-                            "[L]${receiptFees.text}\n" +
-                            "[L]${receiptConfirmations.text}\n" +
-                            "[L]${receiptChain.text}\n" +
-                            "[L]Device ID: ${receiptDeviceID.text}\n" +
-                            "[L]\n" +
-                            "[C]-------------------------------\n" +
-                            "[C]$copyType\n" +
-                            "[L]\n" +
-                            "[C]Thank you for your payment!\n"
-                )
+                printer.printFormattedText(receiptContent.toString())
             }
             onComplete()
         } catch (e: Exception) {
@@ -186,6 +272,4 @@ class ReceiptDialogFragment : DialogFragment() {
             // Handle printing errors
         }
     }
-
-
 }
