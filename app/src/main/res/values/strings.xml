@@ -142,4 +142,7 @@
     <string name="continue_print">Continue</string>
     <string name="are_you_sure_you_dont_want_to_print">Are you sure you don\'t want to print?</string>
     <string name="cancel_printing">Cancel Printing</string>
+    <string name="address_colon">Address</string>
+    <string name="base_currency_colon">Base Currency:</string>
+    <string name="amount_colon">Amount:</string>
 </resources>

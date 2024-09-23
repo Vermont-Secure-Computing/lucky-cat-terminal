@@ -162,11 +162,11 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         amountBaseCurrencyPrice = findViewById(R.id.amountBaseCurrencyPrice)
         amountTextViewAddress = findViewById(R.id.amountTextViewAddress)
         amountTextViewAddressChain = findViewById(R.id.amountTextViewAddressChain)
-        addressTextView.text = "Address:"
+        addressTextView.text = getString(R.string.address)
         addressTextViewAddress.text = "$address"
-        amountBaseCurrency.text = "Base Currency:"
+        amountBaseCurrency.text = getString(R.string.base_currency_colon)
         amountBaseCurrencyPrice.text = "$numericPrice $selectedCurrencyCode"
-        amountTextViewAddress.text = "Amount:"
+        amountTextViewAddress.text = getString(R.string.amount_colon)
         amountTextViewAddressChain.text = "$formattedPrice $currency"
 
         qrCodeImageView = findViewById(R.id.qrCodeImageView)

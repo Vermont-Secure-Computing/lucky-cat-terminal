@@ -138,4 +138,7 @@
     <string name="continue_print">继续</string>
     <string name="are_you_sure_you_dont_want_to_print">确定不打印吗？</string>
     <string name="cancel_printing">取消打印</string>
+    <string name="address_colon">地址:</string>
+    <string name="base_currency_colon">基础货币:</string>
+    <string name="amount_colon">金额:</string>
 </resources>
