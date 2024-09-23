@@ -131,6 +131,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         val managerType = intent.getStringExtra("MANAGER_TYPE") ?: "Bitcoin"
 
         val deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        Log.d("RECEIVING ADDRESS", address)
 
         numericPrice = intent.getStringExtra("NUMERIC_PRICE") ?: ""
         selectedCurrencyCode = intent.getStringExtra("SELECTED_CURRENCY_CODE") ?: ""
@@ -746,7 +747,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         val currentBalance = balance ?: balanceTextView.text.toString().replace("Balance: ", "").toDouble()
         val currentTxid = txid ?: txidTextView.text.toString().replace("Transaction ID: ", "")
         val currentFees = fees ?: feesTextView.text.toString().replace("Fees: ", "").toDouble()
-        val currentConfirmations = confirmationsTextView.text.toString().replace("Confirmations: ", "").toInt()
+        val confirmationsString = confirmationsTextView.text.toString()
+        val currentConfirmations = confirmationsString.replace(Regex("[^0-9]"), "").toInt()
         val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
 
