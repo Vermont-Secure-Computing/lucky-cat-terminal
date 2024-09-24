@@ -14,6 +14,7 @@
     <string-array name="locale_array">
         <item>EN</item>
         <item>ZH</item>
+        <item>RU</item>
     </string-array>
     <string name="neku_gif_description">Neku GIF animation</string>
     <string name="accepted_currency">Accepted Currency</string>
@@ -142,7 +143,8 @@
     <string name="continue_print">Continue</string>
     <string name="are_you_sure_you_dont_want_to_print">Are you sure you don\'t want to print?</string>
     <string name="cancel_printing">Cancel Printing</string>
-    <string name="address_colon">Address</string>
-    <string name="base_currency_colon">Base Currency:</string>
-    <string name="amount_colon">Amount:</string>
+    <string name="address_colon">Address: \n%1$s</string>
+    <string name="base_currency_colon">Base Currency:\n%1$s %2$s</string>
+    <string name="amount_colon">Amount: \n%1$s %2$s</string>
+    <string name="checking_transactions">Checking Transactions…</string>
 </resources>

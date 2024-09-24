@@ -1,0 +1,150 @@
+<resources>
+    <string name="app_name">LCTerm</string>
+    <string-array name="type_array">
+        <item>адрес</item>
+        <item>xpub</item>
+    </string-array>
+    <string-array name="monero_type_array">
+        <item>адрес</item>
+    </string-array>
+    <string-array name="segwit_legacy_array">
+        <item>segwit</item>
+        <item>legacy</item>
+    </string-array>
+    <string-array name="locale_array">
+        <item>EN</item>
+        <item>ZH</item>
+        <item>RU</item>
+    </string-array>
+    <string name="neku_gif_description">Анимация Neku GIF</string>
+    <string name="accepted_currency">Принимаемая валюта</string>
+    <string name="accept_payment">Принять оплату</string>
+    <string name="settings">Настройки</string>
+    <string name="api_key">API ключ</string>
+    <string name="merchant_info">Информация о продавце</string>
+    <string name="coin_settings">Настройки монеты</string>
+    <string name="export">Экспорт</string>
+    <string name="transactions">Транзакции</string>
+    <string name="see_all">Посмотреть все</string>
+    <string name="no_transactions_yet">Пока нет транзакций..</string>
+    <string name="powered_by">Разработано на платформе</string>
+    <string name="incomplete_profile">Неполный профиль</string>
+    <string name="please_fill_up_your_merchant_profile_xpub_and_address.">Пожалуйста, заполните профиль продавца, xpub и адрес.</string>
+    <string name="ok">ОК</string>
+    <string name="enter_pin">Введите PIN</string>
+    <string name="incorrect_pin">Неверный PIN</string>
+    <string name="cancel">Отмена</string>
+    <string name="accepted_coins_are_not_yet_setup">Принятые монеты еще не настроены</string>
+    <string name="is_turned_off">выключен</string>
+    <string name="please_enable">Пожалуйста, включите</string>
+    <string name="to_continue_using_the_apps_features">чтобы продолжить использование функций приложения.</string>
+    <string name="enable">Включить</string>
+    <string name="bluetooth_permission_denied">Доступ к Bluetooth отклонен</string>
+    <string name="bluetooth_is_required_for_this_feature_please_enable_the_permission_from_settings">Для этой функции требуется Bluetooth. Пожалуйста, включите доступ в настройках.</string>
+    <string name="go_to_settings">Перейти в Настройки</string>
+    <string name="please_confirm_your_API_key">Пожалуйста, подтвердите ваш API ключ.</string>
+    <string name="enter_API_key">Введите API ключ</string>
+    <string name="submit">Отправить</string>
+    <string name="api_key_colon">API ключ: %1$s</string>
+    <string name="subscription_level">Уровень подписки: %1$s</string>
+    <string name="active_colon">Активен: %1$s</string>
+    <string name="expires_at">Истекает: %1$s</string>
+    <string name="hourly_calls">Часовые вызовы: %1$s</string>
+    <string name="daily_calls">Дневные вызовы: %1$s</string>
+    <string name="price">Цена: %1$f</string>
+    <string name="API_key_cannot_be_empty">API ключ не может быть пустым</string>
+    <string name="failed_to_get_API_details">Не удалось получить информацию API</string>
+    <string name="error_colon">Ошибка:</string>
+    <string name="set_pin">Установить PIN</string>
+    <string name="business_name">Название компании</string>
+    <string name="enter_your_business_name">Введите название вашей компании</string>
+    <string name="address">Адрес</string>
+    <string name="enter_your_address_optional">Введите ваш адрес (необязательно)</string>
+    <string name="city">Город</string>
+    <string name="enter_your_city_optional">Введите ваш город (необязательно)</string>
+    <string name="state">Штат</string>
+    <string name="enter_your_state_optional">Введите ваш штат (необязательно)</string>
+    <string name="zip_code">Почтовый индекс</string>
+    <string name="enter_your_zip_code_optional">Введите ваш почтовый индекс (необязательно)</string>
+    <string name="country">Страна</string>
+    <string name="enter_your_country_optional">Введите вашу страну (необязательно)</string>
+    <string name="phone_number">Номер телефона</string>
+    <string name="enter_your_phone_number_optional">Введите ваш номер телефона (необязательно)</string>
+    <string name="email">Электронная почта</string>
+    <string name="enter_your_email_optional">Введите вашу электронную почту (необязательно)</string>
+    <string name="update_pin">Обновить PIN</string>
+    <string name="business_name_is_required">Название компании обязательно</string>
+    <string name="search_cryptocurrencies">Поиск криптовалют</string>
+    <string name="scan_a_barcode_or_QR_code">Сканировать штрих-код или QR код</string>
+    <string name="invalid_monero_address">Неверный Monero адрес</string>
+    <string name="invalid_Monero_private_view_key">Неверный Monero закрытый ключ просмотра</string>
+    <string name="invalid_for">Неверный %1$s для %2$s</string>
+    <string name="select_from_date">Выбрать начальную дату</string>
+    <string name="select_to_date">Выбрать конечную дату</string>
+    <string name="export_csv">Экспорт CSV</string>
+    <string name="please_select_both_dates">Пожалуйста, выберите обе даты</string>
+    <string name="transaction_details">Детали транзакции</string>
+    <string name="merchantName">Название компании: %1$s</string>
+    <string name="merchantAddress">Адрес компании: %1$s</string>
+    <string name="chainText">Сеть: %1$s</string>
+    <string name="balance">Сумма: %1$f</string>
+    <string name="baseCurrency">Базовая валюта: %1$s</string>
+    <string name="basePrice">Базовая цена: %1$s</string>
+    <string name="dateText">Дата: %1$s</string>
+    <string name="txidText">TXID: %1$s</string>
+    <string name="receivingAddress">Адрес: %1$s</string>
+    <string name="feesText">Комиссия: %1$f</string>
+    <string name="txType">Тип: %1$s</string>
+    <string name="confirmationsText">Подтверждения: %1$d</string>
+    <string name="timeText">Время: %1$s</string>
+    <string name="messageText">Сообщение: %1$s</string>
+    <string name="difference">Разница: %1$f</string>
+    <string name="previous_receive">Предыдущее получение: %1$f</string>
+    <string name="previousTxidIn">Предыдущий TXID: %1$s</string>
+    <string name="no_paired_Bluetooth_printer_found">Не найдено сопряженных Bluetooth принтеров</string>
+    <string name="input_amount">Введите сумму</string>
+    <string name="server_is_not_available">Сервер недоступен</string>
+    <string name="refresh">Обновить</string>
+    <string name="enter_message_optional">Введите сообщение (необязательно)</string>
+    <string name="bitcoin_manager_not_initialized">Менеджер Bitcoin не инициализирован</string>
+    <string name="litecoin_manager_not_initialized">Менеджер Litecoin не инициализирован</string>
+    <string name="ethereum_manager_not_initialized">Менеджер Ethereum не инициализирован</string>
+    <string name="dogecoin_manager_not_initialized">Менеджер Dogecoin не инициализирован</string>
+    <string name="usdt_manager_not_initialized">Менеджер USDT Tron не инициализирован</string>
+    <string name="dash_manager_not_initialized">Менеджер Dash не инициализирован</string>
+    <string name="failed_to_derive_dash_address">Не удалось получить адрес Dash</string>
+    <string name="bitcoincash_manager_not_initialized">Менеджер Bitcoincash не инициализирован</string>
+    <string name="conversion_rate">Курс обмена: %1$s</string>
+    <string name="conversion_failed">Ошибка конвертации</string>
+    <string name="response_not_successful_Please_check_your_setting_or_API_key">Ответ не успешен. Пожалуйста, проверьте настройки или API ключ</string>
+    <string name="API_call_failed">Ошибка вызова API</string>
+    <string name="home">Главная</string>
+    <string name="transaction_already_seen_on_the_blockchain">Транзакция уже замечена в блокчейне.</string>
+    <string name="print_receipt">Распечатать чек</string>
+    <string name="no_address_provided">Адрес не предоставлен</string>
+    <string name="no_price_provided">Цена не указана</string>
+    <string name="bluetooth_permissions_are_required_for_this_app">Для этого приложения необходимы разрешения на использование Bluetooth</string>
+    <string name="gathering_blocks">Сбор блоков</string>
+    <string name="paid_amount">Оплаченная сумма: %1$f</string>
+    <string name="required_amount">Требуемая сумма: %1$f</string>
+    <string name="total_amount">Общая сумма: %1$f</string>
+    <string name="TXID">TXID: %1$s</string>
+    <string name="received">Получено: %1$f %2$s</string>
+    <string name="amount">Сумма: %1$s</string>
+    <string name="base_currency">Базовая валюта: %1$s</string>
+    <string name="base_price">Базовая цена: %1$s</string>
+    <string name="transaction_ids">Идентификаторы транзакций: %1$s\n%2$s</string>
+    <string name="transaction_id">Идентификатор транзакции: %1$s</string>
+    <string name="fees">Комиссия: %1$s</string>
+    <string name="confirmations">Подтверждения: %1$d</string>
+    <string name="payment_error">Ошибка оплаты: %1$s</string>
+    <string name="are_you_sure_you_want_to_stop_the_process">Вы уверены, что хотите остановить процесс?</string>
+    <string name="cancel_process">Отменить процесс</string>
+    <string name="continue_print">Продолжить</string>
+    <string name="are_you_sure_you_dont_want_to_print">Вы уверены, что не хотите печатать?</string>
+    <string name="cancel_printing">Отменить печать</string>
+    <string name="address_colon">Адрес: \n%1$s</string>
+    <string name="base_currency_colon">Базовая валюта:\n%1$s %2$s</string>
+    <string name="amount_colon">Сумма: \n%1$s %2$s</string>
+    <string name="checking_transactions">Проверка транзакций…</string>
+</resources>

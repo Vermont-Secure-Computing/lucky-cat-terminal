@@ -67,7 +67,7 @@ class CustomWebSocketListener(
                 callback.onPaymentStatusPaid(status, balance, txid, fees, confirmations, feeStatus, chain, addressIndex, managerType)
             }
             "error" -> {
-                val errorMessage = jsonObject.getString("errorMessage")
+                val errorMessage = jsonObject.getString("message")
                 callback.onPaymentError(errorMessage)
             }
             else -> Log.d("WebSocket", "Unhandled status: $status")

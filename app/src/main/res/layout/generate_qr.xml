@@ -83,7 +83,8 @@
                 android:textSize="18sp"
                 android:textColor="#000000"
                 android:layout_marginTop="24dp"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:textAlignment="center" />
 
             <TextView
                 android:id="@+id/addressTextViewAddress"
@@ -99,7 +100,8 @@
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
                 android:textColor="#000000"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:textAlignment="center" />
 
             <TextView
                 android:id="@+id/amountBaseCurrencyPrice"
@@ -115,7 +117,8 @@
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
                 android:textColor="#000000"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:textAlignment="center" />
 
             <TextView
                 android:id="@+id/amountTextViewAddressChain"
@@ -291,7 +294,7 @@
                     android:id="@+id/checkingTransactionsText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Checking Transactions..."
+                    android:text="@string/checking_transactions"
                     android:textSize="16sp"
                     android:textColor="#000000"
                     android:layout_marginTop="5dp"

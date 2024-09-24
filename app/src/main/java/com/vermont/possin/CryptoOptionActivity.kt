@@ -53,8 +53,20 @@ class CryptoOptionActivity : AppCompatActivity() {
 
         window.statusBarColor = ContextCompat.getColor(this, R.color.darkerRed)
 
+        // Get price from intent and log it
         val price = intent.getStringExtra("PRICE") ?: "0.00"
         val priceTextView: TextView = findViewById(R.id.priceTextView)
+        val cleanedPrice = price.replace(Regex("[^\\d.]"), "").trim()
+
+        // Convert to double
+        val priceValue = cleanedPrice.toDoubleOrNull() ?: 0.00
+
+        // Adjust the text size if price is >= 10000
+        if (priceValue >= 10000) {
+            priceTextView.textSize = 30f // Set text size to 30sp
+        }
+
+        // Set the price text
         priceTextView.text = price
         message = intent.getStringExtra("MESSAGE") ?: ""
 

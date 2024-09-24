@@ -11,6 +11,11 @@
         <item>隔离见证</item>
         <item>传统</item>
     </string-array>
+    <string-array name="locale_array">
+        <item>EN</item>
+        <item>ZH</item>
+        <item>RU</item>
+    </string-array>
     <string name="neku_gif_description">Neku GIF 动画</string>
     <string name="accepted_currency">接受的货币</string>
     <string name="accept_payment">接受付款</string>
@@ -138,7 +143,8 @@
     <string name="continue_print">继续</string>
     <string name="are_you_sure_you_dont_want_to_print">确定不打印吗？</string>
     <string name="cancel_printing">取消打印</string>
-    <string name="address_colon">地址:</string>
-    <string name="base_currency_colon">基础货币:</string>
-    <string name="amount_colon">金额:</string>
+    <string name="address_colon">地址: \n%1$s</string>
+    <string name="base_currency_colon">基础货币: \n%1$s %2$s</string>
+    <string name="amount_colon">金额: \n%1$s %2$s</string>
+    <string name="checking_transactions">正在检查交易…</string>
 </resources>

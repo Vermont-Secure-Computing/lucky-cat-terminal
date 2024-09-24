@@ -198,7 +198,13 @@ class HomeActivity : AppCompatActivity() {
 
         // Set the selected item based on the current locale
         val currentLocale = resources.configuration.locale.language
-        localeSpinner.setSelection(if (currentLocale == "zh") 1 else 0)
+        localeSpinner.setSelection(
+            when (currentLocale) {
+                "zh" -> 1 // Chinese
+                "ru" -> 2 // Russian
+                else -> 0 // English
+            }
+        )
 
         // Set a listener for locale selection
         localeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -206,6 +212,7 @@ class HomeActivity : AppCompatActivity() {
                 val selectedLocale = when (position) {
                     0 -> "en" // English (US)
                     1 -> "zh" // Chinese
+                    2 -> "ru" // Russian
                     else -> Locale.getDefault().language
                 }
 

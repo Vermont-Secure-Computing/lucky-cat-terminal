@@ -242,12 +242,12 @@ class ReceiptDialogFragment : DialogFragment() {
                 val feesValue = receiptFees.text.split(":").getOrNull(1)?.trim() ?: receiptFees.text
                 receiptContent.append("[L]${getUSString(R.string.fees, feesValue)}\n")
             }
-//
+
             if (receiptConfirmations.text.isNotEmpty()) {
                 val confirmationsValue = receiptConfirmations.text.split(":").getOrNull(1)?.trim()?.toIntOrNull() ?: 0
                 receiptContent.append("[L]${getUSString(R.string.confirmations, confirmationsValue)}\n")
             }
-//
+
             if (receiptChain.text.isNotEmpty()) {
                 val chainValue = receiptChain.text.split(":").getOrNull(1)?.trim() ?: receiptChain.text
                 receiptContent.append("[L]${getUSString(R.string.chainText, chainValue)}\n")

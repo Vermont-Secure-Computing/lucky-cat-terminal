@@ -162,12 +162,12 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         amountBaseCurrencyPrice = findViewById(R.id.amountBaseCurrencyPrice)
         amountTextViewAddress = findViewById(R.id.amountTextViewAddress)
         amountTextViewAddressChain = findViewById(R.id.amountTextViewAddressChain)
-        addressTextView.text = getString(R.string.address)
-        addressTextViewAddress.text = "$address"
-        amountBaseCurrency.text = getString(R.string.base_currency_colon)
-        amountBaseCurrencyPrice.text = "$numericPrice $selectedCurrencyCode"
-        amountTextViewAddress.text = getString(R.string.amount_colon)
-        amountTextViewAddressChain.text = "$formattedPrice $currency"
+        addressTextView.text = getString(R.string.address_colon, address)
+        addressTextViewAddress.visibility = View.GONE
+        amountBaseCurrency.text = getString(R.string.base_currency_colon, numericPrice, selectedCurrencyCode)
+        amountBaseCurrencyPrice.visibility = View.GONE
+        amountTextViewAddress.text = getString(R.string.amount_colon, formattedPrice, currency)
+        amountTextViewAddressChain.visibility = View.GONE
 
         qrCodeImageView = findViewById(R.id.qrCodeImageView)
         val qrCodeBitmap = generateQRCodeWithLogo(uri, logoResId)
@@ -475,8 +475,8 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         totalAmountTextView.text = getString(R.string.total_amount, totalAmount)
         TXIDTextView.text = getString(R.string.TXID, txid)
 
-        val amountTextViewAddressChain: TextView = findViewById(R.id.amountTextViewAddressChain)
-        amountTextViewAddressChain.text = getString(R.string.received, difference, currency)
+        val amountTextViewAddress: TextView = findViewById(R.id.amountTextViewAddress)
+        amountTextViewAddress.text = getString(R.string.received, difference, currency)
 
         dialogView.findViewById<Button>(R.id.btnRetry).setOnClickListener {
             dialog.dismiss()
