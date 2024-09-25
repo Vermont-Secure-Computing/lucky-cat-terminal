@@ -147,4 +147,8 @@
     <string name="base_currency_colon">Базовая валюта:\n%1$s %2$s</string>
     <string name="amount_colon">Сумма: \n%1$s %2$s</string>
     <string name="checking_transactions">Проверка транзакций…</string>
+    <string name="print_again">Распечатать снова</string>
+    <string name="insuficient_payment">Недостаточная оплата</string>
+    <string name="retry">Повторить</string>
+    <string name="transaction_details_space">Детали транзакции\n</string>
 </resources>

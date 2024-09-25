@@ -727,16 +727,16 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
         val args = Bundle()
         args.putString("receiptTitle", "${merchantName.text}")
         args.putString("receiptAddress", "${merchantAddress.text}")
-        args.putString("receiptDetails", "Transaction Details")
+        args.putString("receiptDetails", getString(R.string.transaction_details))
         args.putString("receiptBalance", "${balanceTextView.text}")
         args.putString("receiptTxID", "${txidTextView.text}")
         args.putString("receiptFees", "${feesTextView.text}")
         args.putString("receiptConfirmations", "${confirmationsTextView.text}")
         args.putString("receiptChain", chain)
         args.putString("receiptDeviceID", deviceId)
-        args.putString("receiptNumericPrice", "Base Price: $numericPrice")
-        args.putString("receiptSelectedCurrencyCode", "Base Currency: $selectedCurrencyCode")
-        args.putString("receivingAddress", "address: $address")
+        args.putString("receiptNumericPrice", getString(R.string.base_price, numericPrice))
+        args.putString("receiptSelectedCurrencyCode", getString(R.string.base_currency, selectedCurrencyCode))
+        args.putString("receivingAddress", getString(R.string.receivingAddress, address))
 
         receiptDialog.arguments = args
 

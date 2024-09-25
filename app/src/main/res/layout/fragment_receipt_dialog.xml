@@ -31,7 +31,7 @@
         android:id="@+id/receiptDetails"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Transaction Details\n"
+        android:text="@string/transaction_details_space"
         android:textColor="@android:color/black"
         android:paddingTop="8dp"/>
 
@@ -127,7 +127,7 @@
             android:id="@+id/homeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Home"
+            android:text="@string/home"
             android:textColor="@android:color/white"
             android:backgroundTint="@color/darkerRed"
             android:padding="8dp"
@@ -137,7 +137,7 @@
             android:id="@+id/printAgainButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Print Again"
+            android:text="@string/print_again"
             android:textColor="@android:color/white"
             android:backgroundTint="@color/darkerRed"
             android:padding="8dp"/>

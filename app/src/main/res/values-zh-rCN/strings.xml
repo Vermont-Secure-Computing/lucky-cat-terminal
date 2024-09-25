@@ -147,4 +147,8 @@
     <string name="base_currency_colon">基础货币: \n%1$s %2$s</string>
     <string name="amount_colon">金额: \n%1$s %2$s</string>
     <string name="checking_transactions">正在检查交易…</string>
+    <string name="print_again">再次打印</string>
+    <string name="insuficient_payment">支付不足</string>
+    <string name="retry">重试</string>
+    <string name="transaction_details_space">交易详情\n</string>
 </resources>

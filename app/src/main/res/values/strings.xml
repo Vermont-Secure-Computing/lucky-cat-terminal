@@ -147,4 +147,8 @@
     <string name="base_currency_colon">Base Currency:\n%1$s %2$s</string>
     <string name="amount_colon">Amount: \n%1$s %2$s</string>
     <string name="checking_transactions">Checking Transactions…</string>
+    <string name="print_again">Print Again</string>
+    <string name="insuficient_payment">Insufficient Payment</string>
+    <string name="retry">Retry</string>
+    <string name="transaction_details_space">Transaction Details\n</string>
 </resources>
