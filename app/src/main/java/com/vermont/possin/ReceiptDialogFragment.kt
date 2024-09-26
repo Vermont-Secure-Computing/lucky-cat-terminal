@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -213,43 +214,53 @@ class ReceiptDialogFragment : DialogFragment() {
 
             // Add transaction details
             if (receiptBalance.text.isNotEmpty()) {
-                val amountValue = receiptBalance.text.split(":").getOrNull(1)?.trim() ?: receiptBalance.text
-                receiptContent.append("[L]${getUSString(R.string.amount, amountValue)}\n")
+                val regex = Regex(".*?[：:\\s]+(\\d+(?:[.,]\\d+)?)")
+                val amountValue = regex.find(receiptBalance.text)?.groupValues?.get(1)?.trim() ?: receiptBalance.text
+                Log.d("AMOUNT VALUE", amountValue.toString())
+                receiptContent.append("[L]Amount: $amountValue\n")
             }
 
             if (receiptBaseCurrency.text.isNotEmpty()) {
-                val baseCurrencyValue = receiptBaseCurrency.text.split(":").getOrNull(1)?.trim() ?: receiptBaseCurrency.text
-                receiptContent.append("[L]${getUSString(R.string.base_currency, baseCurrencyValue)}\n")
+                val regex = Regex(".*?[：:]\\s*([a-zA-Z0-9]+)")
+                val baseCurrencyValue = regex.find(receiptBaseCurrency.text)?.groupValues?.get(1)?.trim() ?: receiptBaseCurrency.text
+                Log.d("BASE CURRENCY", baseCurrencyValue.toString())
+                receiptContent.append("[L]Base Currency: $baseCurrencyValue\n")
             }
 
             if (receiptBasePrice.text.isNotEmpty()) {
-                val basePriceValue = receiptBasePrice.text.split(":").getOrNull(1)?.trim() ?: receiptBasePrice.text
-                receiptContent.append("[L]${getUSString(R.string.base_price, basePriceValue)}\n")
+                val regex = Regex(".*?[：:]?\\s*(\\d*\\.\\d+|\\d+)")
+                val basePriceValue = regex.find(receiptBasePrice.text)?.groupValues?.get(1)?.trim() ?: receiptBasePrice.text
+                receiptContent.append("[L]Base Price: $basePriceValue\n")
             }
 
             if (receiptTxID.text.isNotEmpty()) {
-                val txIDValue = receiptTxID.text.split(":").getOrNull(1)?.trim() ?: receiptTxID.text
-                receiptContent.append("[L]${getUSString(R.string.transaction_id, txIDValue)}\n")
+                val regex = Regex(".*?[：:]\\s*([a-fA-F0-9]+)")
+                val txIDValue = regex.find(receiptTxID.text)?.groupValues?.get(1)?.trim() ?: receiptTxID.text
+                receiptContent.append("[L]Transaction ID: $txIDValue\n")
                 receiptContent.append("[C]<qrcode size='20'>$cleanedTxid</qrcode>\n")
             }
 
             if (receivingAddress.text.isNotEmpty()) {
-                val addressValue = receivingAddress.text.split(":").getOrNull(1)?.trim() ?: receivingAddress.text
-                receiptContent.append("[L]${getUSString(R.string.receivingAddress, addressValue)}\n")
+                val regex = Regex(".*?[：:]\\s*([a-zA-Z0-9]+)")
+                val addressValue = regex.find(receivingAddress.text)?.groupValues?.get(1)?.trim() ?: receivingAddress.text
+                receiptContent.append("[L]Address: $addressValue\n")
             }
 
             if (receiptFees.text.isNotEmpty()) {
-                val feesValue = receiptFees.text.split(":").getOrNull(1)?.trim() ?: receiptFees.text
-                receiptContent.append("[L]${getUSString(R.string.fees, feesValue)}\n")
+                val regex = Regex(".*?[：:\\s]+(\\d+(?:[.,]\\d+)?)")
+                val feesValue = regex.find(receiptFees.text)?.groupValues?.get(1)?.trim() ?: receiptFees.text
+                receiptContent.append("[L]Fees: $feesValue\n")
             }
 
             if (receiptConfirmations.text.isNotEmpty()) {
-                val confirmationsValue = receiptConfirmations.text.split(":").getOrNull(1)?.trim()?.toIntOrNull() ?: 0
-                receiptContent.append("[L]${getUSString(R.string.confirmations, confirmationsValue)}\n")
+                val regex = Regex(".*?[：:]\\s*(\\d+)")
+                val confirmationsValue = regex.find(receiptConfirmations.text)?.groupValues?.get(1)?.trim() ?: 0
+                receiptContent.append("[L]Confirmations: $confirmationsValue\n")
             }
 
             if (receiptChain.text.isNotEmpty()) {
-                val chainValue = receiptChain.text.split(":").getOrNull(1)?.trim() ?: receiptChain.text
+                val regex = Regex(".*?[：:]\\s*([a-zA-Z0-9]+)")
+                val chainValue = regex.find(receiptChain.text)?.groupValues?.get(1)?.trim() ?: receiptChain.text
                 receiptContent.append("[L]${getUSString(R.string.chainText, chainValue)}\n")
             }
 
