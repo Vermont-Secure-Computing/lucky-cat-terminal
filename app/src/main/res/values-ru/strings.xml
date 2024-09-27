@@ -137,7 +137,7 @@
     <string name="transaction_id">Идентификатор транзакции: %1$s</string>
     <string name="fees">Комиссия: %1$s</string>
     <string name="confirmations">Подтверждения: %1$d</string>
-    <string name="payment_error">Ошибка оплаты: %1$s</string>
+    <string name="payment_error">Ошибка оплаты</string>
     <string name="are_you_sure_you_want_to_stop_the_process">Вы уверены, что хотите остановить процесс?</string>
     <string name="cancel_process">Отменить процесс</string>
     <string name="continue_print">Продолжить</string>

@@ -710,6 +710,11 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                             for (i in 0 until confirmations.coerceAtMost(6)) {
                                 confirmationBlocks[i].setBackgroundColor(Color.GREEN)
                             }
+
+                            if (confirmations >= 10) {
+                                // Stop the repeated API calls
+                                handler.removeCallbacksAndMessages(null)
+                            }
                         }
 
                         lifecycleScope.launch(Dispatchers.IO) {
