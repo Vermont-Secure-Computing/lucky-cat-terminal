@@ -137,7 +137,7 @@
     <string name="transaction_id">交易ID：%1$s</string>
     <string name="fees">手续费：%1$s</string>
     <string name="confirmations">确认数：%1$d</string>
-    <string name="payment_error">支付错误：%1$s</string>
+    <string name="payment_error">支付错误</string>
     <string name="are_you_sure_you_want_to_stop_the_process">确定要停止此过程吗？</string>
     <string name="cancel_process">取消过程</string>
     <string name="continue_print">继续</string>

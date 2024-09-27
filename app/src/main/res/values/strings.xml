@@ -137,7 +137,7 @@
     <string name="transaction_id">Transaction ID: %1$s</string>
     <string name="fees">Fees: %1$s</string>
     <string name="confirmations">Confirmations: %1$d</string>
-    <string name="payment_error">Payment Error: %1$s</string>
+    <string name="payment_error">Payment Error</string>
     <string name="are_you_sure_you_want_to_stop_the_process">Are you sure you want to stop the process?</string>
     <string name="cancel_process">Cancel Process</string>
     <string name="continue_print">Continue</string>
