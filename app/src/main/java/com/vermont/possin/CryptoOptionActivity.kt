@@ -43,6 +43,7 @@ class CryptoOptionActivity : AppCompatActivity() {
     private var dashManager: DashManager? = null
     private var tronManager: TronManager? = null
     private var bitcoincashManager: BitcoinCashManager? = null
+    private var moneroManager: MoneroManager? = null
     private lateinit var selectedCurrencyCode: String
     private lateinit var message: String
     private var loadingDialog: AlertDialog? = null
@@ -79,6 +80,19 @@ class CryptoOptionActivity : AppCompatActivity() {
         xPubs["Dash"]?.let { dashManager = DashManager(this, it) }
         xPubs["Tether"]?.let { tronManager = TronManager(this, it) }
         xPubs["Bitcoincash"]?.let { bitcoincashManager = BitcoinCashManager(this, it) }
+
+
+        val properties = loadPropertiesFromConfigFile()
+        val privateViewKey = properties.getProperty("Monero_view_key")
+        val moneroAddress = properties.getProperty("Monero_value")
+
+        if (privateViewKey != null && moneroAddress != null) {
+            moneroManager = MoneroManager(this, privateViewKey, moneroAddress)
+        } else {
+            Log.e("Monero", "Monero keys or address not found in config file.")
+        }
+
+
 
         selectedCurrencyCode = intent.getStringExtra("CURRENCY_CODE") ?: "BTC"
 
@@ -282,7 +296,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             "USDT" -> handleUSDTClick(price)
             "DASH" -> handleDASHlick(price)
             "BCH" -> handleBCHlick(price)
-            // Add other cryptocurrencies as needed
+            "XMR" -> handleMoneroClick(price)
         }
     }
 
@@ -500,11 +514,50 @@ class CryptoOptionActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleMoneroClick(price: String) {
+        moneroManager?.let { manager ->
+            val address = manager.getAddress()
+
+            if (address != null && MoneroManager.isValidAddress(address)) {
+                val numericPrice = price.filter { it.isDigit() || it == '.' }
+
+                // Call the postConversionApi for Monero
+                postConversionApi(numericPrice, selectedCurrencyCode, address, "XMR", R.drawable.monero_logo) { feeStatus, status, formattedRate ->
+                    dismissLoadingDialog()
+                    if (formattedRate.isNotEmpty()) {
+                        // After getting the conversion rate, generate the QR code
+                        startGenerateQRActivity(
+                            address,
+                            formattedRate,
+                            R.drawable.monero_logo,
+                            "XMR",
+                            0,
+                            feeStatus,
+                            status,
+                            "Monero",
+                            numericPrice,
+                            selectedCurrencyCode
+                        )
+                    } else {
+                        Toast.makeText(this, R.string.conversion_failed, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                dismissLoadingDialog()
+                Toast.makeText(this, R.string.invalid_monero_address, Toast.LENGTH_SHORT).show()
+            }
+        } ?: run {
+            dismissLoadingDialog()
+            Toast.makeText(this, R.string.monero_manager_not_initialized, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
     private fun postConversionApi(price: String, currency: String, address: String, chain: String, logoResId: Int, onResult: (String, String, String) -> Unit) {
         val apiService = RetrofitClient.getApiService(this)
-        println("Price $price")
-        println("Currency $currency")
-        println("Chain $chain")
+        Log.d("Price ", price)
+        Log.d("Currency ", currency)
+        Log.d("Chain ", chain)
         val requestBody = ConversionRequestBody(price, currency, chain)
         val call = apiService.postConversion(requestBody)
 
@@ -544,6 +597,15 @@ class CryptoOptionActivity : AppCompatActivity() {
                 onResult("", "", "")
             }
         })
+    }
+
+    private fun loadPropertiesFromConfigFile(): Properties {
+        val properties = Properties()
+        val propertiesFile = File(filesDir, "config.properties")
+        if (propertiesFile.exists()) {
+            properties.load(propertiesFile.inputStream())
+        }
+        return properties
     }
 
     fun formatConversionRate(rate: Double, decimalPlaces: Int = 8): String {

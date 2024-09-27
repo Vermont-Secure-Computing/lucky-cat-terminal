@@ -151,4 +151,7 @@
     <string name="insuficient_payment">支付不足</string>
     <string name="retry">重试</string>
     <string name="transaction_details_space">交易详情\n</string>
+    <string name="enter_private_view_key">输入私密视图密钥</string>
+    <string name="restore_height">恢复高度</string>
+    <string name="monero_manager_not_initialized">Monero管理器未初始化</string>
 </resources>
