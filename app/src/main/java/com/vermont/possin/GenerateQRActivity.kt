@@ -153,6 +153,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             "TRON-NETWORK" -> "tron:$address?amount=$formattedPrice"
             "DASH" -> "dash:$address?amount=$formattedPrice"
             "BCH" -> "bitcoincash:$address?amount=$formattedPrice"
+            "XMR" -> "monero:$address?amount=$formattedPrice"
             else -> "bitcoin:$address?amount=$formattedPrice"
         }
 
@@ -491,6 +492,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                 "TRON-NETWORK" -> "tron:$address?amount=$difference"
                 "DASH" -> "dash:$address?amount=$difference"
                 "BCH" -> "bitcoincash:$address?amount=$difference"
+                "XMR" -> "monero:$address?amount=$difference"
                 else -> "bitcoin:$address?amount=$difference"
             }
 
@@ -652,6 +654,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             "Tron-network" -> TronManager.PREFS_NAME
             "Dash" -> DashManager.PREFS_NAME
             "Bitcoincash" -> BitcoinManager.PREFS_NAME
+            "Monero" -> MoneroManager.PREFS_NAME
             else -> BitcoinManager.PREFS_NAME
         }
     }
@@ -665,6 +668,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
             "Tron-network" -> TronManager.LAST_INDEX_KEY
             "Dash" -> DashManager.LAST_INDEX_KEY
             "Bitcoincash" -> BitcoinCashManager.LAST_INDEX_KEY
+            "Monero" -> MoneroManager.LAST_INDEX_KEY
             else -> BitcoinManager.LAST_INDEX_KEY
         }
     }
@@ -698,6 +702,7 @@ class GenerateQRActivity : AppCompatActivity(), CustomWebSocketListener.PaymentS
                     val responseData = response.body?.string()
                     responseData?.let {
                         val jsonObject = JSONObject(it)
+                        Log.d("JSON CONFIRMATION", jsonObject.toString())
                         val confirmations = jsonObject.getInt("confirmations")
 
                         runOnUiThread {

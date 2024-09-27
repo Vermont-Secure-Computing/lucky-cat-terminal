@@ -22,6 +22,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
+import com.vermont.possin.model.ApiResponse
+import com.vermont.possin.network.MoneroWalletRequestBody
+import com.vermont.possin.network.RetrofitClient
+import retrofit2.Call
 import java.io.File
 import java.util.Properties
 
@@ -119,12 +123,27 @@ class XpubAddress : AppCompatActivity() {
 
             // Get the private view key field (initially hidden)
             val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
+            val restoreHeightField = itemView.findViewById<EditText>(R.id.restore_height_field)
 
             // Show the view key field if the crypto is Monero
             if (crypto.name == "Monero") {
                 viewKeyField.visibility = View.VISIBLE
+                restoreHeightField.visibility = View.VISIBLE
+
+                // Load saved Monero-specific values (view key and restore height)
+                val savedViewKey = properties.getProperty("Monero_view_key")
+                val savedRestoreHeight = properties.getProperty("Monero_height")
+
+                // Set the saved values to the respective fields if they exist
+                if (savedViewKey != null) {
+                    viewKeyField.setText(savedViewKey)
+                }
+                if (savedRestoreHeight != null) {
+                    restoreHeightField.setText(savedRestoreHeight)
+                }
             } else {
                 viewKeyField.visibility = View.GONE
+                restoreHeightField.visibility = View.GONE
             }
 
             val logoId = resources.getIdentifier(crypto.logo, "drawable", packageName)
@@ -217,6 +236,7 @@ class XpubAddress : AppCompatActivity() {
         }
     }
 
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         val result: IntentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
@@ -235,23 +255,35 @@ class XpubAddress : AppCompatActivity() {
                     val walletAddress = parts[0] // The address part (before the ?)
                     val queryParams = parts[1] // The query parameters (after the ?)
 
-                    // Extract the view key from the query parameters
+                    // Extract the view key and restore height from the query parameters
                     val queryMap = queryParams.split("&").associate {
                         val (key, value) = it.split("=")
                         key to value
                     }
 
                     val viewKey = queryMap["view_key"]
+                    val restoreHeight = queryMap["height"] // Extract the restore height
 
                     // Set the values to the respective fields
                     currentInputField?.setText(walletAddress)
                     currentInputField = null // Clear the reference after use
 
-                    // Find the view key field in the current item and set the value
-                    if (viewKey != null) {
+                    if (viewKey != null || restoreHeight != null) {
                         val itemView = cryptocurrencyContainer.getChildAt(filteredCryptocurrencies.indexOfFirst { it.name == "Monero" })
+
+                        // Find the view key and restore height fields
                         val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
-                        viewKeyField?.setText(viewKey)
+                        val restoreHeightField = itemView.findViewById<EditText>(R.id.restore_height_field)
+
+                        // Set the view key if it exists
+                        if (viewKey != null) {
+                            viewKeyField?.setText(viewKey)
+                        }
+
+                        // Set the restore height if it exists
+                        if (restoreHeight != null) {
+                            restoreHeightField?.setText(restoreHeight)
+                        }
                     }
                 }
             } else {
@@ -262,8 +294,11 @@ class XpubAddress : AppCompatActivity() {
         }
     }
 
+
     private fun saveCryptocurrencyValues() {
         properties.remove("default_key")
+
+        var moneroWalletData: MoneroWalletRequestBody? = null // To store Monero data for API call
 
         for (i in 0 until cryptocurrencyContainer.childCount) {
             val itemView = cryptocurrencyContainer.getChildAt(i)
@@ -279,46 +314,94 @@ class XpubAddress : AppCompatActivity() {
 
             // Check if inputType is "address" and cryptoName is "Bitcoincash"
             if (inputType == "address" && cryptoName == "Bitcoincash") {
-                // Skip saving if no value is entered
-                if (value.isEmpty()) {
-                    continue // Skip this entry if there's no value
-                }
-                // Add "bitcoincash:" prefix if it's not present
+                if (value.isEmpty()) continue
                 if (!value.startsWith("bitcoincash:", true)) {
                     value = "bitcoincash:$value"
                 }
             }
 
-            // For Monero, save the private view key
+            // Handle Monero-specific logic
             if (cryptoName == "Monero") {
                 val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
                 val viewKey = viewKeyField.text.toString()
-                if (viewKey.isNotEmpty()) {
-                    properties.setProperty("${cryptoName}_view_key", viewKey)
-                }
-            }
 
-            // Only save if value is not empty
-            if (value.isNotEmpty()) {
-                properties.setProperty("${cryptoName}_type", inputType)
-                if (inputType == "xpub" && (cryptoName == "Bitcoin" || cryptoName == "Litecoin")) {
-                    properties.setProperty("${cryptoName}_segwit_legacy", segwitLegacy)
+                val restoreHeightField = itemView.findViewById<EditText>(R.id.restore_height_field)
+                val restoreHeight = restoreHeightField.text.toString()
+
+                val savedAddress = properties.getProperty("Monero_value")
+                val savedViewKey = properties.getProperty("Monero_view_key")
+                val savedRestoreHeight = properties.getProperty("Monero_height")
+
+                // Check if the new values are different from the saved values
+                val isMoneroChanged = (savedAddress != value || savedViewKey != viewKey || savedRestoreHeight != restoreHeight)
+
+                if (isMoneroChanged) {
+                    // Prepare Monero data if values are different
+                    if (viewKey.isNotEmpty() && value.isNotEmpty()) {
+                        moneroWalletData = MoneroWalletRequestBody(
+                            primaryAddress = value,
+                            privateViewKey = viewKey,
+                            restoreHeight = restoreHeight
+                        )
+                    }
                 }
-                properties.setProperty("${cryptoName}_value", value)
+            } else {
+                // Save other cryptocurrency data directly
+                if (value.isNotEmpty()) {
+                    properties.setProperty("${cryptoName}_type", inputType)
+                    if (inputType == "xpub" && (cryptoName == "Bitcoin" || cryptoName == "Litecoin")) {
+                        properties.setProperty("${cryptoName}_segwit_legacy", segwitLegacy)
+                    }
+                    properties.setProperty("${cryptoName}_value", value)
+                }
             }
         }
 
-        // Manually write properties to avoid colon escaping
+        // If Monero data exists and has changed, make the API call before saving it
+        if (moneroWalletData != null) {
+            val apiService = RetrofitClient.getApiService(this)
+            val call = apiService.createMoneroWallet(moneroWalletData!!)
+            call.enqueue(object : retrofit2.Callback<ApiResponse> {
+                override fun onResponse(call: Call<ApiResponse>, response: retrofit2.Response<ApiResponse>) {
+                    if (response.isSuccessful) {
+                        // Save Monero after successful API response
+                        properties.setProperty("Monero_view_key", moneroWalletData!!.privateViewKey)
+                        properties.setProperty("Monero_height", moneroWalletData!!.restoreHeight)
+                        properties.setProperty("Monero_value", moneroWalletData!!.primaryAddress)
+                        properties.setProperty("Monero_type", "address")
+
+                        // Save all properties to file
+                        savePropertiesToFile()
+                        showSuccessModal()
+                    } else {
+                        // Show error if the API call fails
+                        showErrorModal("Failed to save Monero data. Please try again.")
+                    }
+                }
+
+                override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                    // Handle API failure
+                    showErrorModal("Failed to save Monero. Please check your network connection.")
+                }
+            })
+        } else {
+            // If no Monero changes or no Monero data, just save the other cryptocurrencies
+            savePropertiesToFile()
+            showSuccessModal()
+        }
+    }
+
+
+    private fun savePropertiesToFile() {
         val propertiesFile = File(filesDir, "config.properties")
         propertiesFile.bufferedWriter().use { writer ->
-            properties.forEach { key, v ->
-                val value = v.toString().replace("\\", "") // Ensure no backslashes
-                writer.write("$key=$value\n")
+            properties.forEach { key, value ->
+                writer.write("$key=${value.toString().replace("\\", "")}\n")
             }
         }
-
-        showSuccessModal()
     }
+
+
 
 
 
@@ -426,6 +509,21 @@ class XpubAddress : AppCompatActivity() {
         val intent = Intent(this, HomeActivity::class.java)
         startActivity(intent)
         finish()
+    }
+
+    private fun showErrorModal(message: String) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_error, null)
+        val dialog = Dialog(this, R.style.CustomDialog)
+        dialog.setContentView(dialogView)
+        dialog.setCancelable(false)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        val errorMessage = dialogView.findViewById<TextView>(R.id.error_message)
+        errorMessage.text = message
+        dialogView.findViewById<Button>(R.id.btn_ok).setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
     }
 
     // Getter methods for testing

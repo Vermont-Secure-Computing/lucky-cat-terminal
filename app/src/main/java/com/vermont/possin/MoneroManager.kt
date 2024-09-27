@@ -1,8 +1,8 @@
 package com.vermont.possin
 
 import android.content.Context
-import android.content.res.AssetManager
 import android.util.Log
+import java.io.File
 import java.util.Properties
 
 class MoneroManager(private val context: Context, private val privateViewKey: String, private val privateSpendKey: String) {
@@ -31,11 +31,19 @@ class MoneroManager(private val context: Context, private val privateViewKey: St
 
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun getAddress(index: Int): String {
-        val addressType = getAddressTypeFromConfig()
-        val newAddress = deriveAddress(privateViewKey, privateSpendKey, index, addressType)
-        saveLastIndex(index)
-        return newAddress
+    // Get the Monero address from config.properties
+    fun getAddress(): String? {
+        val properties = Properties()
+        try {
+            val propertiesFile = File(context.filesDir, "config.properties")
+            if (propertiesFile.exists()) {
+                properties.load(propertiesFile.inputStream())
+                return properties.getProperty("Monero_value") // Retrieve Monero address from config.properties
+            }
+        } catch (e: Exception) {
+            Log.e("MoneroManager", "Error reading config.properties", e)
+        }
+        return null // Return null if the address is not found
     }
 
     fun saveLastIndex(index: Int) {
@@ -47,28 +55,6 @@ class MoneroManager(private val context: Context, private val privateViewKey: St
 
     private fun getLastIndex(): Int {
         return sharedPreferences.getInt(LAST_INDEX_KEY, -1)
-    }
-
-    // Simple method to derive an address based on private keys
-    private fun deriveAddress(viewKey: String, spendKey: String, index: Int, addressType: String): String {
-        // Dummy logic to generate an address (you can replace this with actual derivation logic)
-        Log.d("Monero", "Deriving address for index $index with $addressType type")
-        return "4DummyMoneroAddressForIndex$index"
-    }
-
-    private fun getAddressTypeFromConfig(): String {
-        val assetManager: AssetManager = context.assets
-        val properties = Properties()
-
-        try {
-            assetManager.open("config.properties").use { inputStream ->
-                properties.load(inputStream)
-            }
-        } catch (e: Exception) {
-            Log.e("MoneroManager", "Error reading config.properties", e)
-        }
-
-        return properties.getProperty("Monero_address_type", "standard")
     }
 
     fun getPrivateViewKey(): String {

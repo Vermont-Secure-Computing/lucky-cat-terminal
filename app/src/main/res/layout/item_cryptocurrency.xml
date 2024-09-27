@@ -110,11 +110,22 @@
             android:id="@+id/view_key_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter private view key"
+            android:hint="@string/enter_private_view_key"
             android:background="@drawable/bordered_edit_text"
             android:layout_marginTop="8dp"
             android:padding="8dp"
             android:inputType="text"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/restore_height_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/restore_height"
+            android:background="@drawable/bordered_edit_text"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:inputType="number"
             android:visibility="gone" />
 
         <TextView

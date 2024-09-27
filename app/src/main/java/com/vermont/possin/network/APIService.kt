@@ -22,4 +22,9 @@ interface ApiService {
 
     @GET("metrics")
     fun getMetrics(): Call<String>
+
+    @POST("terminal/xmr/create-wallet")
+    fun createMoneroWallet(
+        @Body walletRequestBody: MoneroWalletRequestBody
+    ): Call<ApiResponse>
 }

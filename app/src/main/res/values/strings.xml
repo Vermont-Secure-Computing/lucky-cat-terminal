@@ -151,4 +151,7 @@
     <string name="insuficient_payment">Insufficient Payment</string>
     <string name="retry">Retry</string>
     <string name="transaction_details_space">Transaction Details\n</string>
+    <string name="enter_private_view_key">Enter private view key</string>
+    <string name="restore_height">Restore Height</string>
+    <string name="monero_manager_not_initialized">Monero Manager not initialized</string>
 </resources>
