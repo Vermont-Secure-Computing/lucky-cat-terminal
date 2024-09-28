@@ -18,6 +18,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.zxing.integration.android.IntentIntegrator
@@ -25,6 +26,7 @@ import com.google.zxing.integration.android.IntentResult
 import com.vermont.possin.model.ApiResponse
 import com.vermont.possin.network.MoneroWalletRequestBody
 import com.vermont.possin.network.RetrofitClient
+import pl.droidsonroids.gif.GifDrawable
 import retrofit2.Call
 import java.io.File
 import java.util.Properties
@@ -41,6 +43,7 @@ class XpubAddress : AppCompatActivity() {
     private lateinit var submitText: TextView
     private lateinit var backArrow: ImageView
     private var currentInputField: EditText? = null
+    private var loadingDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,27 +126,21 @@ class XpubAddress : AppCompatActivity() {
 
             // Get the private view key field (initially hidden)
             val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
-            val restoreHeightField = itemView.findViewById<EditText>(R.id.restore_height_field)
 
             // Show the view key field if the crypto is Monero
             if (crypto.name == "Monero") {
                 viewKeyField.visibility = View.VISIBLE
-                restoreHeightField.visibility = View.VISIBLE
 
                 // Load saved Monero-specific values (view key and restore height)
                 val savedViewKey = properties.getProperty("Monero_view_key")
-                val savedRestoreHeight = properties.getProperty("Monero_height")
 
                 // Set the saved values to the respective fields if they exist
                 if (savedViewKey != null) {
                     viewKeyField.setText(savedViewKey)
                 }
-                if (savedRestoreHeight != null) {
-                    restoreHeightField.setText(savedRestoreHeight)
-                }
+
             } else {
                 viewKeyField.visibility = View.GONE
-                restoreHeightField.visibility = View.GONE
             }
 
             val logoId = resources.getIdentifier(crypto.logo, "drawable", packageName)
@@ -262,28 +259,18 @@ class XpubAddress : AppCompatActivity() {
                     }
 
                     val viewKey = queryMap["view_key"]
-                    val restoreHeight = queryMap["height"] // Extract the restore height
 
                     // Set the values to the respective fields
                     currentInputField?.setText(walletAddress)
                     currentInputField = null // Clear the reference after use
 
-                    if (viewKey != null || restoreHeight != null) {
+                    if (viewKey != null) {
                         val itemView = cryptocurrencyContainer.getChildAt(filteredCryptocurrencies.indexOfFirst { it.name == "Monero" })
 
                         // Find the view key and restore height fields
                         val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
-                        val restoreHeightField = itemView.findViewById<EditText>(R.id.restore_height_field)
+                        viewKeyField?.setText(viewKey)
 
-                        // Set the view key if it exists
-                        if (viewKey != null) {
-                            viewKeyField?.setText(viewKey)
-                        }
-
-                        // Set the restore height if it exists
-                        if (restoreHeight != null) {
-                            restoreHeightField?.setText(restoreHeight)
-                        }
                     }
                 }
             } else {
@@ -325,23 +312,18 @@ class XpubAddress : AppCompatActivity() {
                 val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
                 val viewKey = viewKeyField.text.toString()
 
-                val restoreHeightField = itemView.findViewById<EditText>(R.id.restore_height_field)
-                val restoreHeight = restoreHeightField.text.toString()
-
                 val savedAddress = properties.getProperty("Monero_value")
                 val savedViewKey = properties.getProperty("Monero_view_key")
-                val savedRestoreHeight = properties.getProperty("Monero_height")
 
                 // Check if the new values are different from the saved values
-                val isMoneroChanged = (savedAddress != value || savedViewKey != viewKey || savedRestoreHeight != restoreHeight)
+                val isMoneroChanged = (savedAddress != value || savedViewKey != viewKey)
 
                 if (isMoneroChanged) {
                     // Prepare Monero data if values are different
                     if (viewKey.isNotEmpty() && value.isNotEmpty()) {
                         moneroWalletData = MoneroWalletRequestBody(
                             primaryAddress = value,
-                            privateViewKey = viewKey,
-                            restoreHeight = restoreHeight
+                            privateViewKey = viewKey
                         )
                     }
                 }
@@ -359,14 +341,15 @@ class XpubAddress : AppCompatActivity() {
 
         // If Monero data exists and has changed, make the API call before saving it
         if (moneroWalletData != null) {
+            showLoadingDialog() // Show the existing loading dialog before making the API call
             val apiService = RetrofitClient.getApiService(this)
             val call = apiService.createMoneroWallet(moneroWalletData!!)
             call.enqueue(object : retrofit2.Callback<ApiResponse> {
                 override fun onResponse(call: Call<ApiResponse>, response: retrofit2.Response<ApiResponse>) {
+                    dismissLoadingDialog() // Dismiss the loading dialog after API response
                     if (response.isSuccessful) {
                         // Save Monero after successful API response
                         properties.setProperty("Monero_view_key", moneroWalletData!!.privateViewKey)
-                        properties.setProperty("Monero_height", moneroWalletData!!.restoreHeight)
                         properties.setProperty("Monero_value", moneroWalletData!!.primaryAddress)
                         properties.setProperty("Monero_type", "address")
 
@@ -380,6 +363,7 @@ class XpubAddress : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                    dismissLoadingDialog() // Dismiss the loading dialog if API call fails
                     // Handle API failure
                     showErrorModal("Failed to save Monero. Please check your network connection.")
                 }
@@ -391,7 +375,27 @@ class XpubAddress : AppCompatActivity() {
         }
     }
 
+    private fun showLoadingDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_loading, null)
+        val gifImageView: ImageView = dialogView.findViewById(R.id.loadingGifImageView)
+        val gifDrawable = GifDrawable(resources, R.raw.rotating_arc_gradient_thick)
+        gifImageView.setImageDrawable(gifDrawable)
 
+        val builder = AlertDialog.Builder(this)
+        builder.setView(dialogView)
+        builder.setCancelable(false)
+
+        loadingDialog = builder.create()
+        loadingDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        loadingDialog?.window?.setDimAmount(0.5f)
+        loadingDialog?.show()
+    }
+
+    // Function to dismiss the loading dialog
+    private fun dismissLoadingDialog() {
+        loadingDialog?.dismiss()
+        loadingDialog = null
+    }
     private fun savePropertiesToFile() {
         val propertiesFile = File(filesDir, "config.properties")
         propertiesFile.bufferedWriter().use { writer ->

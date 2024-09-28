@@ -2,6 +2,5 @@ package com.vermont.possin.network
 
 data class MoneroWalletRequestBody(
     val primaryAddress: String,
-    val privateViewKey: String,
-    val restoreHeight: String
+    val privateViewKey: String
 )
