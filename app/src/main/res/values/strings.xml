@@ -154,4 +154,5 @@
     <string name="enter_private_view_key">Enter private view key</string>
     <string name="restore_height">Restore Height</string>
     <string name="monero_manager_not_initialized">Monero Manager not initialized</string>
+    <string name="server_response_error_please_verify_transaction_with_merchant">Server Response Error, Please verify this transaction with the merchant</string>
 </resources>

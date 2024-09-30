@@ -153,5 +153,5 @@
     <string name="transaction_details_space">交易详情\n</string>
     <string name="enter_private_view_key">输入私密视图密钥</string>
     <string name="restore_height">恢复高度</string>
-    <string name="monero_manager_not_initialized">Monero管理器未初始化</string>
+    <string name="server_response_error_please_verify_transaction_with_merchant">服务器响应错误，请与商户确认此交易</string>
 </resources>
