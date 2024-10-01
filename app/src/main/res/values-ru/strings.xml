@@ -153,5 +153,10 @@
     <string name="transaction_details_space">Детали транзакции\n</string>
     <string name="enter_private_view_key">Введите приватный ключ просмотра</string>
     <string name="restore_height">Восстановить высоту</string>
+    <string name="monero_manager_not_initialized">Менеджер Monero не инициализирован</string>
     <string name="server_response_error_please_verify_transaction_with_merchant">Ошибка ответа сервера, пожалуйста, подтвердите эту транзакцию с продавцом</string>
+    <string name="try_again">Попробуйте снова</string>
+    <string name="payment_timeout">Тайм-аут платежа</string>
+    <string name="please_choose_an_option">Пожалуйста, выберите вариант.</string>
+    <string name="value_successfully_added">Значение успешно добавлено</string>
 </resources>

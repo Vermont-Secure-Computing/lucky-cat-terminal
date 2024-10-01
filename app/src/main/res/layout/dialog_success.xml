@@ -17,7 +17,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Value Successfully Added"
+            android:text="@string/value_successfully_added"
             android:textSize="18sp"
             android:textColor="@android:color/black"
             android:layout_gravity="center"
@@ -27,7 +27,9 @@
             android:id="@+id/btn_ok"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="OK"
+            android:text="@string/ok"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/tapeRed"
             android:layout_gravity="center"/>
     </LinearLayout>
 
