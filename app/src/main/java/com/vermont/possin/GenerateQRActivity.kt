@@ -105,6 +105,7 @@
             private lateinit var amountBaseCurrencyPrice: TextView
             private lateinit var amountTextViewAddress: TextView
             private lateinit var amountTextViewAddressChain: TextView
+            private var paymentReceived = false
 
             private lateinit var db: AppDatabase
 
@@ -293,7 +294,7 @@
             }
 
             private fun startTimer() {
-                val milliseconds = 30 * 60 * 1000L
+                val milliseconds = 15 * 60 * 1000L
                 countDownTimer = object : CountDownTimer(milliseconds, 1000) {
                     override fun onTick(millisUntilFinished: Long) {
                         val minutes = millisUntilFinished / 1000 / 60
@@ -302,12 +303,40 @@
                     }
 
                     override fun onFinish() {
-                        // Handle the timer finish event
+                        // Timer has ended
                         timerTextView.text = "00:00"
-                        // Perform any action when the timer finishes
-                        // For example, show a dialog or navigate to another screen
+
+                        // Close WebSocket if it's open
+                        if (!paymentReceived && ::webSocket.isInitialized) {
+                            webSocket.close(1000, "Time expired without payment")
+                            showRetryDialog() // Show retry dialog
+                            connectWebSocket("cancel") // Cancel the WebSocket session
+                        }
                     }
                 }.start()
+            }
+
+            private fun showRetryDialog() {
+                val dialogView = layoutInflater.inflate(R.layout.retry_dialog, null)
+                val dialog = AlertDialog.Builder(this)
+                    .setView(dialogView)
+                    .setCancelable(false) // Make the dialog modal
+                    .create()
+
+                // Set up the "Try Again" button
+                dialogView.findViewById<Button>(R.id.btnTryAgain).setOnClickListener {
+                    dialog.dismiss()
+                    startTimer()
+                    connectWebSocket("checkBalance")
+                }
+
+                // Set up the "Go Home" button
+                dialogView.findViewById<Button>(R.id.btnHome).setOnClickListener {
+                    dialog.dismiss()
+                    stopRepeatedApiCallsAndNavigateHome()
+                }
+
+                dialog.show()
             }
 
             private fun generateQRCodeWithLogo(text: String, logoResId: Int): Bitmap {
@@ -600,8 +629,8 @@
                         this.txid = txid
                         this.chain = chain
 
-                        // Start repeated API calls
                         startRepeatedApiCalls()
+
                         if (initialTxid.isNotEmpty()) {
                             saveTransaction(balance, previousReceivedAmt,  txid, initialTxid, fees, confirmations, chain, message, numericPrice, selectedCurrencyCode, websocketParams.address, "from insufficient")
                         } else {
@@ -610,9 +639,22 @@
 
                         printButton.visibility = View.VISIBLE
                     }
+                    if (::countDownTimer.isInitialized) {
+                        countDownTimer.cancel()
+                    }
+
+                    paymentReceived = true
+
+                    if (::webSocket.isInitialized) {
+                        webSocket.close(1000, "Payment received")
+                    }
                 }
             }
 
+            private fun stopRepeatedApiCallsAndNavigateHome() {
+                handler.removeCallbacksAndMessages(null) // Stop repeated API calls
+                navigateToHome() // Redirect to HomeActivity
+            }
 
             override fun onPaymentError(error: String) {
                 runOnUiThread {
@@ -733,7 +775,7 @@
 
                                     if (confirmations >= 10) {
                                         // Stop the repeated API calls
-                                        handler.removeCallbacksAndMessages(null)
+                                        stopRepeatedApiCallsAndNavigateHome()
                                     }
                                 }
 
@@ -835,7 +877,7 @@
 
                 dialogView.findViewById<Button>(R.id.btnOkay).setOnClickListener {
                     dialog.dismiss()
-                    navigateToHome()
+                    stopRepeatedApiCallsAndNavigateHome()
                 }
 
                 dialog.show()
