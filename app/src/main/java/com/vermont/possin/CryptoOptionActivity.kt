@@ -319,7 +319,8 @@ class CryptoOptionActivity : AppCompatActivity() {
                         status,
                         "Bitcoin",
                         numericPrice,
-                        selectedCurrencyCode
+                        selectedCurrencyCode,
+                        "BTC"
                     )
                 }
             }
@@ -348,7 +349,8 @@ class CryptoOptionActivity : AppCompatActivity() {
                         status,
                         "Litecoin",
                         numericPrice,
-                        selectedCurrencyCode
+                        selectedCurrencyCode,
+                        "LTC"
                     )
                 }
             }
@@ -377,7 +379,8 @@ class CryptoOptionActivity : AppCompatActivity() {
                         status,
                         "Ethereum",
                         numericPrice,
-                        selectedCurrencyCode
+                        selectedCurrencyCode,
+                        "ETH"
                     )
                 }
             }
@@ -406,7 +409,8 @@ class CryptoOptionActivity : AppCompatActivity() {
                         status,
                         "Dogecoin",
                         numericPrice,
-                        selectedCurrencyCode
+                        selectedCurrencyCode,
+                        "DOGE"
                     )
                 }
             }
@@ -435,7 +439,8 @@ class CryptoOptionActivity : AppCompatActivity() {
                         status,
                         "Tron-network",
                         numericPrice,
-                        selectedCurrencyCode
+                        selectedCurrencyCode,
+                        "USDT"
                     )
                 }
             }
@@ -475,7 +480,8 @@ class CryptoOptionActivity : AppCompatActivity() {
                         status,
                         "Dash",
                         numericPrice,
-                        selectedCurrencyCode
+                        selectedCurrencyCode,
+                        "DASH"
                     )
                 }
             }
@@ -504,7 +510,8 @@ class CryptoOptionActivity : AppCompatActivity() {
                         status,
                         "Bitcoincash",
                         numericPrice,
-                        selectedCurrencyCode
+                        selectedCurrencyCode,
+                        "BCH"
                     )
                 }
             }
@@ -536,7 +543,8 @@ class CryptoOptionActivity : AppCompatActivity() {
                             status,
                             "Monero",
                             numericPrice,
-                            selectedCurrencyCode
+                            selectedCurrencyCode,
+                            "XMR"
                         )
                     } else {
                         Toast.makeText(this, R.string.conversion_failed, Toast.LENGTH_SHORT).show()
@@ -615,7 +623,7 @@ class CryptoOptionActivity : AppCompatActivity() {
         return decimalFormat.format(bigDecimal)
     }
 
-    private fun startGenerateQRActivity(address: String, price: String, logoResId: Int, currency: String, index: Int, feeStatus: String, status: String, managerType: String, numericPrice: String, selectedCurrencyCode: String) {
+    private fun startGenerateQRActivity(address: String, price: String, logoResId: Int, currency: String, index: Int, feeStatus: String, status: String, managerType: String, numericPrice: String, selectedCurrencyCode: String, shortname: String) {
         Log.d("MESSAGE", message)
         val intent = Intent(this, GenerateQRActivity::class.java).apply {
             putExtra("ADDRESS", address)
@@ -629,6 +637,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             putExtra("MESSAGE", message)
             putExtra("NUMERIC_PRICE", numericPrice)
             putExtra("SELECTED_CURRENCY_CODE", selectedCurrencyCode)
+            putExtra("SHORTNAME", shortname)  // Pass the shortname of the cryptocurrency
         }
         startActivity(intent)
     }

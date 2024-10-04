@@ -159,4 +159,6 @@
     <string name="payment_timeout">Payment Timeout</string>
     <string name="please_choose_an_option">Please choose an option.</string>
     <string name="value_successfully_added">Value Successfully Added</string>
+    <string name="file_saved_at">File saved at: %1$s</string>
+    <string name="failed_to_save_the_CSV_file">Failed to save the CSV file</string>
 </resources>

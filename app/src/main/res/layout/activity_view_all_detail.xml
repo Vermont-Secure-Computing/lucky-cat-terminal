@@ -99,6 +99,14 @@
                 android:padding="8dp"/>
 
             <TextView
+                android:id="@+id/coinTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:padding="8dp"/>
+
+            <TextView
                 android:id="@+id/dateTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
