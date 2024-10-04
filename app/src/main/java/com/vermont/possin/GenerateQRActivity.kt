@@ -532,8 +532,10 @@
                     connectWebSocketForRetry(address, difference.toString(), currency, txid)
                 }
 
+                val coin = intent.getStringExtra("SHORTNAME") ?: "UnknownCoin"
+
                 dialogView.findViewById<Button>(R.id.btnCancel).setOnClickListener {
-                    saveTransaction(receivedAmt, difference,  txid, initialTxid, fees, confirmations, chain, message, numericPrice, selectedCurrencyCode, websocketParams.address, "insufficient")
+                    saveTransaction(receivedAmt, difference,  txid, initialTxid, fees, confirmations, chain, coin, message, numericPrice, selectedCurrencyCode, websocketParams.address, "insufficient")
                     printReceipt(receivedAmt, totalAmount, difference, txid, fees, confirmations, chain)
                     saveLastIndex(addressIndex, managerType)
                     dialog.dismiss()
@@ -631,10 +633,12 @@
 
                         startRepeatedApiCalls()
 
+                        val coin = intent.getStringExtra("SHORTNAME") ?: "UnknownCoin"
+
                         if (initialTxid.isNotEmpty()) {
-                            saveTransaction(balance, previousReceivedAmt,  txid, initialTxid, fees, confirmations, chain, message, numericPrice, selectedCurrencyCode, websocketParams.address, "from insufficient")
+                            saveTransaction(balance, previousReceivedAmt,  txid, initialTxid, fees, confirmations, chain, coin, message, numericPrice, selectedCurrencyCode, websocketParams.address, "from insufficient")
                         } else {
-                            saveTransaction(balance, previousReceivedAmt,  txid, initialTxid, fees, confirmations, chain, message, numericPrice, selectedCurrencyCode, websocketParams.address, "paid")
+                            saveTransaction(balance, previousReceivedAmt,  txid, initialTxid, fees, confirmations, chain, coin, message, numericPrice, selectedCurrencyCode, websocketParams.address, "paid")
                         }
 
                         printButton.visibility = View.VISIBLE
@@ -815,7 +819,7 @@
                 receiptDialog.show(supportFragmentManager, "ReceiptDialog")
             }
 
-            private fun saveTransaction(balance: Double? = null, balanceIn: Double? = null, txid: String? = null, txidIn: String? = null, fees: Double? = null, confirmations: Int = 0, chain: String, message: String? = null, numericPrice: String, selectedCurrencyCode: String, address: String, txtype: String) {
+            private fun saveTransaction(balance: Double? = null, balanceIn: Double? = null, txid: String? = null, txidIn: String? = null, fees: Double? = null, confirmations: Int = 0, chain: String, coin: String, message: String? = null, numericPrice: String, selectedCurrencyCode: String, address: String, txtype: String) {
                 val currentBalance = balance ?: balanceTextView.text.toString().replace("Balance: ", "").toDouble()
                 val currentTxid = txid ?: txidTextView.text.toString().replace("Transaction ID: ", "")
                 val currentFees = fees ?: feesTextView.text.toString().replace("Fees: ", "").toDouble()
@@ -823,6 +827,7 @@
                 val currentConfirmations = confirmationsString.replace(Regex("[^0-9]"), "").toInt()
                 val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
                 val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+                Log.d("COIN", coin)
 
                 val transaction = Transaction(
                     balance = currentBalance,
@@ -834,6 +839,7 @@
                     date = currentDate,
                     time = currentTime,
                     chain = chain,
+                    coin = coin,
                     message = message,
                     numericPrice = numericPrice,
                     selectedCurrencyCode = selectedCurrencyCode,

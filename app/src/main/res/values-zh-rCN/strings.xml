@@ -159,4 +159,6 @@
     <string name="payment_timeout">支付超时</string>
     <string name="please_choose_an_option">请选择一个选项。</string>
     <string name="value_successfully_added">值已成功添加</string>
+    <string name="file_saved_at">文件已保存到: %1$s</string>
+    <string name="failed_to_save_the_CSV_file">无法保存CSV文件</string>
 </resources>

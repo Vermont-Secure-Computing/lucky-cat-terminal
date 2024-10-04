@@ -159,4 +159,6 @@
     <string name="payment_timeout">Тайм-аут платежа</string>
     <string name="please_choose_an_option">Пожалуйста, выберите вариант.</string>
     <string name="value_successfully_added">Значение успешно добавлено</string>
+    <string name="file_saved_at">Файл сохранён по адресу: %1$s</string>
+    <string name="failed_to_save_the_CSV_file">Не удалось сохранить файл CSV</string>
 </resources>

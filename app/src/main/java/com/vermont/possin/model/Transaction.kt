@@ -18,6 +18,7 @@ data class Transaction(
     val date: String,
     val time: String,
     val chain: String,
+    val coin: String,
     val message: String? = null,
     val numericPrice: String,
     val selectedCurrencyCode: String,
