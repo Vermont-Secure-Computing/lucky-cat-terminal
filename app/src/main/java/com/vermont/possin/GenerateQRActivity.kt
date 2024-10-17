@@ -896,6 +896,20 @@
                 finish()
             }
 
+            override fun onBackPressed() {
+                when {
+                    cancelText.visibility == View.VISIBLE -> {
+                        showCancelDialog() // Call the function associated with cancelText
+                    }
+                    homeText.visibility == View.VISIBLE -> {
+                        showHomeConfirmationDialog() // Call the function associated with homeText
+                    }
+                    else -> {
+                        super.onBackPressed() // Default behavior if none are visible
+                    }
+                }
+            }
+
             private fun showPaymentReceivedDialog() {
                 if (!isFinishing && !isDestroyed) {
                     val dialogView = layoutInflater.inflate(R.layout.payment_received_dialog, null)
