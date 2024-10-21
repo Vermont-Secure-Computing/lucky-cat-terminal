@@ -150,7 +150,7 @@ class XpubAddress : AppCompatActivity() {
             chainTextView.text = crypto.chain
 
             // Set up type spinner
-            val typeAdapter: ArrayAdapter<CharSequence> = if (crypto.name == "Monero") {
+            val typeAdapter: ArrayAdapter<CharSequence> = if (crypto.name == "Monero" || crypto.name == "Ethereum" || crypto.name == "Tether") {
                 // For Monero, only show "address" option
                 ArrayAdapter.createFromResource(this, R.array.monero_type_array, android.R.layout.simple_spinner_item)
             } else {
