@@ -740,10 +740,16 @@
             }
 
             private fun startRepeatedApiCalls() {
+                val delay = if (chain == "Bitcoin" || chain == "Bitcoincash") {
+                    10 * 60 * 1000L // 10 minutes in milliseconds
+                } else {
+                    60 * 1000L // 1 minute in milliseconds
+                }
+
                 handler.post(object : Runnable {
                     override fun run() {
                         getConfirmations(chain, txid)
-                        handler.postDelayed(this, 60 * 1000) // 1 minute delay
+                        handler.postDelayed(this, delay)
                     }
                 })
             }
