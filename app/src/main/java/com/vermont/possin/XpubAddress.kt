@@ -270,16 +270,26 @@ class XpubAddress : AppCompatActivity() {
                         // Find the view key and restore height fields
                         val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
                         viewKeyField?.setText(viewKey)
-
                     }
                 }
             } else {
                 // Handle other scanned results (non-Monero)
-                currentInputField?.setText(result.contents)
+                var scannedAddress = result.contents
+
+                // Remove prefix for all cryptocurrencies except Bitcoin Cash
+                if (!scannedAddress.startsWith("bitcoincash:", true) && scannedAddress.contains(":")) {
+                    val parts = scannedAddress.split(":")
+                    if (parts.size > 1) {
+                        scannedAddress = parts[1] // Take only the address part
+                    }
+                }
+
+                currentInputField?.setText(scannedAddress)
                 currentInputField = null // Clear the reference after use
             }
         }
     }
+
 
 
     private fun saveCryptocurrencyValues() {
@@ -298,6 +308,14 @@ class XpubAddress : AppCompatActivity() {
             val inputType = typeSpinner.selectedItem.toString()
             val segwitLegacy = segwitLegacySpinner.selectedItem.toString()
             var value = inputField.text.toString()
+
+            // Remove prefix for all cryptocurrencies except Bitcoin Cash
+            if (inputType == "address" && cryptoName != "Bitcoincash" && value.contains(":")) {
+                val parts = value.split(":")
+                if (parts.size > 1) {
+                    value = parts[1] // Take only the address part
+                }
+            }
 
             // Check if inputType is "address" and cryptoName is "Bitcoincash"
             if (inputType == "address" && cryptoName == "Bitcoincash") {
@@ -374,6 +392,7 @@ class XpubAddress : AppCompatActivity() {
             showSuccessModal()
         }
     }
+
 
     private fun showLoadingDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_loading, null)
