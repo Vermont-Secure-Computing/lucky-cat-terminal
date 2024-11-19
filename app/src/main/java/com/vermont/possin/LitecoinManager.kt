@@ -3,8 +3,8 @@ package com.vermont.possin
 import android.content.Context
 import android.content.res.AssetManager
 import android.util.Log
-import android.widget.Toast
 import org.bitcoinj.core.Address
+import org.bitcoinj.core.Base58
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.core.SegwitAddress
 import org.bitcoinj.crypto.ChildNumber
@@ -13,6 +13,7 @@ import org.bitcoinj.crypto.HDKeyDerivation
 import org.bitcoinj.params.AbstractBitcoinNetParams
 import org.bitcoinj.params.Networks
 import org.bitcoinj.script.Script
+import java.security.MessageDigest
 import java.util.Properties
 
 class LitecoinMainNetParams : AbstractBitcoinNetParams() {
@@ -63,18 +64,71 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
         const val PREFS_NAME = "LitecoinManagerPrefs"
         const val LAST_INDEX_KEY = "lastIndex"
 
+        private fun sha256(input: ByteArray): ByteArray {
+            val digest = MessageDigest.getInstance("SHA-256")
+            return digest.digest(input)
+        }
+
+        private fun addChecksumAndEncode(data: ByteArray): String {
+            val hash1 = sha256(data)
+            val hash2 = sha256(hash1)
+            val checksum = hash2.copyOfRange(0, 4)
+
+            val dataWithChecksum = ByteArray(data.size + 4)
+            System.arraycopy(data, 0, dataWithChecksum, 0, data.size)
+            System.arraycopy(checksum, 0, dataWithChecksum, data.size, 4)
+
+            return Base58.encode(dataWithChecksum)
+        }
+
+        fun convertBitcoinXpubToLitecoin(xPub: String): String {
+            Log.d("LitecoinManager", "Attempting to decode xPub: $xPub")
+
+            val prefixMap = mapOf(
+                "xpub" to byteArrayOf(0x01, 0x9d.toByte(), 0xa4.toByte(), 0x62.toByte()), // Ltub
+                "ypub" to byteArrayOf(0x04, 0xb2.toByte(), 0x47.toByte(), 0x46.toByte()), // Mtub
+                "zpub" to byteArrayOf(0x04, 0xb2.toByte(), 0x43.toByte(), 0x0c.toByte())  // Mtpv
+            )
+
+            val bitcoinPrefix = prefixMap.keys.find { xPub.startsWith(it) }
+                ?: throw IllegalArgumentException("Invalid Bitcoin xPub prefix: $xPub")
+
+            val litecoinPrefix = prefixMap[bitcoinPrefix]!!
+
+            val decoded = try {
+                Base58.decodeChecked(xPub)
+            } catch (e: Exception) {
+                throw IllegalArgumentException("Base58 decoding failed: ${e.message}")
+            }
+
+            if (decoded.size != 78) {
+                throw IllegalArgumentException("Decoded xPub must be 78 bytes but got: ${decoded.size}")
+            }
+
+            Log.d("LitecoinManager", "Decoded xPub bytes: ${decoded.joinToString(", ")}")
+
+            System.arraycopy(litecoinPrefix, 0, decoded, 0, 4)
+            return addChecksumAndEncode(decoded)
+        }
+
         fun isValidXpub(xPub: String, context: Context): Boolean {
             return try {
                 val params: NetworkParameters = LitecoinMainNetParams.get()
-                val validPrefixes = listOf("Ltub", "Mtub", "zpub")
-                if (xPub.startsWith("zpub")) {
-                    Toast.makeText(context, "Make sure your xpub is correct", Toast.LENGTH_LONG).show()
-                    return true
+
+                // Convert Bitcoin xPub to Litecoin xPub if necessary
+                val convertedXpub = if (xPub.startsWith("xpub")) {
+                    Log.d("LitecoinManager", "Converting Bitcoin xPub to Litecoin xPub...")
+                    convertBitcoinXpubToLitecoin(xPub)
+                } else {
+                    xPub
                 }
-                if (validPrefixes.none { xPub.startsWith(it) }) return false
-                DeterministicKey.deserializeB58(null, xPub, params)
+
+                // Validate the xPub
+                DeterministicKey.deserializeB58(null, convertedXpub, params)
+                Log.d("LitecoinManager", "xPub is valid: $convertedXpub")
                 true
             } catch (e: Exception) {
+                Log.e("LitecoinManager", "Invalid xPub: ${e.message}")
                 false
             }
         }
@@ -95,53 +149,53 @@ class LitecoinManager(private val context: Context, private val xPub: String) {
     }
 
     private val params: NetworkParameters = LitecoinMainNetParams.get()
-    private val accountKey = if (isValidXpub(xPub, context)) DeterministicKey.deserializeB58(null, xPub, params) else null
+    private val accountKey = try {
+        DeterministicKey.deserializeB58(null, xPub, params)
+    } catch (e: Exception) {
+        Log.e("LitecoinManager", "Failed to initialize account key: ${e.message}")
+        null
+    }
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     init {
-        // Register Litecoin parameters
         Networks.register(params)
     }
 
     fun getAddress(): Pair<String, Int> {
+        if (accountKey == null) {
+            throw IllegalStateException("Account key is not initialized.")
+        }
+
         val lastIndex = getLastIndex()
         val newIndex = if (lastIndex == -1) 0 else lastIndex + 1
-        return Pair(deriveAddress(newIndex), newIndex)
-    }
-
-    fun saveLastIndex(index: Int) {
-        with(sharedPreferences.edit()) {
-            putInt(LAST_INDEX_KEY, index)
-            apply()
+        return try {
+            Pair(deriveAddress(newIndex), newIndex)
+        } catch (e: Exception) {
+            Log.e("LitecoinManager", "Error deriving address: ${e.message}")
+            throw IllegalStateException("Failed to derive address.")
         }
     }
-
 
     private fun deriveAddress(index: Int): String {
-        Log.d("LTC", "Litecoin address index $index")
-        val receivingKey = deriveKey(accountKey!!, index)
-
-        // Create a P2WPKH (Pay to Witness Public Key Hash) address with correct HRP for Litecoin
-        val addressType = getAddressTypeFromConfig()
-        val address = if (addressType == "legacy") {
-            Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH)
-        } else {
-            SegwitAddress.fromKey(params, receivingKey)
+        if (accountKey == null) {
+            throw IllegalStateException("Account key is not initialized. Invalid xPub: $xPub")
         }
-        Log.d("ADDRESS", address.toString())
-        return address.toString()
+
+        val receivingKey = deriveKey(accountKey, index)
+        val addressType = getAddressTypeFromConfig()
+        return if (addressType == "legacy") {
+            Address.fromKey(params, receivingKey, Script.ScriptType.P2PKH).toString()
+        } else {
+            SegwitAddress.fromKey(params, receivingKey).toString()
+        }
     }
 
     private fun deriveKey(masterKey: DeterministicKey, index: Int): DeterministicKey {
-        // Use non-hardened derivation path m/0/index
         val changeKey = HDKeyDerivation.deriveChildKey(masterKey, ChildNumber(0, false))
         return HDKeyDerivation.deriveChildKey(changeKey, index)
     }
 
     private fun getLastIndex(): Int {
-        if (!sharedPreferences.contains(LAST_INDEX_KEY)) {
-            return -1
-        }
         return sharedPreferences.getInt(LAST_INDEX_KEY, -1)
     }
 
