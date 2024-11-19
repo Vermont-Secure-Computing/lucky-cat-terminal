@@ -446,7 +446,7 @@ class XpubAddress : AppCompatActivity() {
                 if (inputType == "xpub") BitcoinManager.isValidXpub(value) else BitcoinManager.isValidAddress(value)
             }
             "Dogecoin" -> {
-                if (inputType == "xpub") DogecoinManager.isValidXpub(value) else DogecoinManager.isValidAddress(value)
+                if (inputType == "xpub") DogecoinManager.isValidXpub(value, this) else DogecoinManager.isValidAddress(value)
             }
             "Litecoin" -> {
                 if (inputType == "xpub") LitecoinManager.isValidXpub(value, this) else LitecoinManager.isValidAddress(value)

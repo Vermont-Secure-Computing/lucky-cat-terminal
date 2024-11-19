@@ -161,4 +161,5 @@
     <string name="value_successfully_added">Значение успешно добавлено</string>
     <string name="file_saved_at">Файл сохранён по адресу: %1$s</string>
     <string name="failed_to_save_the_CSV_file">Не удалось сохранить файл CSV</string>
+    <string name="failed_to_derive_address">Не удалось получить адрес.</string>
 </resources>

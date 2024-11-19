@@ -72,10 +72,50 @@ class CryptoOptionActivity : AppCompatActivity() {
         message = intent.getStringExtra("MESSAGE") ?: ""
 
         val xPubs = loadXPubsFromSettings()
+        xPubs.forEach { (key, value) ->
+            Log.d("CryptoOptionActivity", "Loaded xPub for $key: $value")
+        }
         xPubs["Bitcoin"]?.let { bitcoinManager = BitcoinManager(this, it) }
-        xPubs["Litecoin"]?.let { litecoinManager = LitecoinManager(this, it) }
+        xPubs["Litecoin"]?.let {
+            val convertedXpub = if (it.startsWith("xpub")) {
+                try {
+                    LitecoinManager.convertBitcoinXpubToLitecoin(it)
+                } catch (e: Exception) {
+                    Log.e("LitecoinManager", "Error converting xPub: ${e.message}")
+                    return@let
+                }
+            } else {
+                it // Use the existing xPub if not `xpub`
+            }
+
+            if (LitecoinManager.isValidXpub(convertedXpub, this)) {
+                litecoinManager = LitecoinManager(this, convertedXpub)
+                Log.d("CryptoOptionActivity", "LitecoinManager initialized successfully.")
+            } else {
+                Log.e("LitecoinManager", "xPub is invalid: $convertedXpub")
+            }
+        }
         xPubs["Ethereum"]?.let { ethereumManager = EthereumManager(this, it) }
-        xPubs["Dogecoin"]?.let { dogecoinManager = DogecoinManager(this, it) }
+        xPubs["Dogecoin"]?.let {
+            val convertedXpub = if (it.startsWith("xpub")) {
+                try {
+                    DogecoinManager.convertBitcoinXpubToDogecoin(it)
+                } catch (e: Exception) {
+                    Log.e("DogecoinManager", "Error converting xPub: ${e.message}")
+                    return@let
+                }
+            } else {
+                it // Use the existing xPub if not `xpub`
+            }
+
+            if (DogecoinManager.isValidXpub(convertedXpub, this)) {
+                dogecoinManager = DogecoinManager(this, convertedXpub)
+                Log.d("CryptoOptionActivity", "DogecoinManager initialized successfully.")
+            } else {
+                Log.e("DogecoinManager", "xPub is invalid: $convertedXpub")
+            }
+        }
+
         xPubs["Woodcoin"]?.let { woodcoinManager = WoodcoinManager(this, it) }
         xPubs["Dash"]?.let { dashManager = DashManager(this, it) }
         xPubs["Tether"]?.let { tronManager = TronManager(this, it) }
@@ -332,33 +372,43 @@ class CryptoOptionActivity : AppCompatActivity() {
 
     private fun handleLTCClick(price: String) {
         litecoinManager?.let { manager ->
-            val (address, index) = if (LitecoinManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
+            try {
+                val (address, index) = if (LitecoinManager.isValidAddress(manager.getXpub()))
+                    Pair(manager.getXpub(), -1)
+                else
+                    manager.getAddress()
 
-            val numericPrice = price.filter { it.isDigit() || it == '.' }
+                val numericPrice = price.filter { it.isDigit() || it == '.' }
 
-            postConversionApi(numericPrice, selectedCurrencyCode, address, "LTC", R.drawable.litecoin_new_logo) { feeStatus, status, formattedRate ->
-                dismissLoadingDialog()
-                if (formattedRate.isNotEmpty()) {
-                    startGenerateQRActivity(
-                        address,
-                        formattedRate,
-                        R.drawable.litecoin_new_logo,
-                        "LTC",
-                        index,
-                        feeStatus,
-                        status,
-                        "Litecoin",
-                        numericPrice,
-                        selectedCurrencyCode,
-                        "LTC"
-                    )
+                postConversionApi(numericPrice, selectedCurrencyCode, address, "LTC", R.drawable.litecoin_new_logo) { feeStatus, status, formattedRate ->
+                    dismissLoadingDialog()
+                    if (formattedRate.isNotEmpty()) {
+                        startGenerateQRActivity(
+                            address,
+                            formattedRate,
+                            R.drawable.litecoin_new_logo,
+                            "LTC",
+                            index,
+                            feeStatus,
+                            status,
+                            "Litecoin",
+                            numericPrice,
+                            selectedCurrencyCode,
+                            "LTC"
+                        )
+                    }
                 }
+            } catch (e: Exception) {
+                dismissLoadingDialog()
+                Log.e("CryptoOptionActivity", "Error handling Litecoin click: ${e.message}")
+                Toast.makeText(this, R.string.failed_to_derive_address, Toast.LENGTH_SHORT).show()
             }
         } ?: run {
             dismissLoadingDialog()
             Toast.makeText(this, R.string.litecoin_manager_not_initialized, Toast.LENGTH_SHORT).show()
         }
     }
+
 
     private fun handleETHClick(price: String) {
         ethereumManager?.let { manager ->

@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.retrofit.scalars)
+    implementation(libs.commons.codec)
 
 
     implementation(libs.room.runtime)

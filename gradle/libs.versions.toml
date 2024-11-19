@@ -53,6 +53,7 @@ org-slf4j = "1.7.32"
 logback-classic = "1.2.7"
 lifecycle-viewmodel = "2.6.1"
 coreSplashscreen = "1.0.1"
+commons-codec = "1.15"
 
 
 
@@ -111,6 +112,7 @@ org-slf4j = {group = "org.slf4j", name = "slf4j-api", version.ref = "org-slf4j"}
 logback-classic = {group = "ch.qos.logback", name = "logback-classic", version.ref = "logback-classic"}
 lifecycle-viewmodel = {group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle-viewmodel"}
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
+commons-codec = { group = "commons-codec", name = "commons-codec", version.ref = "commons-codec"}
 
 
 
