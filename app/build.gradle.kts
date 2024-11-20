@@ -20,7 +20,7 @@ android {
         versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        setProperty("archivesBaseName", "LuckyCat-$versionName")
+        setProperty("archivesBaseName", "LuckyCat-submit-$versionName")
     }
 
     buildTypes {

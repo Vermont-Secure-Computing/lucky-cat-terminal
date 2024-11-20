@@ -1,5 +1,6 @@
 package com.vermont.possin
 
+import MoneroWalletRequestBody
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
@@ -24,7 +25,7 @@ import androidx.core.content.ContextCompat
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
 import com.vermont.possin.model.ApiResponse
-import com.vermont.possin.network.MoneroWalletRequestBody
+import com.vermont.possin.network.MoneroDeleteWalletRequestBody
 import com.vermont.possin.network.RetrofitClient
 import pl.droidsonroids.gif.GifDrawable
 import retrofit2.Call
@@ -296,6 +297,7 @@ class XpubAddress : AppCompatActivity() {
         properties.remove("default_key")
 
         var moneroWalletData: MoneroWalletRequestBody? = null // To store Monero data for API call
+        var moneroDeleted = false // To track if Monero needs to be deleted via API
 
         for (i in 0 until cryptocurrencyContainer.childCount) {
             val itemView = cryptocurrencyContainer.getChildAt(i)
@@ -307,87 +309,107 @@ class XpubAddress : AppCompatActivity() {
             val cryptoName = nameTextView.text.toString()
             val inputType = typeSpinner.selectedItem.toString()
             val segwitLegacy = segwitLegacySpinner.selectedItem.toString()
-            var value = inputField.text.toString()
-
-            // Remove prefix for all cryptocurrencies except Bitcoin Cash
-            if (inputType == "address" && cryptoName != "Bitcoincash" && value.contains(":")) {
-                val parts = value.split(":")
-                if (parts.size > 1) {
-                    value = parts[1] // Take only the address part
-                }
-            }
-
-            // Check if inputType is "address" and cryptoName is "Bitcoincash"
-            if (inputType == "address" && cryptoName == "Bitcoincash") {
-                if (value.isEmpty()) continue
-                if (!value.startsWith("bitcoincash:", true)) {
-                    value = "bitcoincash:$value"
-                }
-            }
+            val value = inputField.text.toString().trim()
 
             // Handle Monero-specific logic
             if (cryptoName == "Monero") {
                 val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
-                val viewKey = viewKeyField.text.toString()
+                val viewKey = viewKeyField.text.toString().trim()
 
                 val savedAddress = properties.getProperty("Monero_value")
                 val savedViewKey = properties.getProperty("Monero_view_key")
 
-                // Check if the new values are different from the saved values
-                val isMoneroChanged = (savedAddress != value || savedViewKey != viewKey)
-
-                if (isMoneroChanged) {
-                    // Prepare Monero data if values are different
-                    if (viewKey.isNotEmpty() && value.isNotEmpty()) {
-                        moneroWalletData = MoneroWalletRequestBody(
-                            primaryAddress = value,
-                            privateViewKey = viewKey
-                        )
-                    }
+                if (value.isEmpty() && savedAddress != null) {
+                    // Monero address was removed
+                    properties.remove("Monero_value")
+                    properties.remove("Monero_view_key")
+                    properties.remove("Monero_type")
+                    moneroDeleted = true
+                } else if (value.isNotEmpty() && (savedAddress != value || savedViewKey != viewKey)) {
+                    // Monero address was modified
+                    moneroWalletData = MoneroWalletRequestBody(
+                        currentAddress = savedAddress,
+                        newAddress = value,
+                        privateViewKey = viewKey
+                    )
                 }
             } else {
-                // Save other cryptocurrency data directly
-                if (value.isNotEmpty()) {
+                // Handle other cryptocurrencies
+                val savedValue = properties.getProperty("${cryptoName}_value")
+
+                if (value.isEmpty() && savedValue != null) {
+                    // Address or xpub was removed
+                    properties.remove("${cryptoName}_type")
+                    properties.remove("${cryptoName}_segwit_legacy")
+                    properties.remove("${cryptoName}_value")
+                } else if (value.isNotEmpty()) {
+                    // Address or xpub was updated
                     properties.setProperty("${cryptoName}_type", inputType)
                     if (inputType == "xpub" && (cryptoName == "Bitcoin" || cryptoName == "Litecoin")) {
                         properties.setProperty("${cryptoName}_segwit_legacy", segwitLegacy)
+                    } else if (inputType == "address" && (cryptoName == "Bitcoin" || cryptoName == "Litecoin")) {
+                        // Remove segwit_legacy property if the type changes from xpub to address
+                        properties.remove("${cryptoName}_segwit_legacy")
                     }
                     properties.setProperty("${cryptoName}_value", value)
                 }
             }
         }
 
-        // If Monero data exists and has changed, make the API call before saving it
-        if (moneroWalletData != null) {
-            showLoadingDialog() // Show the existing loading dialog before making the API call
+        // Handle Monero API calls
+        if (moneroDeleted) {
+            showLoadingDialog() // Show loading dialog for deletion
+            val apiService = RetrofitClient.getApiService(this)
+            val deleteRequestBody = MoneroDeleteWalletRequestBody(
+                primaryAddress = properties.getProperty("Monero_value") ?: ""
+            )
+            val call = apiService.deleteMoneroWallet(deleteRequestBody)
+            call.enqueue(object : retrofit2.Callback<ApiResponse> {
+                override fun onResponse(call: Call<ApiResponse>, response: retrofit2.Response<ApiResponse>) {
+                    dismissLoadingDialog()
+                    if (response.isSuccessful) {
+                        // Remove Monero properties from the file after successful deletion
+                        properties.remove("Monero_value")
+                        properties.remove("Monero_view_key")
+                        properties.remove("Monero_type")
+                        savePropertiesToFile()
+                        showSuccessModal()
+                    } else {
+                        showErrorModal("Failed to delete Monero data. Please try again.")
+                    }
+                }
+
+                override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                    dismissLoadingDialog()
+                    showErrorModal("Failed to delete Monero. Please check your network connection.")
+                }
+            })
+        } else if (moneroWalletData != null) {
+            // Make the API call for Monero save
+            showLoadingDialog()
             val apiService = RetrofitClient.getApiService(this)
             val call = apiService.createMoneroWallet(moneroWalletData!!)
             call.enqueue(object : retrofit2.Callback<ApiResponse> {
                 override fun onResponse(call: Call<ApiResponse>, response: retrofit2.Response<ApiResponse>) {
-                    dismissLoadingDialog() // Dismiss the loading dialog after API response
+                    dismissLoadingDialog()
                     if (response.isSuccessful) {
-                        // Save Monero after successful API response
                         properties.setProperty("Monero_view_key", moneroWalletData!!.privateViewKey)
-                        properties.setProperty("Monero_value", moneroWalletData!!.primaryAddress)
+                        properties.setProperty("Monero_value", moneroWalletData!!.newAddress)
                         properties.setProperty("Monero_type", "address")
-
-                        // Save all properties to file
                         savePropertiesToFile()
                         showSuccessModal()
                     } else {
-                        // Show error if the API call fails
                         showErrorModal("Failed to save Monero data. Please try again.")
                     }
                 }
 
                 override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                    dismissLoadingDialog() // Dismiss the loading dialog if API call fails
-                    // Handle API failure
+                    dismissLoadingDialog()
                     showErrorModal("Failed to save Monero. Please check your network connection.")
                 }
             })
         } else {
-            // If no Monero changes or no Monero data, just save the other cryptocurrencies
+            // Save other cryptocurrencies
             savePropertiesToFile()
             showSuccessModal()
         }
@@ -429,20 +451,32 @@ class XpubAddress : AppCompatActivity() {
 
 
 
-    private fun validateInput(editText: EditText, inputType: String, segwitLegacy: String, currency: String, errorTextView: TextView, submitText: TextView) {
+    private fun validateInput(
+        editText: EditText,
+        inputType: String,
+        segwitLegacy: String,
+        currency: String,
+        errorTextView: TextView,
+        submitText: TextView
+    ) {
         val value = editText.text.toString()
-        println(value)
 
+        // Check for blank input but allow submit
         if (value.isBlank()) {
             errorTextView.text = ""
-            submitText.isEnabled = false
-            submitText.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
+            // Enable submit button if there are no validation errors in other fields
+            submitText.isEnabled = allInputsValid()
+            submitText.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    if (submitText.isEnabled) R.color.white else android.R.color.darker_gray
+                )
+            )
             return
         }
 
         val isValid = when (currency) {
             "Bitcoin" -> {
-                println(inputType)
                 if (inputType == "xpub") BitcoinManager.isValidXpub(value) else BitcoinManager.isValidAddress(value)
             }
             "Dogecoin" -> {
@@ -464,39 +498,43 @@ class XpubAddress : AppCompatActivity() {
                 if (inputType == "xpub") BitcoinCashManager.isValidXpub(value) else BitcoinCashManager.isValidAddress(value)
             }
             "Monero" -> {
-                val itemView = cryptocurrencyContainer.getChildAt(filteredCryptocurrencies.indexOfFirst { it.name == "Monero" })
+                val itemView = cryptocurrencyContainer.getChildAt(
+                    filteredCryptocurrencies.indexOfFirst { it.name == "Monero" }
+                )
                 val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
                 val viewKey = viewKeyField.text.toString().trim()
 
                 // Validate Monero address and private view key separately
                 val isAddressValid = MoneroManager.isValidAddress(value)
-                val isViewKeyValid = if (viewKey.isNotEmpty()) MoneroManager.isValidPrivateViewKey(viewKey) else true // Allow empty view key
+                val isViewKeyValid =
+                    if (viewKey.isNotEmpty()) MoneroManager.isValidPrivateViewKey(viewKey) else true
 
-                // Display appropriate error messages
                 if (!isAddressValid) {
                     errorTextView.text = getString(R.string.invalid_monero_address)
                 } else if (!isViewKeyValid) {
                     errorTextView.text = getString(R.string.invalid_Monero_private_view_key)
                 }
 
-                // Validation is true if the address is valid and the view key is either valid or not provided
+                // Validation passes if the address is valid and the view key is valid (or not provided)
                 isAddressValid && isViewKeyValid
             }
             else -> false
         }
 
         if (!isValid) {
-            errorTextView.setText(getString(R.string.invalid_for, inputType, currency))
+            errorTextView.text = getString(R.string.invalid_for, inputType, currency)
             submitText.isEnabled = false
             submitText.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
         } else {
             errorTextView.text = ""
+            // Enable submit button if all inputs are valid or blank
             submitText.isEnabled = allInputsValid()
-            if (submitText.isEnabled) {
-                submitText.setTextColor(ContextCompat.getColor(this, R.color.white))
-            } else {
-                submitText.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
-            }
+            submitText.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    if (submitText.isEnabled) R.color.white else android.R.color.darker_gray
+                )
+            )
         }
     }
 

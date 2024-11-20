@@ -27,4 +27,9 @@ interface ApiService {
     fun createMoneroWallet(
         @Body walletRequestBody: MoneroWalletRequestBody
     ): Call<ApiResponse>
+
+    @POST("terminal/xmr/delete-wallet")
+    fun deleteMoneroWallet(
+        @Body deleteRequestBody: MoneroDeleteWalletRequestBody
+    ): Call<ApiResponse>
 }
