@@ -76,43 +76,58 @@ class CryptoOptionActivity : AppCompatActivity() {
             Log.d("CryptoOptionActivity", "Loaded xPub for $key: $value")
         }
         xPubs["Bitcoin"]?.let { bitcoinManager = BitcoinManager(this, it) }
-        xPubs["Litecoin"]?.let {
-            val convertedXpub = if (it.startsWith("xpub")) {
-                try {
-                    LitecoinManager.convertBitcoinXpubToLitecoin(it)
-                } catch (e: Exception) {
-                    Log.e("LitecoinManager", "Error converting xPub: ${e.message}")
-                    return@let
-                }
-            } else {
-                it // Use the existing xPub if not `xpub`
-            }
+        xPubs["Litecoin"]?.let { litecoinValue ->
+            val litecoinType = getCryptoTypeFromConfig("Litecoin_type") // Get type from config.properties
 
-            if (LitecoinManager.isValidXpub(convertedXpub, this)) {
-                litecoinManager = LitecoinManager(this, convertedXpub)
-                Log.d("CryptoOptionActivity", "LitecoinManager initialized successfully.")
-            } else {
-                Log.e("LitecoinManager", "xPub is invalid: $convertedXpub")
+            if (litecoinType == "xpub") {
+                val convertedXpub = if (litecoinValue.startsWith("xpub")) {
+                    try {
+                        LitecoinManager.convertBitcoinXpubToLitecoin(litecoinValue)
+                    } catch (e: Exception) {
+                        Log.e("LitecoinManager", "Error converting xPub: ${e.message}")
+                        return@let
+                    }
+                } else {
+                    litecoinValue // Use the existing xPub if not `xpub`
+                }
+
+                if (LitecoinManager.isValidXpub(convertedXpub, this)) {
+                    litecoinManager = LitecoinManager(this, convertedXpub)
+                    Log.d("CryptoOptionActivity", "LitecoinManager initialized successfully.")
+                } else {
+                    Log.e("LitecoinManager", "xPub is invalid: $convertedXpub")
+                }
+            } else if (litecoinType == "address") {
+                litecoinManager = LitecoinManager(this, litecoinValue) // Initialize with address directly
+                Log.d("CryptoOptionActivity", "LitecoinManager initialized with address.")
             }
         }
-        xPubs["Ethereum"]?.let { ethereumManager = EthereumManager(this, it) }
-        xPubs["Dogecoin"]?.let {
-            val convertedXpub = if (it.startsWith("xpub")) {
-                try {
-                    DogecoinManager.convertBitcoinXpubToDogecoin(it)
-                } catch (e: Exception) {
-                    Log.e("DogecoinManager", "Error converting xPub: ${e.message}")
-                    return@let
-                }
-            } else {
-                it // Use the existing xPub if not `xpub`
-            }
 
-            if (DogecoinManager.isValidXpub(convertedXpub, this)) {
-                dogecoinManager = DogecoinManager(this, convertedXpub)
-                Log.d("CryptoOptionActivity", "DogecoinManager initialized successfully.")
-            } else {
-                Log.e("DogecoinManager", "xPub is invalid: $convertedXpub")
+        xPubs["Ethereum"]?.let { ethereumManager = EthereumManager(this, it) }
+        xPubs["Dogecoin"]?.let { dogecoinValue ->
+            val dogecoinType = getCryptoTypeFromConfig("Dogecoin_type") // Get type from config.properties
+
+            if (dogecoinType == "xpub") {
+                val convertedXpub = if (dogecoinValue.startsWith("xpub")) {
+                    try {
+                        DogecoinManager.convertBitcoinXpubToDogecoin(dogecoinValue)
+                    } catch (e: Exception) {
+                        Log.e("DogecoinManager", "Error converting xPub: ${e.message}")
+                        return@let
+                    }
+                } else {
+                    dogecoinValue // Use the existing xPub if not `xpub`
+                }
+
+                if (DogecoinManager.isValidXpub(convertedXpub, this)) {
+                    dogecoinManager = DogecoinManager(this, convertedXpub)
+                    Log.d("CryptoOptionActivity", "DogecoinManager initialized successfully.")
+                } else {
+                    Log.e("DogecoinManager", "xPub is invalid: $convertedXpub")
+                }
+            } else if (dogecoinType == "address") {
+                dogecoinManager = DogecoinManager(this, dogecoinValue) // Initialize with address directly
+                Log.d("CryptoOptionActivity", "DogecoinManager initialized with address.")
             }
         }
 
@@ -154,6 +169,16 @@ class CryptoOptionActivity : AppCompatActivity() {
         val nekuGifView = findViewById<ImageView>(R.id.nekuGifImageView)
         val gifDrawable = GifDrawable(resources, R.raw.neku)
         nekuGifView.setImageDrawable(gifDrawable)
+    }
+
+    private fun getCryptoTypeFromConfig(cryptoTypeKey: String): String {
+        val properties = Properties()
+        val propertiesFile = File(filesDir, "config.properties")
+        if (propertiesFile.exists()) {
+            properties.load(propertiesFile.inputStream())
+        }
+
+        return properties.getProperty(cryptoTypeKey, "xpub") // Default to xpub if not specified
     }
 
     private fun loadCryptocurrenciesFromJson(): List<CryptoCurrency> {
@@ -379,6 +404,7 @@ class CryptoOptionActivity : AppCompatActivity() {
                     manager.getAddress()
 
                 val numericPrice = price.filter { it.isDigit() || it == '.' }
+                Log.d("ADDRESS_CHECK ", address)
 
                 postConversionApi(numericPrice, selectedCurrencyCode, address, "LTC", R.drawable.litecoin_new_logo) { feeStatus, status, formattedRate ->
                     dismissLoadingDialog()
