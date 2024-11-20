@@ -13,7 +13,7 @@
       "attributes": [],
       "versionCode": 1,
       "versionName": "1.1",
-      "outputFile": "LuckyCat-1.1-release.apk"
+      "outputFile": "LuckyCat-submit-1.1-release.apk"
     }
   ],
   "elementType": "File",
@@ -22,14 +22,14 @@
       "minApi": 28,
       "maxApi": 30,
       "baselineProfiles": [
-        "baselineProfiles/1/LuckyCat-1.1-release.dm"
+        "baselineProfiles/1/LuckyCat-submit-1.1-release.dm"
       ]
     },
     {
       "minApi": 31,
       "maxApi": 2147483647,
       "baselineProfiles": [
-        "baselineProfiles/0/LuckyCat-1.1-release.dm"
+        "baselineProfiles/0/LuckyCat-submit-1.1-release.dm"
       ]
     }
   ],
