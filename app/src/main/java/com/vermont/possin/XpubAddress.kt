@@ -1,11 +1,11 @@
 package com.vermont.possin
 
-import MoneroWalletRequestBody
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +26,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
 import com.vermont.possin.model.ApiResponse
 import com.vermont.possin.network.MoneroDeleteWalletRequestBody
+import com.vermont.possin.network.MoneroWalletRequestBody
 import com.vermont.possin.network.RetrofitClient
 import pl.droidsonroids.gif.GifDrawable
 import retrofit2.Call
@@ -360,8 +361,10 @@ class XpubAddress : AppCompatActivity() {
         if (moneroDeleted) {
             showLoadingDialog() // Show loading dialog for deletion
             val apiService = RetrofitClient.getApiService(this)
+            val loadProperties = ConfigProperties.loadProperties(this)
+            Log.d("DEBUG", "Properties loaded: ${loadProperties.getProperty("Monero_value")}")
             val deleteRequestBody = MoneroDeleteWalletRequestBody(
-                primaryAddress = properties.getProperty("Monero_value") ?: ""
+                primaryAddress = loadProperties.getProperty("Monero_value") ?: ""
             )
             val call = apiService.deleteMoneroWallet(deleteRequestBody)
             call.enqueue(object : retrofit2.Callback<ApiResponse> {
