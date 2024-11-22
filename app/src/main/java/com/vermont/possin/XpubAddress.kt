@@ -241,20 +241,17 @@ class XpubAddress : AppCompatActivity() {
         val result: IntentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
 
         if (result.contents != null) {
-            val scannedContent = result.contents
+            var scannedContent = result.contents
 
             // Check if the scanned result is in the Monero wallet format
             if (scannedContent.startsWith("monero_wallet:")) {
-                // Remove the "monero_wallet:" prefix
+                // Handle Monero wallet-specific logic
                 val uriWithoutPrefix = scannedContent.removePrefix("monero_wallet:")
-
-                // Split the string at the '?' to separate the wallet address and query parameters
                 val parts = uriWithoutPrefix.split("?")
                 if (parts.size == 2) {
-                    val walletAddress = parts[0] // The address part (before the ?)
-                    val queryParams = parts[1] // The query parameters (after the ?)
+                    val walletAddress = parts[0]
+                    val queryParams = parts[1]
 
-                    // Extract the view key from the query parameters
                     val queryMap = queryParams.split("&").associate {
                         val (key, value) = it.split("=")
                         key to value
@@ -262,37 +259,46 @@ class XpubAddress : AppCompatActivity() {
 
                     val viewKey = queryMap["view_key"]
 
-                    // Set the values to the respective fields
                     currentInputField?.setText(walletAddress)
-                    currentInputField = null // Clear the reference after use
+                    currentInputField = null
 
                     if (viewKey != null) {
-                        val itemView = cryptocurrencyContainer.getChildAt(filteredCryptocurrencies.indexOfFirst { it.name == "Monero" })
+                        val itemView = cryptocurrencyContainer.getChildAt(
+                            filteredCryptocurrencies.indexOfFirst { it.name == "Monero" }
+                        )
                         val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
                         viewKeyField?.setText(viewKey)
                     }
                 }
             } else {
                 // Handle other scanned results (non-Monero)
-                var scannedAddress = result.contents
+                var scannedAddress = scannedContent
 
-                // Remove prefixes for all cryptocurrencies except Bitcoin Cash
-                if (!scannedAddress.startsWith("bitcoincash:", ignoreCase = true)) {
-                    if (scannedAddress.contains(":")) {
-                        val parts = scannedAddress.split(":")
-                        if (parts.size > 1) {
-                            scannedAddress = parts[1].trim() // Take only the address part and trim it
-                        }
+                if (scannedAddress.startsWith("bitcoincash:", ignoreCase = true)) {
+                    // Check if it's a valid xpub or address for Bitcoin Cash
+                    val addressWithoutPrefix = scannedAddress.removePrefix("bitcoincash:").trim()
+
+                    if (BitcoinCashManager.isValidXpub(addressWithoutPrefix)) {
+                        // If valid xpub, remove the prefix
+                        scannedAddress = addressWithoutPrefix
+                    } else if (BitcoinCashManager.isValidAddress(addressWithoutPrefix)) {
+                        // If valid address, retain the prefix
+                        scannedAddress = scannedAddress.trim()
+                    }
+                } else if (scannedAddress.contains(":")) {
+                    // For other cryptocurrencies, remove the prefix
+                    val parts = scannedAddress.split(":")
+                    if (parts.size > 1) {
+                        scannedAddress = parts[1].trim()
                     }
                 }
 
+                // Set the result in the current input field
                 currentInputField?.setText(scannedAddress)
-                currentInputField = null // Clear the reference after use
+                currentInputField = null
             }
         }
     }
-
-
 
 
     private fun saveCryptocurrencyValues() {
