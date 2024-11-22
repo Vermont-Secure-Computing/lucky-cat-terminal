@@ -254,7 +254,7 @@ class XpubAddress : AppCompatActivity() {
                     val walletAddress = parts[0] // The address part (before the ?)
                     val queryParams = parts[1] // The query parameters (after the ?)
 
-                    // Extract the view key and restore height from the query parameters
+                    // Extract the view key from the query parameters
                     val queryMap = queryParams.split("&").associate {
                         val (key, value) = it.split("=")
                         key to value
@@ -268,8 +268,6 @@ class XpubAddress : AppCompatActivity() {
 
                     if (viewKey != null) {
                         val itemView = cryptocurrencyContainer.getChildAt(filteredCryptocurrencies.indexOfFirst { it.name == "Monero" })
-
-                        // Find the view key and restore height fields
                         val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
                         viewKeyField?.setText(viewKey)
                     }
@@ -278,11 +276,13 @@ class XpubAddress : AppCompatActivity() {
                 // Handle other scanned results (non-Monero)
                 var scannedAddress = result.contents
 
-                // Remove prefix for all cryptocurrencies except Bitcoin Cash
-                if (!scannedAddress.startsWith("bitcoincash:", true) && scannedAddress.contains(":")) {
-                    val parts = scannedAddress.split(":")
-                    if (parts.size > 1) {
-                        scannedAddress = parts[1] // Take only the address part
+                // Remove prefixes for all cryptocurrencies except Bitcoin Cash
+                if (!scannedAddress.startsWith("bitcoincash:", ignoreCase = true)) {
+                    if (scannedAddress.contains(":")) {
+                        val parts = scannedAddress.split(":")
+                        if (parts.size > 1) {
+                            scannedAddress = parts[1].trim() // Take only the address part and trim it
+                        }
                     }
                 }
 
@@ -291,6 +291,7 @@ class XpubAddress : AppCompatActivity() {
             }
         }
     }
+
 
 
 
