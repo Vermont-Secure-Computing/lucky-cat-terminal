@@ -162,4 +162,5 @@
     <string name="file_saved_at">文件已保存到: %1$s</string>
     <string name="failed_to_save_the_CSV_file">无法保存CSV文件</string>
     <string name="failed_to_derive_address">无法生成地址。</string>
+    <string name="add_note">添加备注</string>
 </resources>

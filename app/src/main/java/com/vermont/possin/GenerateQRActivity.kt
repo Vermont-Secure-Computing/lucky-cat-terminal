@@ -819,6 +819,7 @@
                 args.putString("receiptNumericPrice", getString(R.string.base_price, numericPrice))
                 args.putString("receiptSelectedCurrencyCode", getString(R.string.base_currency, selectedCurrencyCode))
                 args.putString("receivingAddress", getString(R.string.receivingAddress, address))
+                args.putString("message", message)
 
                 receiptDialog.arguments = args
 

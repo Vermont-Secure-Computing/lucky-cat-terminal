@@ -226,6 +226,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
         args.putString("receiptDeviceID", "$deviceId")
         args.putString("receiptNumericPrice", "${basePriceTextView.text}")
         args.putString("receiptSelectedCurrencyCode", "${baseCurrencyTextView.text}")
+        args.putString("message", "${messageTextView.text}")
         receiptDialog.arguments = args
 
         receiptDialog.show(supportFragmentManager, "ReceiptDialog")

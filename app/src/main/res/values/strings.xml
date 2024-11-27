@@ -162,4 +162,5 @@
     <string name="file_saved_at">File saved at: %1$s</string>
     <string name="failed_to_save_the_CSV_file">Failed to save the CSV file</string>
     <string name="failed_to_derive_address">Failed to derive address.</string>
+    <string name="add_note">Add Note</string>
 </resources>

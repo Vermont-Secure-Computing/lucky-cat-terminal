@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
@@ -43,6 +44,7 @@ class POSView @JvmOverloads constructor(
     private lateinit var buttons: List<Button>
     private var errorTextView: TextView? = null
     private var refreshButton: Button? = null
+    private lateinit var addNoteCheckbox: CheckBox
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + Job()) // Define a coroutine scope
 
@@ -67,7 +69,7 @@ class POSView @JvmOverloads constructor(
     private fun setupView() {
         itemPriceInput = findViewById(R.id.itemPriceInput)
         currencySpinner = findViewById(R.id.currencySpinner)
-
+        addNoteCheckbox = findViewById(R.id.add_note_checkbox)
         backArrow = findViewById(R.id.back_arrow)
         backArrow.setOnClickListener {
             context.startActivity(Intent(context, HomeActivity::class.java))
@@ -289,12 +291,22 @@ class POSView @JvmOverloads constructor(
                 }
             }
 
-            val intent = Intent(context, PriceConfirmActivity::class.java)
-            intent.putExtra("PRICE", "$currentCurrencySymbol$currentInput")
-            intent.putExtra("CURRENCY_CODE", currentCurrencyCode)
+            val intent = if (addNoteCheckbox.isChecked) {
+                Intent(context, PriceConfirmActivity::class.java).apply {
+                    putExtra("PRICE", "$currentCurrencySymbol$currentInput")
+                    putExtra("CURRENCY_CODE", currentCurrencyCode)
+                }
+            } else {
+                Intent(context, CryptoOptionActivity::class.java).apply {
+                    putExtra("PRICE", "$currentCurrencySymbol$currentInput")
+                    putExtra("CURRENCY_CODE", currentCurrencyCode)
+                }
+            }
+
             context.startActivity(intent)
         }
     }
+
 
     private fun clearInput() {
         currentInput = ""
