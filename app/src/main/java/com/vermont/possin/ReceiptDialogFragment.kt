@@ -268,6 +268,11 @@ class ReceiptDialogFragment : DialogFragment() {
                 receiptContent.append("[L]Device ID: ${receiptDeviceID.text}\n")
             }
 
+            val message = arguments?.getString("message") ?: ""
+            if (message.isNotEmpty()) {
+                receiptContent.append("[L]$message\n")
+            }
+
             receiptContent.append("[C]-------------------------------\n")
             receiptContent.append("[C]$copyType\n")
             receiptContent.append("[L]\n")
