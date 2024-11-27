@@ -187,7 +187,7 @@ class ViewAllDetailActivity : AppCompatActivity() {
         messageTextView.text = if (transaction.message.isNullOrEmpty()) {
             ""
         } else {
-            getString(R.string.messageText, transaction.message)
+            transaction.message
         }
 
         if (transaction.balanceIn != 0.0) {
