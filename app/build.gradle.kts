@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.retrofit.scalars)
     implementation(libs.commons.codec)
+    implementation(libs.logging.interceptor)
 
 
     implementation(libs.room.runtime)

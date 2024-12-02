@@ -398,13 +398,14 @@ class XpubAddress : AppCompatActivity() {
             // Make the API call for Monero save
             showLoadingDialog()
             val apiService = RetrofitClient.getApiService(this)
-            val call = apiService.createMoneroWallet(moneroWalletData!!)
+            val call = apiService.createMoneroWallet(moneroWalletData)
             call.enqueue(object : retrofit2.Callback<ApiResponse> {
                 override fun onResponse(call: Call<ApiResponse>, response: retrofit2.Response<ApiResponse>) {
                     dismissLoadingDialog()
+                    Log.d("MONERO_RESPONSE", response.toString() )
                     if (response.isSuccessful) {
-                        properties.setProperty("Monero_view_key", moneroWalletData!!.privateViewKey)
-                        properties.setProperty("Monero_value", moneroWalletData!!.newAddress)
+                        properties.setProperty("Monero_view_key", moneroWalletData.privateViewKey)
+                        properties.setProperty("Monero_value", moneroWalletData.newAddress)
                         properties.setProperty("Monero_type", "address")
                         savePropertiesToFile()
                         showSuccessModal()
