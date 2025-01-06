@@ -44,6 +44,7 @@ class CryptoOptionActivity : AppCompatActivity() {
     private var tronManager: TronManager? = null
     private var bitcoincashManager: BitcoinCashManager? = null
     private var moneroManager: MoneroManager? = null
+    private var solanaManager: SolanaManager? = null
     private lateinit var selectedCurrencyCode: String
     private lateinit var message: String
     private var loadingDialog: AlertDialog? = null
@@ -135,6 +136,8 @@ class CryptoOptionActivity : AppCompatActivity() {
         xPubs["Dash"]?.let { dashManager = DashManager(this, it) }
         xPubs["Tether"]?.let { tronManager = TronManager(this, it) }
         xPubs["Bitcoincash"]?.let { bitcoincashManager = BitcoinCashManager(this, it) }
+        xPubs["Solana"]?.let { solanaManager = SolanaManager(this, it) }
+        xPubs["USDC"]?.let { solanaManager = SolanaManager(this, it) }
 
 
         val properties = loadPropertiesFromConfigFile()
@@ -362,6 +365,8 @@ class CryptoOptionActivity : AppCompatActivity() {
             "DASH" -> handleDASHlick(price)
             "BCH" -> handleBCHlick(price)
             "XMR" -> handleMoneroClick(price)
+            "SOL" -> handleSolanaClick(price)
+            "USDC" -> handleUSDCClick(price)
         }
     }
 
@@ -633,6 +638,66 @@ class CryptoOptionActivity : AppCompatActivity() {
         } ?: run {
             dismissLoadingDialog()
             Toast.makeText(this, R.string.monero_manager_not_initialized, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun handleSolanaClick(price: String) {
+        solanaManager?.let { manager ->
+            val (address, index) = if (SolanaManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
+
+            val numericPrice = price.filter { it.isDigit() || it == '.' }
+
+            postConversionApi(numericPrice, selectedCurrencyCode, address, "SOL", R.drawable.solana) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(
+                        address,
+                        formattedRate,
+                        R.drawable.solana,
+                        "SOL",
+                        index,
+                        feeStatus,
+                        status,
+                        "Solana",
+                        numericPrice,
+                        selectedCurrencyCode,
+                        "SOL"
+                    )
+                }
+            }
+        } ?: run {
+            dismissLoadingDialog()
+            Toast.makeText(this, R.string.solana_manager_not_initialized, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun handleUSDCClick(price: String) {
+        solanaManager?.let { manager ->
+            val (address, index) = if (SolanaManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
+
+            val numericPrice = price.filter { it.isDigit() || it == '.' }
+
+            postConversionApi(numericPrice, selectedCurrencyCode, address, "USDC", R.drawable.usdc) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(
+                        address,
+                        formattedRate,
+                        R.drawable.solana,
+                        "USDC",
+                        index,
+                        feeStatus,
+                        status,
+                        "USDC",
+                        numericPrice,
+                        selectedCurrencyCode,
+                        "USDC"
+                    )
+                }
+            }
+        } ?: run {
+            dismissLoadingDialog()
+            Toast.makeText(this, R.string.solana_manager_not_initialized, Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -47,6 +47,18 @@
       "shortname": "BCH",
       "chain": "Bitcoincash",
       "logo": "bitcoin_cash"
+    },
+    {
+      "name": "Solana",
+      "shortname": "SOL",
+      "chain": "Solana",
+      "logo": "solana"
+    },
+    {
+      "name": "USDC",
+      "shortname": "USDC",
+      "chain": "Solana",
+      "logo": "usdc"
     }
   ]
 }

@@ -111,6 +111,8 @@
     <string name="ethereum_manager_not_initialized">Ethereum Manager not initialized</string>
     <string name="dogecoin_manager_not_initialized">Dogecoin Manager not initialized</string>
     <string name="usdt_manager_not_initialized">USDT Tron Manager not initialized</string>
+    <string name="solana_manager_not_initialized">Solana Manager not initialized</string>
+    <string name="usdc_manager_not_initialized">USDC Solana Manager not initialized</string>
     <string name="dash_manager_not_initialized">Dash Manager not initialized</string>
     <string name="failed_to_derive_dash_address">Failed to derive Dash address</string>
     <string name="bitcoincash_manager_not_initialized">Bitcoincash Manager not initialized</string>

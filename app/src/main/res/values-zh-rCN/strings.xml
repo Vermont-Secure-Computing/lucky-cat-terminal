@@ -111,6 +111,8 @@
     <string name="ethereum_manager_not_initialized">以太坊管理器未初始化</string>
     <string name="dogecoin_manager_not_initialized">狗狗币管理器未初始化</string>
     <string name="usdt_manager_not_initialized">USDT Tron 管理器未初始化</string>
+    <string name="solana_manager_not_initialized"> Solana 管理器未初始化</string>
+    <string name="usdc_manager_not_initialized">USDC Solana 管理器未初始化</string>
     <string name="dash_manager_not_initialized">达世币管理器未初始化</string>
     <string name="failed_to_derive_dash_address">派生达世币地址失败</string>
     <string name="bitcoincash_manager_not_initialized">比特现金管理器未初始化</string>

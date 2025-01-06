@@ -123,9 +123,13 @@
 
                 address = intent.getStringExtra("ADDRESS") ?: getString(R.string.no_address_provided)
                 val price = intent.getStringExtra("PRICE") ?: getString(R.string.no_price_provided)
-                val logoResId = intent.getIntExtra("LOGO_RES_ID", R.drawable.bitcoin_logo)
                 currency = intent.getStringExtra("CURRENCY") ?: "BTC"
                 chain = currency
+                val logoResId = when (currency) {
+                    "USDC" -> R.drawable.usdc // Use the USDC logo
+                    "SOL" -> R.drawable.solana // Use the Solana logo
+                    else -> intent.getIntExtra("LOGO_RES_ID", R.drawable.bitcoin_logo)
+                }
                 val addressIndex = intent.getIntExtra("ADDRESS_INDEX", -1)
                 val feeStatus = intent.getStringExtra("FEE_STATUS") ?: ""
                 val status = intent.getStringExtra("STATUS") ?: ""
@@ -140,7 +144,7 @@
                 message = intent.getStringExtra("MESSAGE") ?: ""
 
 
-                val formattedPrice = if (currency == "TRON") {
+                val formattedPrice = if (currency == "TRON" || currency == "USDC") {
                     BigDecimal(price).setScale(6, RoundingMode.HALF_UP).toPlainString()
                 } else {
                     price
@@ -155,6 +159,8 @@
                     "DASH" -> "dash:$address?amount=$formattedPrice"
                     "BCH" -> "bitcoincash:$address?amount=$formattedPrice"
                     "XMR" -> "monero:$address?amount=$formattedPrice"
+                    "SOL" -> "solana:$address?amount=$formattedPrice"
+                    "USDC" -> "solana:$address?amount=$formattedPrice"
                     else -> "bitcoin:$address?amount=$formattedPrice"
                 }
 
@@ -518,10 +524,12 @@
                         "LTC" -> "litecoin:$address?amount=$difference"
                         "DOGE" -> "dogecoin:$address?amount=$difference"
                         "ETH" -> "ethereum:$address?amount=$difference"
-                        "TRON-NETWORK" -> "tron:$address?amount=$difference"
+                        "TRON-NETWORK" -> "tron:$address?amount=${BigDecimal(difference).setScale(6, RoundingMode.HALF_UP).toPlainString()}"
                         "DASH" -> "dash:$address?amount=$difference"
                         "BCH" -> "bitcoincash:$address?amount=$difference"
                         "XMR" -> "monero:$address?amount=$difference"
+                        "SOL" -> "solana:$address?amount=$difference"
+                        "USDC" -> "solana:$address?amount=${BigDecimal(difference).setScale(6, RoundingMode.HALF_UP).toPlainString()}"
                         else -> "bitcoin:$address?amount=$difference"
                     }
 
@@ -579,13 +587,13 @@
 
                         // Update the TextViews with the received data
                         // Convert balance and fees to their correct values
-                        val formattedBalance = if (chain == "TRON") {
+                        val formattedBalance = if (chain == "TRON" || chain == "USDC") {
                             String.format("%.6f", convertBalance(totalReceivedAmount))
                         } else {
                             String.format("%.8f", convertBalance(totalReceivedAmount))
                         }
 
-                        val formattedFees = if (chain == "TRON") {
+                        val formattedFees = if (chain == "TRON" || chain == "USDC") {
                             String.format("%.6f", convertFee(fees))
                         } else {
                             String.format("%.8f", convertFee(fees))
@@ -721,6 +729,8 @@
                     "Dash" -> DashManager.PREFS_NAME
                     "Bitcoincash" -> BitcoinManager.PREFS_NAME
                     "Monero" -> MoneroManager.PREFS_NAME
+                    "Solana" -> SolanaManager.PREFS_NAME
+                    "USDC" -> SolanaManager.PREFS_NAME
                     else -> BitcoinManager.PREFS_NAME
                 }
             }
@@ -735,6 +745,8 @@
                     "Dash" -> DashManager.LAST_INDEX_KEY
                     "Bitcoincash" -> BitcoinCashManager.LAST_INDEX_KEY
                     "Monero" -> MoneroManager.LAST_INDEX_KEY
+                    "Solana" -> SolanaManager.LAST_INDEX_KEY
+                    "USDC" -> SolanaManager.LAST_INDEX_KEY
                     else -> BitcoinManager.LAST_INDEX_KEY
                 }
             }
