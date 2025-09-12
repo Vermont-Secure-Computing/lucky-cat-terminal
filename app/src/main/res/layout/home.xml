@@ -53,6 +53,17 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <TextView
+                android:id="@+id/networkBanner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/tapeRed"
+                android:textColor="@android:color/white"
+                android:padding="8dp"
+                android:textSize="14sp"
+                android:visibility="gone"
+                android:text="@string/internet_is_unstable_try_again"/>
+
             <!-- Accepted Currency Title -->
             <TextView
                 android:id="@+id/acceptedCurrencyTitle"

@@ -22,8 +22,6 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.Properties
@@ -93,26 +91,15 @@ class APIActivity : AppCompatActivity() {
     }
 
     private fun loadApiKey() {
-        val apiPropertiesFile = File(filesDir, "api.properties")
-        if (apiPropertiesFile.exists()) {
-            val properties = Properties()
-            FileInputStream(apiPropertiesFile).use { input ->
-                properties.load(input)
-            }
-            val apiKey = properties.getProperty("api_key")
-            if (!apiKey.isNullOrEmpty()) {
-                apiKeyInput.setText(apiKey)
-                // Call the API to get details
-                callApiDetails(apiKey)
-            } else {
-                // Hide the API details if API key is empty
-                hideApiDetails()
-            }
+        val key = ApiKeyStore.get(this)?.trim().orEmpty()
+        if (key.isNotEmpty()) {
+            apiKeyInput.setText(key)
+            callApiDetails(key)  // your verify/details call
         } else {
-            // Hide the API details if the file does not exist
             hideApiDetails()
         }
     }
+
 
     private fun callApiDetails(apiKey: String) {
         val call = apiService.getApiDetails(apiKey)
@@ -181,13 +168,15 @@ class APIActivity : AppCompatActivity() {
     }
 
     private fun saveApiKey(apiKey: String) {
-        val apiPropertiesFile = File(filesDir, "api.properties")
-        val properties = Properties()
-        properties.setProperty("api_key", apiKey)
+        // Save to SharedPreferences
+        ApiKeyStore.set(this, apiKey.trim())
 
-        FileOutputStream(apiPropertiesFile).use { output ->
-            properties.store(output, null)
-        }
+        // Also save to api.properties file
+        val apiFile = File(filesDir, "api.properties")
+        val props = Properties().apply { setProperty("api_key", apiKey.trim()) }
+        apiFile.outputStream().use { props.store(it, null) }
+
+        com.vermont.possin.network.RetrofitClient.invalidate()
     }
 
     private fun showSuccessDialog() {

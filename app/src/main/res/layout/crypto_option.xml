@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="@color/customGray">
 
-    <!-- Header with logo and text -->
+    <!-- Header with logo and back -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
@@ -47,48 +47,92 @@
             app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <!-- Shared banner controlled by BaseNetworkActivity -->
+    <TextView
+        android:id="@+id/networkBanner"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:layout_marginTop="16dp">
+        android:background="@color/tapeRed"
+        android:textColor="@android:color/white"
+        android:padding="8dp"
+        android:textSize="14sp"
+        android:visibility="gone"
+        android:text="@string/internet_is_unstable_try_again" />
 
-        <TextView
-            android:id="@+id/priceTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="50sp"
-            android:textColor="#000000"
-            android:text="0.00"
-            android:layout_gravity="center" />
-
-        <ImageView
-            android:id="@+id/nekuGifImageView"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_marginStart="8dp"
-            android:layout_gravity="center"
-            android:contentDescription="@string/neku_gif_description" />
-    </LinearLayout>
-
-    <ScrollView
+    <!-- Content + overlay lives in a FrameLayout so overlay sits on top -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
+        android:layout_weight="1">
 
+        <!-- Main content column -->
         <LinearLayout
-            android:id="@+id/buttonContainer"
+            android:id="@+id/contentRoot"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:background="@android:color/transparent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:id="@+id/priceTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="50sp"
+                    android:textColor="#000000"
+                    android:text="0.00"
+                    android:layout_gravity="center" />
+
+                <ImageView
+                    android:id="@+id/nekuGifImageView"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/neku_gif_description" />
+            </LinearLayout>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:fillViewport="true">
+
+                <LinearLayout
+                    android:id="@+id/buttonContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:background="@android:color/transparent" />
+            </ScrollView>
         </LinearLayout>
 
-    </ScrollView>
+        <!-- Optional blocking overlay (same pattern as POS) -->
+        <LinearLayout
+            android:id="@+id/offlineOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#CCFFFFFF"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
 
+            <TextView
+                android:id="@+id/offlineOverlayText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_internet_connection"
+                android:textColor="@color/dark_gray"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </FrameLayout>
 </LinearLayout>

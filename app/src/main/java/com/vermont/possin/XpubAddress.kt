@@ -152,7 +152,7 @@ class XpubAddress : AppCompatActivity() {
             chainTextView.text = crypto.chain
 
             // Set up type spinner
-            val typeAdapter: ArrayAdapter<CharSequence> = if (crypto.name == "Monero" || crypto.name == "Ethereum" || crypto.name == "Tether" || crypto.name == "Solana" || crypto.name == "USDC") {
+            val typeAdapter: ArrayAdapter<CharSequence> = if (crypto.name == "Monero" || crypto.name == "Ethereum" || crypto.name == "Tether" || crypto.name == "Solana") {
                 // For Monero, only show "address" option
                 ArrayAdapter.createFromResource(this, R.array.monero_type_array, android.R.layout.simple_spinner_item)
             } else {
@@ -532,9 +532,9 @@ class XpubAddress : AppCompatActivity() {
             "Solana" -> {
                 if (inputType == "xpub") SolanaManager.isValidXpub(value) else SolanaManager.isValidAddress(value)
             }
-            "USDC" -> {
-                if (inputType == "xpub") SolanaManager.isValidXpub(value) else SolanaManager.isValidAddress(value)
-            }
+//            "USDC" -> {
+//                if (inputType == "xpub") SolanaManager.isValidXpub(value) else SolanaManager.isValidAddress(value)
+//            }
             else -> false
         }
 

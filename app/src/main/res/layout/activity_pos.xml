@@ -4,7 +4,47 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.vermont.possin.POSView
+    <!-- Network banner at top -->
+    <TextView
+        android:id="@+id/networkBanner"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"
+        android:background="@color/tapeRed"
+        android:textColor="@android:color/white"
+        android:padding="8dp"
+        android:textSize="14sp"
+        android:visibility="gone"
+        android:text="@string/internet_is_unstable_try_again" />
+
+    <!-- Content + overlay live in a FrameLayout so overlay sits on top -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <com.vermont.possin.POSView
+            android:id="@+id/posView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- This overlay blocks/obscures the POSView when net is LIMITED/OFFLINE -->
+        <LinearLayout
+            android:id="@+id/offlineOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#CCFFFFFF"
+            android:gravity="center"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/offlineOverlayText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_internet_connection"
+            android:textColor="@color/dark_gray"
+            android:textSize="16sp" />
+        </LinearLayout>
+    </FrameLayout>
 </LinearLayout>

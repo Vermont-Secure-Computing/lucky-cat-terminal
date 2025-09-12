@@ -165,4 +165,19 @@
     <string name="failed_to_save_the_CSV_file">Не удалось сохранить файл CSV</string>
     <string name="failed_to_derive_address">Не удалось получить адрес.</string>
     <string name="add_note">Добавить заметку</string>
+    <string name="payment_confirmed">Оплата подтверждена</string>
+    <string name="would_you_like_to_print_a_receipt">Хотите распечатать чек?</string>
+    <string name="print">Распечатать</string>
+    <string name="stay">Остаться</string>
+    <string name="no_internet_connection">Нет подключения к интернету. Пожалуйста, проверьте Wi-Fi или мобильные данные.</string>
+    <string name="internet_is_unstable_try_again">Подключение к интернету слабое или ограниченное. Попробуйте снова.</string>
+    <string name="open_bluetooth_settings">Открыть настройки Bluetooth</string>
+    <string name="printer_not_found">Принтер не найден</string>
+    <string name="no_paired_printer_message">Не найдено сопряжённых Bluetooth-принтеров. Сначала подключите принтер, вставьте бумагу и нажмите «Повторить».</string>
+    <string name="printer_issue_title">Проблема с принтером</string>
+    <string name="paper_or_jam_message">Ошибка печати. Убедитесь, что принтер ВКЛЮЧЁН, подключён и в нём есть бумага (нет замятия). Плотно закройте крышку, затем нажмите «Повторить».</string>
+    <string name="connection_error_message">Не удаётся подключиться к принтеру. Убедитесь, что он включён, в зоне действия и сопряжён.</string>
+    <string name="parser_error_message">Ошибка формата печати. Проверьте теги ESC/POS (например, &lt;font&gt;, &lt;b&gt;, &lt;qrcode&gt;).</string>
+    <string name="encoding_error_message">Ошибка кодировки при печати (неподдерживаемые символы).</string>
+    <string name="barcode_qr_error_message">Ошибка генерации штрих-кода/QR. Проверьте данные.</string>
 </resources>

@@ -53,12 +53,6 @@
       "shortname": "SOL",
       "chain": "Solana",
       "logo": "solana"
-    },
-    {
-      "name": "USDC",
-      "shortname": "USDC",
-      "chain": "Solana",
-      "logo": "usdc"
     }
   ]
 }

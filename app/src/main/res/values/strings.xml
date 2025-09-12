@@ -165,4 +165,19 @@
     <string name="failed_to_save_the_CSV_file">Failed to save the CSV file</string>
     <string name="failed_to_derive_address">Failed to derive address.</string>
     <string name="add_note">Add Note</string>
+    <string name="payment_confirmed">Payment confirmed</string>
+    <string name="would_you_like_to_print_a_receipt">Would you like to print a receipt?</string>
+    <string name="print">Print</string>
+    <string name="stay">Stay</string>
+    <string name="no_internet_connection">No internet connection. Please check Wi-Fi or mobile data.</string>
+    <string name="internet_is_unstable_try_again">Internet connection seems weak or limited. Try again.</string>
+    <string name="open_bluetooth_settings">Open Bluetooth settings</string>
+    <string name="printer_not_found">Printer not found</string>
+    <string name="no_paired_printer_message">No paired Bluetooth printer was found. Pair a printer first, load paper, then tap Retry.</string>
+    <string name="printer_issue_title">Printer problem</string>
+    <string name="paper_or_jam_message">Printing failed. Make sure the printer is ON, paired, and has paper (no jam). Close the cover firmly, then tap Retry.</string>
+    <string name="connection_error_message">Can’t reach the printer. Make sure it’s powered on, within range, and paired.</string>
+    <string name="parser_error_message">Print format error. Please check your ESC/POS tags (e.g., &lt;font&gt;, &lt;b&gt;, &lt;qrcode&gt;).</string>
+    <string name="encoding_error_message">Encoding error while printing (unsupported characters).</string>
+    <string name="barcode_qr_error_message">Barcode/QR generation error. Please check the data.</string>
 </resources>
