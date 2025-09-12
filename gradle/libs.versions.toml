@@ -55,6 +55,7 @@ lifecycle-viewmodel = "2.6.1"
 coreSplashscreen = "1.0.1"
 commons-codec = "1.15"
 logging-interceptor = "4.11.0"
+androidx-lifecycle = "2.8.6"
 
 
 
@@ -115,6 +116,7 @@ lifecycle-viewmodel = {group = "androidx.lifecycle", name = "lifecycle-viewmodel
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 commons-codec = { group = "commons-codec", name = "commons-codec", version.ref = "commons-codec"}
 logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "logging-interceptor"}
+androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle"}
 
 
 [plugins]

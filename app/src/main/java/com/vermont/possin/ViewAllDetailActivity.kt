@@ -7,15 +7,14 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
+import com.dantsu.escposprinter.exceptions.EscPosConnectionException
 import com.vermont.possin.database.AppDatabase
 import com.vermont.possin.model.Transaction
-import com.vermont.possin.utils.PropertiesUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.Call
@@ -122,9 +121,22 @@ class ViewAllDetailActivity : AppCompatActivity() {
         return getProperty("address")
     }
 
+    private fun normalizeChain(chain: String): String = when (chain.uppercase()) {
+        "USDC", "SOLANA", "SOL" -> "SOL"
+        "TRON-NETWORK", "USDT-TRON" -> "TRON"
+        "BITCOIN" -> "BTC"
+        "BITCOINCASH" -> "BCH"
+        "LITECOIN" -> "LTC"
+        "DOGECOIN" -> "DOGE"
+        "ETHEREUM" -> "ETH"
+        "MONERO" -> "XMR"
+        else -> chain.uppercase()
+    }
+
     private fun getConfirmations(chain: String, txid: String) {
-        val url = "https://dogpay.mom/terminal/tx_confirmations/$chain/$txid"
-        val apiKey = PropertiesUtil.getProperty(this, "api_key")
+        val normalizedChain = normalizeChain(chain)
+        val url = "https://dogpay.mom/terminal/tx_confirmations/$normalizedChain/$txid"
+        val apiKey = ApiKeyStore.get(this) ?: ""
 
         val client = OkHttpClient()
         val request = Request.Builder()
@@ -133,29 +145,24 @@ class ViewAllDetailActivity : AppCompatActivity() {
             .build()
 
         client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
-
+            override fun onFailure(call: Call, e: IOException) { e.printStackTrace() }
             override fun onResponse(call: Call, response: Response) {
                 if (response.isSuccessful) {
                     val responseData = response.body?.string()
                     responseData?.let {
                         val jsonObject = JSONObject(it)
-                        val confirmations = jsonObject.getInt("confirmations")
+                        val confirmations = jsonObject.optInt("confirmations", 0)
 
-                        // Update the UI on the main thread
                         runOnUiThread {
                             confirmationsTextView.text = getString(R.string.confirmations, confirmations)
+                            confirmationsTextView.visibility = TextView.VISIBLE
+                            // If you also have a container layout for confirmations here, make it visible too
+                            // confirmationsLayout.visibility = View.VISIBLE
                         }
 
-                        // Update the transaction in the database
                         lifecycleScope.launch(Dispatchers.IO) {
-                            val transaction = db.transactionDao().getTransactionByTxid(txid)
-                            transaction?.let {
-                                it.confirmations = confirmations
-                                db.transactionDao().update(it)
-                            }
+                            val t = db.transactionDao().getTransactionByTxid(txid)
+                            t?.let { it.confirmations = confirmations; db.transactionDao().update(it) }
                         }
                     }
                 }
@@ -235,9 +242,52 @@ class ViewAllDetailActivity : AppCompatActivity() {
     fun performPrint() {
         val bluetoothConnection = BluetoothPrintersConnections.selectFirstPaired()
         if (bluetoothConnection == null) {
-            Toast.makeText(this, R.string.no_paired_Bluetooth_printer_found, Toast.LENGTH_SHORT).show()
+            showPrintRecoveryDialog(
+                title = getString(R.string.printer_not_found),
+                message = getString(R.string.no_paired_printer_message),
+                onRetry = { performPrint() }
+            )
             return
         }
+
+        try {
+            val printer = EscPosPrinter(bluetoothConnection, 203, 48f, 32)
+            for (i in 1..2) {
+                val copyType = if (i == 1) "Customer Copy" else "Owner's Copy"
+                printer.printFormattedText(
+                    "[C]<u><font size='big'>RECEIPT</font></u>\n" +
+                            "[L]\n" +
+                            "[C]-------------------------------\n" +
+                            "[L]\n" +
+                            "[L]<b>${R.string.transaction_details}</b>\n" +
+                            "[L]\n" +
+                            "[L]${balanceTextView.text}\n" +
+                            "[L]${txidTextView.text}\n" +
+                            "[L]${feesTextView.text}\n" +
+                            "[L]${confirmationsTextView.text}\n" +
+                            "[L]${chainTextView.text}\n" +
+                            "[L]Device ID: $deviceId\n" +
+                            "[L]\n" +
+                            "[C]-------------------------------\n" +
+                            "[C]$copyType\n" +
+                            "[L]\n" +
+                            "[C]Thank you for your payment!\n"
+                )
+            }
+        } catch (e: EscPosConnectionException) {
+            showPrintRecoveryDialog(
+                title = getString(R.string.printer_issue_title),
+                message = getString(R.string.paper_or_jam_message),
+                onRetry = { performPrint() }
+            )
+        } catch (e: Exception) {
+            showPrintRecoveryDialog(
+                title = getString(R.string.printer_issue_title),
+                message = e.userFacingMessage(this),
+                onRetry = { performPrint() }
+            )
+        }
+
         try {
             val printer = EscPosPrinter(bluetoothConnection, 203, 48f, 32)
             for (i in 1..2) {

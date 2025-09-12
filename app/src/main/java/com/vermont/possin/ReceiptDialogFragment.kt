@@ -8,7 +8,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +18,7 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
+import com.dantsu.escposprinter.exceptions.EscPosConnectionException
 import java.io.File
 import java.io.FileInputStream
 import java.util.Locale
@@ -169,16 +169,22 @@ class ReceiptDialogFragment : DialogFragment() {
         val bluetoothConnection = BluetoothPrintersConnections.selectFirstPaired()
         if (bluetoothConnection == null) {
             Toast.makeText(activity, R.string.no_paired_Bluetooth_printer_found, Toast.LENGTH_SHORT).show()
+            requireContext().showPrintRecoveryDialog(
+                title = getString(R.string.printer_not_found),
+                message = getString(R.string.no_paired_printer_message),
+                onRetry = { performPrintCopies(copies, copyType, onComplete) }
+            )
             return
         }
+
         try {
             val printer = EscPosPrinter(bluetoothConnection, 203, 48f, 32)
             val receiptContent = StringBuilder()
 
-            // Add required fields
+            // Header
             receiptContent.append("[C]<font size='big'>${receiptTitle.text}</font>\n")
 
-            // Add optional fields from merchant.properties
+            // Optional merchant fields
             val address = merchantProperties.getProperty("address", "")
             val city = merchantProperties.getProperty("city", "")
             val state = merchantProperties.getProperty("state", "")
@@ -187,43 +193,27 @@ class ReceiptDialogFragment : DialogFragment() {
             val phone = merchantProperties.getProperty("phone", "")
             val email = merchantProperties.getProperty("email", "")
 
-            if (address.isNotEmpty()) {
-                receiptContent.append("[L]Address: $address\n")
-            }
-            if (city.isNotEmpty()) {
-                receiptContent.append("[L]City: $city\n")
-            }
-            if (state.isNotEmpty()) {
-                receiptContent.append("[L]State: $state\n")
-            }
-            if (zipCode.isNotEmpty()) {
-                receiptContent.append("[L]Zip Code: $zipCode\n")
-            }
-            if (country.isNotEmpty()) {
-                receiptContent.append("[L]Country: $country\n")
-            }
-            if (phone.isNotEmpty()) {
-                receiptContent.append("[L]Phone: $phone\n")
-            }
-            if (email.isNotEmpty()) {
-                receiptContent.append("[L]Email: $email\n")
-            }
+            if (address.isNotEmpty()) receiptContent.append("[L]Address: $address\n")
+            if (city.isNotEmpty()) receiptContent.append("[L]City: $city\n")
+            if (state.isNotEmpty()) receiptContent.append("[L]State: $state\n")
+            if (zipCode.isNotEmpty()) receiptContent.append("[L]Zip Code: $zipCode\n")
+            if (country.isNotEmpty()) receiptContent.append("[L]Country: $country\n")
+            if (phone.isNotEmpty()) receiptContent.append("[L]Phone: $phone\n")
+            if (email.isNotEmpty()) receiptContent.append("[L]Email: $email\n")
 
             receiptContent.append("[C]-------------------------------\n")
             receiptContent.append("[L]<b>Transaction Details</b>\n")
 
-            // Add transaction details
+            // Transaction details
             if (receiptBalance.text.isNotEmpty()) {
                 val regex = Regex(".*?[：:\\s]+(\\d+(?:[.,]\\d+)?)")
                 val amountValue = regex.find(receiptBalance.text)?.groupValues?.get(1)?.trim() ?: receiptBalance.text
-                Log.d("AMOUNT VALUE", amountValue.toString())
                 receiptContent.append("[L]Amount: $amountValue\n")
             }
 
             if (receiptBaseCurrency.text.isNotEmpty()) {
                 val regex = Regex(".*?[：:]\\s*([a-zA-Z0-9]+)")
                 val baseCurrencyValue = regex.find(receiptBaseCurrency.text)?.groupValues?.get(1)?.trim() ?: receiptBaseCurrency.text
-                Log.d("BASE CURRENCY", baseCurrencyValue.toString())
                 receiptContent.append("[L]Base Currency: $baseCurrencyValue\n")
             }
 
@@ -254,7 +244,7 @@ class ReceiptDialogFragment : DialogFragment() {
 
             if (receiptConfirmations.text.isNotEmpty()) {
                 val regex = Regex(".*?[：:]\\s*(\\d+)")
-                val confirmationsValue = regex.find(receiptConfirmations.text)?.groupValues?.get(1)?.trim() ?: 0
+                val confirmationsValue = regex.find(receiptConfirmations.text)?.groupValues?.get(1)?.trim() ?: "0"
                 receiptContent.append("[L]Confirmations: $confirmationsValue\n")
             }
 
@@ -278,14 +268,25 @@ class ReceiptDialogFragment : DialogFragment() {
             receiptContent.append("[L]\n")
             receiptContent.append("[C]Thank you for your payment!\n")
 
-            // Print the receipt
+            // IMPORTANT: convert to String
+            val escpos = receiptContent.toString()
             for (i in 1..copies) {
-                printer.printFormattedText(receiptContent.toString())
+                printer.printFormattedText(escpos)
             }
+
             onComplete()
+        } catch (e: EscPosConnectionException) {
+            requireContext().showPrintRecoveryDialog(
+                title = getString(R.string.printer_issue_title),
+                message = getString(R.string.paper_or_jam_message),
+                onRetry = { performPrintCopies(copies, copyType, onComplete) }
+            )
         } catch (e: Exception) {
-            e.printStackTrace()
-            // Handle printing errors
+            requireContext().showPrintRecoveryDialog(
+                title = getString(R.string.printer_issue_title),
+                message = e.userFacingMessage(requireContext()),
+                onRetry = { performPrintCopies(copies, copyType, onComplete) }
+            )
         }
     }
 }

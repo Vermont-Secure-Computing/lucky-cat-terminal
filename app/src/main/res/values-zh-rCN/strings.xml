@@ -111,6 +111,8 @@
     <string name="ethereum_manager_not_initialized">以太坊管理器未初始化</string>
     <string name="dogecoin_manager_not_initialized">狗狗币管理器未初始化</string>
     <string name="usdt_manager_not_initialized">USDT Tron 管理器未初始化</string>
+    <string name="solana_manager_not_initialized"> Solana 管理器未初始化</string>
+    <string name="usdc_manager_not_initialized">USDC Solana 管理器未初始化</string>
     <string name="dash_manager_not_initialized">达世币管理器未初始化</string>
     <string name="failed_to_derive_dash_address">派生达世币地址失败</string>
     <string name="bitcoincash_manager_not_initialized">比特现金管理器未初始化</string>
@@ -163,4 +165,19 @@
     <string name="failed_to_save_the_CSV_file">无法保存CSV文件</string>
     <string name="failed_to_derive_address">无法生成地址。</string>
     <string name="add_note">添加备注</string>
+    <string name="payment_confirmed">支付已确认</string>
+    <string name="would_you_like_to_print_a_receipt">是否打印收据？</string>
+    <string name="print">打印</string>
+    <string name="stay">停留</string>
+    <string name="no_internet_connection">没有网络连接。请检查 Wi-Fi 或移动数据。</string>
+    <string name="internet_is_unstable_try_again">网络连接较弱或受限，请重试。</string>
+    <string name="open_bluetooth_settings">打开蓝牙设置</string>
+    <string name="printer_not_found">未找到打印机</string>
+    <string name="no_paired_printer_message">未找到已配对的蓝牙打印机。请先配对打印机、装入纸张，然后点击“重试”。</string>
+    <string name="printer_issue_title">打印机问题</string>
+    <string name="paper_or_jam_message">打印失败。请确认打印机已开启、已配对，并且有纸（无卡纸）。请关闭机盖后再点击“重试”。</string>
+    <string name="connection_error_message">无法连接到打印机。请确认打印机已开启、在连接范围内并已配对。</string>
+    <string name="parser_error_message">打印格式错误。请检查 ESC/POS 标签（例如 &lt;font&gt;, &lt;b&gt;, &lt;qrcode&gt;）。</string>
+    <string name="encoding_error_message">打印时发生编码错误（包含不支持的字符）。</string>
+    <string name="barcode_qr_error_message">条码/二维码生成错误。请检查数据。</string>
 </resources>

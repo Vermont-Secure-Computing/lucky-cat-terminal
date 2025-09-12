@@ -12,7 +12,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import com.google.gson.Gson
@@ -20,6 +19,7 @@ import com.google.gson.JsonObject
 import com.vermont.possin.model.ConversionResponse
 import com.vermont.possin.network.ConversionRequestBody
 import com.vermont.possin.network.RetrofitClient
+import org.json.JSONObject
 import pl.droidsonroids.gif.GifDrawable
 import retrofit2.Call
 import retrofit2.Callback
@@ -33,7 +33,7 @@ import java.util.Properties
 
 data class CryptoCurrency(val name: String, val shortname: String, val chain: String, val logo: String)
 
-class CryptoOptionActivity : AppCompatActivity() {
+class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network helpers
 
     private var bitcoinManager: BitcoinManager? = null
     private var litecoinManager: LitecoinManager? = null
@@ -44,90 +44,63 @@ class CryptoOptionActivity : AppCompatActivity() {
     private var tronManager: TronManager? = null
     private var bitcoincashManager: BitcoinCashManager? = null
     private var moneroManager: MoneroManager? = null
+    private var solanaManager: SolanaManager? = null
     private lateinit var selectedCurrencyCode: String
     private lateinit var message: String
     private var loadingDialog: AlertDialog? = null
+
+    // keep references to enable/disable on net changes
+    private val clickableViews = mutableListOf<View>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.crypto_option)
 
+        // Optional banner; safe even if crypto_option has no networkBanner TextView
+        setupNetworkMonitoring(R.id.networkBanner)
+
         window.statusBarColor = ContextCompat.getColor(this, R.color.darkerRed)
 
-        // Get price from intent and log it
         val price = intent.getStringExtra("PRICE") ?: "0.00"
         val priceTextView: TextView = findViewById(R.id.priceTextView)
         val cleanedPrice = price.replace(Regex("[^\\d.]"), "").trim()
-
-        // Convert to double
         val priceValue = cleanedPrice.toDoubleOrNull() ?: 0.00
-
-        // Adjust the text size if price is >= 10000
-        if (priceValue >= 10000) {
-            priceTextView.textSize = 30f // Set text size to 30sp
-        }
-
-        // Set the price text
+        if (priceValue >= 10000) priceTextView.textSize = 30f
         priceTextView.text = price
+
         message = intent.getStringExtra("MESSAGE") ?: ""
 
         val xPubs = loadXPubsFromSettings()
-        xPubs.forEach { (key, value) ->
-            Log.d("CryptoOptionActivity", "Loaded xPub for $key: $value")
-        }
         xPubs["Bitcoin"]?.let { bitcoinManager = BitcoinManager(this, it) }
-        xPubs["Litecoin"]?.let { litecoinValue ->
-            val litecoinType = getCryptoTypeFromConfig("Litecoin_type") // Get type from config.properties
 
+        xPubs["Litecoin"]?.let { litecoinValue ->
+            val litecoinType = getCryptoTypeFromConfig("Litecoin_type")
             if (litecoinType == "xpub") {
                 val convertedXpub = if (litecoinValue.startsWith("xpub")) {
-                    try {
-                        LitecoinManager.convertBitcoinXpubToLitecoin(litecoinValue)
-                    } catch (e: Exception) {
-                        Log.e("LitecoinManager", "Error converting xPub: ${e.message}")
-                        return@let
-                    }
-                } else {
-                    litecoinValue // Use the existing xPub if not `xpub`
-                }
-
+                    try { LitecoinManager.convertBitcoinXpubToLitecoin(litecoinValue) }
+                    catch (e: Exception) { Log.e("LitecoinManager","Error converting xPub: ${e.message}"); return@let }
+                } else litecoinValue
                 if (LitecoinManager.isValidXpub(convertedXpub, this)) {
                     litecoinManager = LitecoinManager(this, convertedXpub)
-                    Log.d("CryptoOptionActivity", "LitecoinManager initialized successfully.")
-                } else {
-                    Log.e("LitecoinManager", "xPub is invalid: $convertedXpub")
-                }
-            } else if (litecoinType == "address") {
-                litecoinManager = LitecoinManager(this, litecoinValue) // Initialize with address directly
-                Log.d("CryptoOptionActivity", "LitecoinManager initialized with address.")
+                } else Log.e("LitecoinManager","xPub is invalid: $convertedXpub")
+            } else {
+                litecoinManager = LitecoinManager(this, litecoinValue)
             }
         }
 
         xPubs["Ethereum"]?.let { ethereumManager = EthereumManager(this, it) }
         xPubs["Dogecoin"]?.let { dogecoinValue ->
-            val dogecoinType = getCryptoTypeFromConfig("Dogecoin_type") // Get type from config.properties
-
+            val dogecoinType = getCryptoTypeFromConfig("Dogecoin_type")
             if (dogecoinType == "xpub") {
                 val convertedXpub = if (dogecoinValue.startsWith("xpub")) {
-                    try {
-                        DogecoinManager.convertBitcoinXpubToDogecoin(dogecoinValue)
-                    } catch (e: Exception) {
-                        Log.e("DogecoinManager", "Error converting xPub: ${e.message}")
-                        return@let
-                    }
-                } else {
-                    dogecoinValue // Use the existing xPub if not `xpub`
-                }
-
+                    try { DogecoinManager.convertBitcoinXpubToDogecoin(dogecoinValue) }
+                    catch (e: Exception) { Log.e("DogecoinManager","Error converting xPub: ${e.message}"); return@let }
+                } else dogecoinValue
                 if (DogecoinManager.isValidXpub(convertedXpub, this)) {
                     dogecoinManager = DogecoinManager(this, convertedXpub)
-                    Log.d("CryptoOptionActivity", "DogecoinManager initialized successfully.")
-                } else {
-                    Log.e("DogecoinManager", "xPub is invalid: $convertedXpub")
-                }
-            } else if (dogecoinType == "address") {
-                dogecoinManager = DogecoinManager(this, dogecoinValue) // Initialize with address directly
-                Log.d("CryptoOptionActivity", "DogecoinManager initialized with address.")
+                } else Log.e("DogecoinManager","xPub is invalid: $convertedXpub")
+            } else {
+                dogecoinManager = DogecoinManager(this, dogecoinValue)
             }
         }
 
@@ -135,50 +108,85 @@ class CryptoOptionActivity : AppCompatActivity() {
         xPubs["Dash"]?.let { dashManager = DashManager(this, it) }
         xPubs["Tether"]?.let { tronManager = TronManager(this, it) }
         xPubs["Bitcoincash"]?.let { bitcoincashManager = BitcoinCashManager(this, it) }
-
+        xPubs["Solana"]?.let { solanaManager = SolanaManager(this, it) }
+        xPubs["USDC"]?.let { solanaManager = SolanaManager(this, it) }
 
         val properties = loadPropertiesFromConfigFile()
         val privateViewKey = properties.getProperty("Monero_view_key")
         val moneroAddress = properties.getProperty("Monero_value")
-
         if (privateViewKey != null && moneroAddress != null) {
             moneroManager = MoneroManager(this, privateViewKey, moneroAddress)
         } else {
-            Log.e("Monero", "Monero keys or address not found in config file.")
+            Log.e("Monero","Monero keys or address not found in config file.")
         }
-
-
 
         selectedCurrencyCode = intent.getStringExtra("CURRENCY_CODE") ?: "BTC"
 
         val buttonContainer: LinearLayout = findViewById(R.id.buttonContainer)
         val cryptoCurrencies = loadCryptocurrenciesFromJson()
-
         cryptoCurrencies.forEach { crypto ->
             val logoResId = resources.getIdentifier(crypto.logo, "drawable", packageName)
             addCardView(buttonContainer, logoResId, xPubs.containsKey(crypto.name), crypto) {
+                // HARD GUARD: only handle clicks when truly CONNECTED
+                if (lastObservedNetworkStatus != NetworkStatus.CONNECTED) {
+                    Toast.makeText(this, getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show()
+                    return@addCardView
+                }
                 handleCryptoClick(crypto, price)
             }
         }
 
-        val backArrow: ImageView = findViewById(R.id.back_arrow)
-        backArrow.setOnClickListener {
-            finish() // Navigate back to the previous activity
+        findViewById<ImageView>(R.id.back_arrow)?.setOnClickListener { finish() }
+        findViewById<ImageView>(R.id.nekuGifImageView)?.apply {
+            val gifDrawable = GifDrawable(resources, R.raw.neku)
+            setImageDrawable(gifDrawable)
         }
 
-        val nekuGifView = findViewById<ImageView>(R.id.nekuGifImageView)
-        val gifDrawable = GifDrawable(resources, R.raw.neku)
-        nekuGifView.setImageDrawable(gifDrawable)
+        // Initial state (will be corrected again by onNetworkStatusChanged after debounce)
+        applyNetworkStateToUi(lastObservedNetworkStatus)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Re-apply quickly when returning from settings etc.
+        applyNetworkStateToUi(lastObservedNetworkStatus)
+    }
+
+    /** Called by BaseNetworkActivity whenever status (debounced) changes */
+    override fun onNetworkStatusChanged(status: NetworkStatus) {
+        super.onNetworkStatusChanged(status) // optional
+        applyNetworkStateToUi(status) // you already have this
+
+        // Toggle the overlay (optional visual block)
+        val overlay = findViewById<View>(R.id.offlineOverlay)
+        val label   = findViewById<TextView>(R.id.offlineOverlayText)
+        when (status) {
+            NetworkStatus.CONNECTED -> overlay?.visibility = View.GONE
+            NetworkStatus.LIMITED -> {
+                label?.text = getString(R.string.internet_is_unstable_try_again)
+                overlay?.visibility = View.VISIBLE
+            }
+            NetworkStatus.OFFLINE -> {
+                label?.text = getString(R.string.no_internet_connection)
+                overlay?.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun applyNetworkStateToUi(status: NetworkStatus) {
+        val enable = status == NetworkStatus.CONNECTED
+        clickableViews.forEach { v ->
+            v.isEnabled = enable
+            v.isClickable = enable
+            v.alpha = if (enable) 1f else 0.5f
+        }
     }
 
     private fun getCryptoTypeFromConfig(cryptoTypeKey: String): String {
         val properties = Properties()
         val propertiesFile = File(filesDir, "config.properties")
-        if (propertiesFile.exists()) {
-            properties.load(propertiesFile.inputStream())
-        }
-
-        return properties.getProperty(cryptoTypeKey, "xpub") // Default to xpub if not specified
+        if (propertiesFile.exists()) properties.load(propertiesFile.inputStream())
+        return properties.getProperty(cryptoTypeKey, "xpub")
     }
 
     private fun loadCryptocurrenciesFromJson(): List<CryptoCurrency> {
@@ -190,24 +198,22 @@ class CryptoOptionActivity : AppCompatActivity() {
         return cryptoList
     }
 
-    // Function to show the loading dialog with the GIF
+    // Loading dialog with GIF
     private fun showLoadingDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_loading, null)
         val gifImageView: ImageView = dialogView.findViewById(R.id.loadingGifImageView)
         val gifDrawable = GifDrawable(resources, R.raw.rotating_arc_gradient_thick)
         gifImageView.setImageDrawable(gifDrawable)
 
-        val builder = AlertDialog.Builder(this)
-        builder.setView(dialogView)
-        builder.setCancelable(false)
-
-        loadingDialog = builder.create()
+        loadingDialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
         loadingDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
         loadingDialog?.window?.setDimAmount(0.5f)
         loadingDialog?.show()
     }
 
-    // Function to dismiss the loading dialog
     private fun dismissLoadingDialog() {
         loadingDialog?.dismiss()
         loadingDialog = null
@@ -220,7 +226,6 @@ class CryptoOptionActivity : AppCompatActivity() {
         crypto: CryptoCurrency,
         onClick: () -> Unit
     ) {
-        // To store if the view has been clicked already
         var isClicked = false
 
         val cardView = CardView(this).apply {
@@ -230,11 +235,8 @@ class CryptoOptionActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                setMargins(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8)) // Increased left and right margins
-            }
+            ).apply { setMargins(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8)) }
 
-            // Set the click listener for the entire cardView
             setOnClickListener {
                 if (!isClicked) {
                     isClicked = true
@@ -249,38 +251,22 @@ class CryptoOptionActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            setPadding(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8)) // Adjust padding as needed
+            setPadding(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8))
             gravity = android.view.Gravity.CENTER
-            setBackgroundResource(R.drawable.button_selector) // Apply button background for feedback
+            setBackgroundResource(R.drawable.button_selector)
         }
 
         val imageButton = ImageButton(this).apply {
             val originalBitmap = BitmapFactory.decodeResource(resources, imageResId)
-            val targetSize = 300 // Increased target size for larger logo
-            val resizedBitmap = Bitmap.createScaledBitmap(
-                originalBitmap,
-                targetSize,
-                targetSize,
-                true
-            )
-            val scaledBitmap = Bitmap.createScaledBitmap(
-                resizedBitmap,
-                targetSize / 2,
-                targetSize / 2,
-                true
-            )
-            this.setImageBitmap(scaledBitmap)
+            val targetSize = 300
+            val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, targetSize, targetSize, true)
+            val scaledBitmap = Bitmap.createScaledBitmap(resizedBitmap, targetSize / 2, targetSize / 2, true)
+            setImageBitmap(scaledBitmap)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                width = LinearLayout.LayoutParams.WRAP_CONTENT
-                height = LinearLayout.LayoutParams.WRAP_CONTENT
-                setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
-            }
-            background = null // Remove the button background since the entire container is clickable
-
-            // Set a click listener for the logo itself, with click prevention
+            ).apply { setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8)) }
+            background = null
             setOnClickListener {
                 if (!isClicked) {
                     isClicked = true
@@ -294,9 +280,7 @@ class CryptoOptionActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                setMargins(dpToPx(16), 0, 0, 0) // Add left margin to separate text from image
-            }
+            ).apply { setMargins(dpToPx(16), 0, 0, 0) }
         }
 
         val nameTextView = TextView(this).apply {
@@ -326,18 +310,20 @@ class CryptoOptionActivity : AppCompatActivity() {
 
         cardView.addView(cardContent)
         container.addView(cardView)
+
+        // Track clickables so we can enable/disable them on net changes
+        if (isVisible) {
+            clickableViews.add(cardView)
+            clickableViews.add(imageButton)
+        }
     }
 
-    private fun dpToPx(dp: Int): Int {
-        return (dp * resources.displayMetrics.density).toInt()
-    }
+    private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
 
     private fun loadXPubsFromSettings(): Map<String, String> {
         val properties = Properties()
         val propertiesFile = File(filesDir, "config.properties")
-        if (propertiesFile.exists()) {
-            properties.load(propertiesFile.inputStream())
-        }
+        if (propertiesFile.exists()) properties.load(propertiesFile.inputStream())
 
         val xPubs = mutableMapOf<String, String>()
         properties.stringPropertyNames().forEach { key ->
@@ -346,13 +332,11 @@ class CryptoOptionActivity : AppCompatActivity() {
                 properties.getProperty(key)?.let { xPubs[cryptoKey] = it }
             }
         }
-
         return xPubs
     }
 
     private fun handleCryptoClick(crypto: CryptoCurrency, price: String) {
         showLoadingDialog()
-
         when (crypto.shortname) {
             "BTC" -> handleBTCClick(price)
             "LTC" -> handleLTCClick(price)
@@ -362,31 +346,20 @@ class CryptoOptionActivity : AppCompatActivity() {
             "DASH" -> handleDASHlick(price)
             "BCH" -> handleBCHlick(price)
             "XMR" -> handleMoneroClick(price)
+            "SOL" -> handleSolanaClick(price)
+            "USDC" -> handleUSDCClick(price)
         }
     }
 
     private fun handleBTCClick(price: String) {
         bitcoinManager?.let { manager ->
             val (address, index) = if (BitcoinManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
-
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "BTC", R.drawable.bitcoin_logo) { feeStatus, status, formattedRate ->
                 dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
-                    startGenerateQRActivity(
-                        address,
-                        formattedRate,
-                        R.drawable.bitcoin_logo,
-                        "BTC",
-                        index,
-                        feeStatus,
-                        status,
-                        "Bitcoin",
-                        numericPrice,
-                        selectedCurrencyCode,
-                        "BTC"
-                    )
+                    startGenerateQRActivity(address, formattedRate, R.drawable.bitcoin_logo, "BTC", index, feeStatus, status, "Bitcoin", numericPrice, selectedCurrencyCode, "BTC")
                 }
             }
         } ?: run {
@@ -398,35 +371,18 @@ class CryptoOptionActivity : AppCompatActivity() {
     private fun handleLTCClick(price: String) {
         litecoinManager?.let { manager ->
             try {
-                val (address, index) = if (LitecoinManager.isValidAddress(manager.getXpub()))
-                    Pair(manager.getXpub(), -1)
-                else
-                    manager.getAddress()
-
+                val (address, index) = if (LitecoinManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
                 val numericPrice = price.filter { it.isDigit() || it == '.' }
-                Log.d("ADDRESS_CHECK ", address)
 
                 postConversionApi(numericPrice, selectedCurrencyCode, address, "LTC", R.drawable.litecoin_new_logo) { feeStatus, status, formattedRate ->
                     dismissLoadingDialog()
                     if (formattedRate.isNotEmpty()) {
-                        startGenerateQRActivity(
-                            address,
-                            formattedRate,
-                            R.drawable.litecoin_new_logo,
-                            "LTC",
-                            index,
-                            feeStatus,
-                            status,
-                            "Litecoin",
-                            numericPrice,
-                            selectedCurrencyCode,
-                            "LTC"
-                        )
+                        startGenerateQRActivity(address, formattedRate, R.drawable.litecoin_new_logo, "LTC", index, feeStatus, status, "Litecoin", numericPrice, selectedCurrencyCode, "LTC")
                     }
                 }
             } catch (e: Exception) {
                 dismissLoadingDialog()
-                Log.e("CryptoOptionActivity", "Error handling Litecoin click: ${e.message}")
+                Log.e("CryptoOptionActivity","Error handling Litecoin click: ${e.message}")
                 Toast.makeText(this, R.string.failed_to_derive_address, Toast.LENGTH_SHORT).show()
             }
         } ?: run {
@@ -435,29 +391,15 @@ class CryptoOptionActivity : AppCompatActivity() {
         }
     }
 
-
     private fun handleETHClick(price: String) {
         ethereumManager?.let { manager ->
             val (address, index) = if (EthereumManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
-
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "ETH", R.drawable.ethereum_logo) { feeStatus, status, formattedRate ->
                 dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
-                    startGenerateQRActivity(
-                        address,
-                        formattedRate,
-                        R.drawable.ethereum_logo,
-                        "ETH",
-                        index,
-                        feeStatus,
-                        status,
-                        "Ethereum",
-                        numericPrice,
-                        selectedCurrencyCode,
-                        "ETH"
-                    )
+                    startGenerateQRActivity(address, formattedRate, R.drawable.ethereum_logo, "ETH", index, feeStatus, status, "Ethereum", numericPrice, selectedCurrencyCode, "ETH")
                 }
             }
         } ?: run {
@@ -469,25 +411,12 @@ class CryptoOptionActivity : AppCompatActivity() {
     private fun handleDOGEClick(price: String) {
         dogecoinManager?.let { manager ->
             val (address, index) = if (DogecoinManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
-
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "DOGE", R.drawable.dogecoin_logo) { feeStatus, status, formattedRate ->
                 dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
-                    startGenerateQRActivity(
-                        address,
-                        formattedRate,
-                        R.drawable.dogecoin_logo,
-                        "DOGE",
-                        index,
-                        feeStatus,
-                        status,
-                        "Dogecoin",
-                        numericPrice,
-                        selectedCurrencyCode,
-                        "DOGE"
-                    )
+                    startGenerateQRActivity(address, formattedRate, R.drawable.dogecoin_logo, "DOGE", index, feeStatus, status, "Dogecoin", numericPrice, selectedCurrencyCode, "DOGE")
                 }
             }
         } ?: run {
@@ -499,25 +428,12 @@ class CryptoOptionActivity : AppCompatActivity() {
     private fun handleUSDTClick(price: String) {
         tronManager?.let { manager ->
             val (address, index) = if (TronManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
-
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "TRON-NETWORK", R.drawable.tether_logo) { feeStatus, status, formattedRate ->
                 dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
-                    startGenerateQRActivity(
-                        address,
-                        formattedRate,
-                        R.drawable.tether_logo,
-                        "TRON-NETWORK",
-                        index,
-                        feeStatus,
-                        status,
-                        "Tron-network",
-                        numericPrice,
-                        selectedCurrencyCode,
-                        "USDT"
-                    )
+                    startGenerateQRActivity(address, formattedRate, R.drawable.tether_logo, "TRON-NETWORK", index, feeStatus, status, "Tron-network", numericPrice, selectedCurrencyCode, "USDT")
                 }
             }
         } ?: run {
@@ -530,9 +446,7 @@ class CryptoOptionActivity : AppCompatActivity() {
         dashManager?.let { manager ->
             val addressIndexPair: Pair<String, Int>? = if (DashManager.isValidAddress(manager.getXpub())) {
                 Pair(manager.getXpub(), -1)
-            } else {
-                manager.getAddress()
-            }
+            } else manager.getAddress()
 
             if (addressIndexPair == null) {
                 Toast.makeText(this, R.string.failed_to_derive_dash_address, Toast.LENGTH_SHORT).show()
@@ -540,25 +454,12 @@ class CryptoOptionActivity : AppCompatActivity() {
             }
 
             val (address, index) = addressIndexPair
-
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "DASH", R.drawable.dashcoin_logo) { feeStatus, status, formattedRate ->
                 dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
-                    startGenerateQRActivity(
-                        address,
-                        formattedRate,
-                        R.drawable.dashcoin_logo,
-                        "DASH",
-                        index,
-                        feeStatus,
-                        status,
-                        "Dash",
-                        numericPrice,
-                        selectedCurrencyCode,
-                        "DASH"
-                    )
+                    startGenerateQRActivity(address, formattedRate, R.drawable.dashcoin_logo, "DASH", index, feeStatus, status, "Dash", numericPrice, selectedCurrencyCode, "DASH")
                 }
             }
         } ?: run {
@@ -570,25 +471,12 @@ class CryptoOptionActivity : AppCompatActivity() {
     private fun handleBCHlick(price: String) {
         bitcoincashManager?.let { manager ->
             val (address, index) = if (BitcoinCashManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
-
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "BCH", R.drawable.bitcoin_cash) { feeStatus, status, formattedRate ->
                 dismissLoadingDialog()
                 if (formattedRate.isNotEmpty()) {
-                    startGenerateQRActivity(
-                        address,
-                        formattedRate,
-                        R.drawable.bitcoin_cash,
-                        "BCH",
-                        index,
-                        feeStatus,
-                        status,
-                        "Bitcoincash",
-                        numericPrice,
-                        selectedCurrencyCode,
-                        "BCH"
-                    )
+                    startGenerateQRActivity(address, formattedRate, R.drawable.bitcoin_cash, "BCH", index, feeStatus, status, "Bitcoincash", numericPrice, selectedCurrencyCode, "BCH")
                 }
             }
         } ?: run {
@@ -600,28 +488,12 @@ class CryptoOptionActivity : AppCompatActivity() {
     private fun handleMoneroClick(price: String) {
         moneroManager?.let { manager ->
             val address = manager.getAddress()
-
             if (address != null && MoneroManager.isValidAddress(address)) {
                 val numericPrice = price.filter { it.isDigit() || it == '.' }
-
-                // Call the postConversionApi for Monero
                 postConversionApi(numericPrice, selectedCurrencyCode, address, "XMR", R.drawable.monero_logo) { feeStatus, status, formattedRate ->
                     dismissLoadingDialog()
                     if (formattedRate.isNotEmpty()) {
-                        // After getting the conversion rate, generate the QR code
-                        startGenerateQRActivity(
-                            address,
-                            formattedRate,
-                            R.drawable.monero_logo,
-                            "XMR",
-                            0,
-                            feeStatus,
-                            status,
-                            "Monero",
-                            numericPrice,
-                            selectedCurrencyCode,
-                            "XMR"
-                        )
+                        startGenerateQRActivity(address, formattedRate, R.drawable.monero_logo, "XMR", 0, feeStatus, status, "Monero", numericPrice, selectedCurrencyCode, "XMR")
                     } else {
                         Toast.makeText(this, R.string.conversion_failed, Toast.LENGTH_SHORT).show()
                     }
@@ -636,47 +508,91 @@ class CryptoOptionActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleSolanaClick(price: String) {
+        solanaManager?.let { manager ->
+            val (address, index) = if (SolanaManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
+            val numericPrice = price.filter { it.isDigit() || it == '.' }
+            postConversionApi(numericPrice, selectedCurrencyCode, address, "SOL", R.drawable.solana) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(address, formattedRate, R.drawable.solana, "SOL", index, feeStatus, status, "Solana", numericPrice, selectedCurrencyCode, "SOL")
+                }
+            }
+        } ?: run {
+            dismissLoadingDialog()
+            Toast.makeText(this, R.string.solana_manager_not_initialized, Toast.LENGTH_SHORT).show()
+        }
+    }
 
-    private fun postConversionApi(price: String, currency: String, address: String, chain: String, logoResId: Int, onResult: (String, String, String) -> Unit) {
+    private fun handleUSDCClick(price: String) {
+        solanaManager?.let { manager ->
+            val (address, index) = if (SolanaManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
+            val numericPrice = price.filter { it.isDigit() || it == '.' }
+            postConversionApi(numericPrice, selectedCurrencyCode, address, "USDC", R.drawable.usdc) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(address, formattedRate, R.drawable.solana, "USDC", index, feeStatus, status, "USDC", numericPrice, selectedCurrencyCode, "USDC")
+                }
+            }
+        } ?: run {
+            dismissLoadingDialog()
+            Toast.makeText(this, R.string.solana_manager_not_initialized, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun postConversionApi(
+        price: String,
+        currency: String,
+        address: String,
+        chain: String,
+        logoResId: Int,
+        onResult: (String, String, String) -> Unit
+    ) {
         val apiService = RetrofitClient.getApiService(this)
-        Log.d("Price ", price)
-        Log.d("Currency ", currency)
-        Log.d("Chain ", chain)
-        val requestBody = ConversionRequestBody(price, currency, chain)
-        val call = apiService.postConversion(requestBody)
+        val call = apiService.postConversion(ConversionRequestBody(price, currency, chain))
 
         call.enqueue(object : Callback<ConversionResponse> {
             override fun onResponse(call: Call<ConversionResponse>, response: Response<ConversionResponse>) {
-                Log.d("API", "Response conversion $response")
                 if (response.isSuccessful) {
                     val conversionResponse = response.body()
-                    Log.d("Conversion", "Response body $conversionResponse")
                     conversionResponse?.let {
                         val feeStatus = it.feeStatus ?: ""
                         val status = it.status ?: ""
                         if (it.success) {
                             val formattedRate = formatConversionRate(it.conversionRate)
-                            Log.d("API", "Conversion rate: $formattedRate")
                             Toast.makeText(this@CryptoOptionActivity, getString(R.string.conversion_rate, formattedRate), Toast.LENGTH_SHORT).show()
-                            onResult(feeStatus, status, formattedRate)  // Pass the values to the callback
+                            onResult(feeStatus, status, formattedRate)
                         } else {
-                            Log.e("API", "Conversion failed")
                             Toast.makeText(this@CryptoOptionActivity, R.string.conversion_failed, Toast.LENGTH_SHORT).show()
                             onResult(feeStatus, status, "")
                         }
-                    } ?: run {
-                        Log.e("API", "Response body is null")
-                        onResult("", "", "")
-                    }
-                } else {
-                    Log.e("API", "Response not successful")
-                    Toast.makeText(this@CryptoOptionActivity, R.string.response_not_successful_Please_check_your_setting_or_API_key, Toast.LENGTH_SHORT).show()
-                    onResult("", "", "")
+                    } ?: run { onResult("", "", "") }
+                    return
                 }
+
+                if (response.code() == 403) {
+                    val errMsg = try {
+                        val raw = response.errorBody()?.string().orEmpty()
+                        if (raw.isNotEmpty()) JSONObject(raw).optString("message", "") else ""
+                    } catch (_: Exception) { "" }
+
+                    if (errMsg.equals("API key has expired", ignoreCase = true)) {
+                        dismissLoadingDialog()
+                        showExpiredDialog()
+                        onResult("", "", "")
+                        return
+                    }
+                }
+
+                Toast.makeText(
+                    this@CryptoOptionActivity,
+                    R.string.response_not_successful_Please_check_your_setting_or_API_key,
+                    Toast.LENGTH_SHORT
+                ).show()
+                onResult("", "", "")
             }
 
             override fun onFailure(call: Call<ConversionResponse>, t: Throwable) {
-                Log.e("API", "API call failed", t)
                 Toast.makeText(this@CryptoOptionActivity, R.string.API_call_failed, Toast.LENGTH_SHORT).show()
                 onResult("", "", "")
             }
@@ -686,9 +602,7 @@ class CryptoOptionActivity : AppCompatActivity() {
     private fun loadPropertiesFromConfigFile(): Properties {
         val properties = Properties()
         val propertiesFile = File(filesDir, "config.properties")
-        if (propertiesFile.exists()) {
-            properties.load(propertiesFile.inputStream())
-        }
+        if (propertiesFile.exists()) properties.load(propertiesFile.inputStream())
         return properties
     }
 
@@ -699,8 +613,19 @@ class CryptoOptionActivity : AppCompatActivity() {
         return decimalFormat.format(bigDecimal)
     }
 
-    private fun startGenerateQRActivity(address: String, price: String, logoResId: Int, currency: String, index: Int, feeStatus: String, status: String, managerType: String, numericPrice: String, selectedCurrencyCode: String, shortname: String) {
-        Log.d("MESSAGE", message)
+    private fun startGenerateQRActivity(
+        address: String,
+        price: String,
+        logoResId: Int,
+        currency: String,
+        index: Int,
+        feeStatus: String,
+        status: String,
+        managerType: String,
+        numericPrice: String,
+        selectedCurrencyCode: String,
+        shortname: String
+    ) {
         val intent = Intent(this, GenerateQRActivity::class.java).apply {
             putExtra("ADDRESS", address)
             putExtra("PRICE", price)
@@ -713,8 +638,17 @@ class CryptoOptionActivity : AppCompatActivity() {
             putExtra("MESSAGE", message)
             putExtra("NUMERIC_PRICE", numericPrice)
             putExtra("SELECTED_CURRENCY_CODE", selectedCurrencyCode)
-            putExtra("SHORTNAME", shortname)  // Pass the shortname of the cryptocurrency
+            putExtra("SHORTNAME", shortname)
         }
         startActivity(intent)
+    }
+
+    private fun showExpiredDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("API Key Expired")
+            .setMessage("Your API key has expired. Please renew it on the server to continue.")
+            .setCancelable(false)
+            .setPositiveButton("OK") { d, _ -> d.dismiss() }
+            .show()
     }
 }

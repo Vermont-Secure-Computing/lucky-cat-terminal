@@ -17,7 +17,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", "LuckyCat-$versionName")
@@ -25,6 +25,7 @@ android {
 
     buildTypes {
         release {
+            isDebuggable = true
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -79,6 +80,7 @@ dependencies {
     implementation(libs.retrofit.scalars)
     implementation(libs.commons.codec)
     implementation(libs.logging.interceptor)
+    implementation(libs.androidx.lifecycle)
 
 
     implementation(libs.room.runtime)
