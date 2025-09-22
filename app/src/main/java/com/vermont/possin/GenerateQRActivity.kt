@@ -15,9 +15,11 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -169,6 +171,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
     private lateinit var amountTextViewAddress: TextView
     private lateinit var amountTextViewAddressChain: TextView
     private var paymentReceived = false
+    private var wakeLock: PowerManager.WakeLock? = null
 
     private lateinit var db: AppDatabase
     private lateinit var wsChain: String
@@ -191,10 +194,15 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
     private var remainingMs: Long = 15 * 60 * 1000L
     private var timerRunning = false
     private var lastWebSocketType: String = "checkBalance"
+    private var socketConnected = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.generate_qr)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "POS:TransactionLock")
+        wakeLock?.acquire()
         window.statusBarColor = ContextCompat.getColor(this, R.color.tapeRed)
 
         // Shared banner monitor
@@ -459,6 +467,12 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
     }
 
     private fun connectWebSocket(type: String) {
+        // Guard against duplicate connections
+        if (socketConnected && ::webSocket.isInitialized) {
+            Log.d("WS", "WebSocket already connected, skipping new connection")
+            return
+        }
+
         lastWebSocketType = type
         val apiKey = ApiKeyStore.get(this) ?: ""
         client = OkHttpClient()
@@ -476,14 +490,19 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
             websocketParams.addressIndex,
             websocketParams.managerType,
             websocketParams.txid
-        )
+        ).apply {
+            onSocketOpened = { socketConnected = true }
+            onSocketClosed = { socketConnected = false }
+            onSocketFailure = { socketConnected = false }
+        }
 
         webSocket = client.newWebSocket(request, listener)
     }
 
     private fun closeWebSocket(reconnect: Boolean = true) {
         if (::webSocket.isInitialized) {
-            webSocket.close(1000, "Payment received")
+            webSocket.close(1000, "Closing WebSocket")
+            socketConnected = false
         }
         if (reconnect) {
             cancelText.visibility = View.GONE
@@ -509,6 +528,9 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
 
     override fun onDestroy() {
         super.onDestroy()
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        wakeLock?.release()
+        wakeLock = null
         if (::countDownTimer.isInitialized) countDownTimer.cancel()
         handler.removeCallbacksAndMessages(null)
         runCatching { paymentDialog?.dismiss() }
@@ -934,6 +956,9 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                             else -> confirmations >= 1
                         }
                         if (terminal) {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                            wakeLock?.release()
+                            wakeLock = null
                             stopPollingAndMaybePromptToPrint()
                         }
                     }
@@ -1200,8 +1225,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 printButton.alpha = 1f
                 resumeTimerIfNeeded()
                 if (!paymentReceived) {
-                    runCatching { if (::webSocket.isInitialized) webSocket.cancel() }
-                    connectWebSocket(lastWebSocketType)
+                    connectWebSocket(lastWebSocketType) // guarded now
                 }
             }
             NetworkStatus.LIMITED -> {
@@ -1211,6 +1235,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 printButton.alpha = 0.5f
                 pauseTimer()
                 runCatching { if (::webSocket.isInitialized) webSocket.close(1001, "Network limited") }
+                socketConnected = false
             }
             NetworkStatus.OFFLINE -> {
                 label?.text = getString(R.string.no_internet_connection)
@@ -1219,6 +1244,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 printButton.alpha = 0.5f
                 pauseTimer()
                 runCatching { if (::webSocket.isInitialized) webSocket.close(1001, "Network offline") }
+                socketConnected = false
             }
         }
     }
