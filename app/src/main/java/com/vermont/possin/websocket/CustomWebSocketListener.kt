@@ -18,18 +18,41 @@ class CustomWebSocketListener(
     val optionalParam: String? = null
 ) : WebSocketListener() {
 
+    // Hooks for activity
+    var onSocketOpened: (() -> Unit)? = null
+    var onSocketClosed: (() -> Unit)? = null
+    var onSocketFailure: (() -> Unit)? = null
+
     interface PaymentStatusCallback {
-        fun onPaymentStatusPaid(status: String, balance: Double, txid: String, fees: Double, confirmations: Int, feeStatus: String, chain: String, addressIndex: Int, managerType: String)
-        fun onInsufficientPayment(receivedAmt: Double, totalAmount: Double, difference: Double, txid: String, fees: Double, confirmations: Int, addressIndex: Int, managerType: String)
+        fun onPaymentStatusPaid(
+            status: String,
+            balance: Double,
+            txid: String,
+            fees: Double,
+            confirmations: Int,
+            feeStatus: String,
+            chain: String,
+            addressIndex: Int,
+            managerType: String
+        )
+        fun onInsufficientPayment(
+            receivedAmt: Double,
+            totalAmount: Double,
+            difference: Double,
+            txid: String,
+            fees: Double,
+            confirmations: Int,
+            addressIndex: Int,
+            managerType: String
+        )
         fun onPaymentError(error: String)
     }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         super.onOpen(webSocket, response)
         Log.d("WebSocket", "Connected to WebSocket server")
+        onSocketOpened?.invoke()
 
-
-        // Construct the JSON object with the parameters
         val jsonObject = JSONObject().apply {
             put("address", address)
             put("amount", amount)
@@ -39,7 +62,6 @@ class CustomWebSocketListener(
         }
 
         Log.d("WebSocket", "Sending: $jsonObject")
-        // Send the JSON object as a string
         webSocket.send(jsonObject.toString())
     }
 
@@ -77,23 +99,25 @@ class CustomWebSocketListener(
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
         super.onMessage(webSocket, bytes)
         Log.d("WebSocket", "Received bytes: $bytes")
-        // Handle the received bytes
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         super.onClosing(webSocket, code, reason)
         Log.d("WebSocket", "Closing WebSocket: $code / $reason")
+        onSocketClosed?.invoke()
         webSocket.close(1000, null)
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
         super.onClosed(webSocket, code, reason)
         Log.d("WebSocket", "Closed WebSocket: $code / $reason")
+        onSocketClosed?.invoke()
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         super.onFailure(webSocket, t, response)
         Log.e("WebSocket", "WebSocket error", t)
+        onSocketFailure?.invoke()
         response?.let {
             Log.e("WebSocket", "Response: ${it.body?.string()}")
         }
