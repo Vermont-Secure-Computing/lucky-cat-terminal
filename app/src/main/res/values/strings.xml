@@ -180,4 +180,5 @@
     <string name="parser_error_message">Print format error. Please check your ESC/POS tags (e.g., &lt;font&gt;, &lt;b&gt;, &lt;qrcode&gt;).</string>
     <string name="encoding_error_message">Encoding error while printing (unsupported characters).</string>
     <string name="barcode_qr_error_message">Barcode/QR generation error. Please check the data.</string>
+    <string name="no_checksum_warning">This address has no checksum. Would you like to continue?</string>
 </resources>

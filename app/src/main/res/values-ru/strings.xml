@@ -180,4 +180,5 @@
     <string name="parser_error_message">Ошибка формата печати. Проверьте теги ESC/POS (например, &lt;font&gt;, &lt;b&gt;, &lt;qrcode&gt;).</string>
     <string name="encoding_error_message">Ошибка кодировки при печати (неподдерживаемые символы).</string>
     <string name="barcode_qr_error_message">Ошибка генерации штрих-кода/QR. Проверьте данные.</string>
+    <string name="no_checksum_warning">У этого адреса нет контрольной суммы. Хотите продолжить?</string>
 </resources>

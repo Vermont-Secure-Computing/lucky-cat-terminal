@@ -26,18 +26,35 @@ class EthereumManager(private val context: Context, private val xPub: String) {
             }
         }
 
-        fun isValidAddress(address: String): Boolean {
+        /**
+         * Validate and normalize Ethereum address.
+         * @return Triple<isValid, normalizedAddressOrNull, warningMessageOrNull>
+         */
+        fun validateAddress(address: String): Triple<Boolean, String?, String?> {
             return try {
-                if (address.length != 42 || !address.startsWith("0x")) return false
+                if (address.length != 42 || !address.startsWith("0x")) {
+                    return Triple(false, null, "Invalid length or missing 0x prefix")
+                }
+
                 val checksumAddress = Keys.toChecksumAddress(address)
-                checksumAddress == address
+
+                return if (address == checksumAddress) {
+                    // fully valid, already checksummed
+                    Triple(true, checksumAddress, null)
+                } else if (address.lowercase() == checksumAddress.lowercase()) {
+                    // valid but unchecksummed — normalize it
+                    Triple(true, checksumAddress, "This address has no checksum. Would you like to continue?")
+                } else {
+                    Triple(false, null, "Invalid Ethereum address")
+                }
             } catch (e: Exception) {
-                false
+                Triple(false, null, "Invalid Ethereum address")
             }
         }
     }
 
-    private val accountKey: DeterministicKey? = if (isValidXpub(xPub)) DeterministicKey.deserializeB58(xPub, MainNetParams.get()) else null
+    private val accountKey: DeterministicKey? =
+        if (isValidXpub(xPub)) DeterministicKey.deserializeB58(xPub, MainNetParams.get()) else null
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     fun getAddress(): Pair<String, Int> {
@@ -56,40 +73,26 @@ class EthereumManager(private val context: Context, private val xPub: String) {
     private fun deriveAddress(index: Int): String {
         Log.d("ETH", "Ethereum address index $index")
 
-        // Deserialize the xPub key using MainNetParams
         val xpubKey = accountKey ?: throw IllegalStateException("Invalid xPub key")
 
-        // Derive the key using the non-hardened path m/0/index
-        val path = listOf(
-            ChildNumber(0, false),
-            ChildNumber(index, false)
-        )
-
+        val path = listOf(ChildNumber(0, false), ChildNumber(index, false))
         val derivedKey = path.fold(xpubKey) { key, childNumber ->
             HDKeyDerivation.deriveChildKey(key, childNumber)
         }
 
-        // Get the public key bytes (uncompressed, starting with 0x04)
         val publicKeyBytes = derivedKey.pubKeyPoint.getEncoded(false)
-
-        // Perform Keccak-256 hashing on the public key bytes without the prefix
         val hash = Hash.sha3(publicKeyBytes.copyOfRange(1, publicKeyBytes.size))
-
-        // Extract the last 20 bytes of the hash to form the Ethereum address
         val addressBytes = hash.copyOfRange(hash.size - 20, hash.size)
+
         val address = Numeric.toHexString(addressBytes)
         Log.d("ADDRESS", address)
         return address
     }
 
     private fun getLastIndex(): Int {
-        if (!sharedPreferences.contains(LAST_INDEX_KEY)) {
-            return -1
-        }
+        if (!sharedPreferences.contains(LAST_INDEX_KEY)) return -1
         return sharedPreferences.getInt(LAST_INDEX_KEY, -1)
     }
 
-    fun getXpub(): String {
-        return xPub
-    }
+    fun getXpub(): String = xPub
 }

@@ -90,8 +90,17 @@ class XpubAddress : AppCompatActivity() {
         })
 
         submitText.setOnClickListener {
+            // clear warnings before saving
+            for (i in 0 until cryptocurrencyContainer.childCount) {
+                val itemView = cryptocurrencyContainer.getChildAt(i)
+                val errorTextView = itemView.findViewById<TextView>(R.id.error_text)
+                if (errorTextView.text.toString().contains(getString(R.string.no_checksum_warning))) {
+                    errorTextView.text = ""
+                }
+            }
             saveCryptocurrencyValues()
         }
+
 
         // Set up back arrow listener
         backArrow.setOnClickListener {
@@ -185,6 +194,7 @@ class XpubAddress : AppCompatActivity() {
             if (savedValue != null) {
                 inputField.setText(savedValue)
             }
+
 
             // Initially hide segwit/legacy spinner
             segwitLegacySpinner.visibility = View.GONE
@@ -341,6 +351,18 @@ class XpubAddress : AppCompatActivity() {
                         privateViewKey = viewKey
                     )
                 }
+            } else if (cryptoName == "Ethereum") {
+                if (value.isNotEmpty()) {
+                    val (isValidEth, normalized, _) = EthereumManager.validateAddress(value)
+                    if (isValidEth) {
+                        val finalValue = normalized ?: value
+                        properties.setProperty("${cryptoName}_type", inputType)
+                        properties.setProperty("${cryptoName}_value", finalValue)
+                    }
+                } else {
+                    properties.remove("${cryptoName}_type")
+                    properties.remove("${cryptoName}_value")
+                }
             } else {
                 // Handle other cryptocurrencies
                 val savedValue = properties.getProperty("${cryptoName}_value")
@@ -457,11 +479,6 @@ class XpubAddress : AppCompatActivity() {
         }
     }
 
-
-
-
-
-
     private fun validateInput(
         editText: EditText,
         inputType: String,
@@ -472,41 +489,62 @@ class XpubAddress : AppCompatActivity() {
     ) {
         val value = editText.text.toString()
 
-        // Check for blank input but allow submit
         if (value.isBlank()) {
             errorTextView.text = ""
-            // Enable submit button if there are no validation errors in other fields
             submitText.isEnabled = allInputsValid()
             submitText.setTextColor(
-                ContextCompat.getColor(
-                    this,
-                    if (submitText.isEnabled) R.color.white else android.R.color.darker_gray
-                )
+                ContextCompat.getColor(this, if (submitText.isEnabled) R.color.white else android.R.color.darker_gray)
             )
             return
         }
 
-        val isValid = when (currency) {
+        var isValid = false
+        var warningShown = false
+
+        when (currency) {
             "Bitcoin" -> {
-                if (inputType == "xpub") BitcoinManager.isValidXpub(value) else BitcoinManager.isValidAddress(value)
+                isValid = if (inputType == "xpub") BitcoinManager.isValidXpub(value) else BitcoinManager.isValidAddress(value)
             }
             "Dogecoin" -> {
-                if (inputType == "xpub") DogecoinManager.isValidXpub(value, this) else DogecoinManager.isValidAddress(value)
+                isValid = if (inputType == "xpub") DogecoinManager.isValidXpub(value, this) else DogecoinManager.isValidAddress(value)
             }
             "Litecoin" -> {
-                if (inputType == "xpub") LitecoinManager.isValidXpub(value, this) else LitecoinManager.isValidAddress(value)
+                isValid = if (inputType == "xpub") LitecoinManager.isValidXpub(value, this) else LitecoinManager.isValidAddress(value)
             }
             "Ethereum" -> {
-                if (inputType == "xpub") EthereumManager.isValidXpub(value) else EthereumManager.isValidAddress(value)
+                if (inputType == "xpub") {
+                    isValid = EthereumManager.isValidXpub(value)
+                } else {
+                    val (isValidEth, normalized, warning) = EthereumManager.validateAddress(value)
+                    isValid = isValidEth
+
+                    if (!isValidEth) {
+                        errorTextView.text = getString(R.string.invalid_for, inputType, currency)
+                        submitText.isEnabled = false
+                        submitText.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
+                        return
+                    }
+
+                    if (warning != null) {
+                        // Show checksum warning
+                        errorTextView.text = getString(R.string.no_checksum_warning)
+                        warningShown = true
+                        submitText.isEnabled = true
+                        submitText.setTextColor(ContextCompat.getColor(this, R.color.white))
+                    } else {
+                        errorTextView.text = ""
+                    }
+                }
             }
+
             "Tether" -> {
-                if (inputType == "xpub") TronManager.isValidXpub(value) else TronManager.isValidAddress(value)
+                isValid = if (inputType == "xpub") TronManager.isValidXpub(value) else TronManager.isValidAddress(value)
             }
             "Dash" -> {
-                if (inputType == "xpub") DashManager.isValidXpub(value) else DashManager.isValidAddress(value)
+                isValid = if (inputType == "xpub") DashManager.isValidXpub(value) else DashManager.isValidAddress(value)
             }
             "Bitcoincash" -> {
-                if (inputType == "xpub") BitcoinCashManager.isValidXpub(value) else BitcoinCashManager.isValidAddress(value)
+                isValid = if (inputType == "xpub") BitcoinCashManager.isValidXpub(value) else BitcoinCashManager.isValidAddress(value)
             }
             "Monero" -> {
                 val itemView = cryptocurrencyContainer.getChildAt(
@@ -515,42 +553,32 @@ class XpubAddress : AppCompatActivity() {
                 val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
                 val viewKey = viewKeyField.text.toString().trim()
 
-                // Validate Monero address and private view key separately
                 val isAddressValid = MoneroManager.isValidAddress(value)
-                val isViewKeyValid =
-                    if (viewKey.isNotEmpty()) MoneroManager.isValidPrivateViewKey(viewKey) else true
+                val isViewKeyValid = if (viewKey.isNotEmpty()) MoneroManager.isValidPrivateViewKey(viewKey) else true
 
                 if (!isAddressValid) {
                     errorTextView.text = getString(R.string.invalid_monero_address)
                 } else if (!isViewKeyValid) {
                     errorTextView.text = getString(R.string.invalid_Monero_private_view_key)
                 }
-
-                // Validation passes if the address is valid and the view key is valid (or not provided)
-                isAddressValid && isViewKeyValid
+                isValid = isAddressValid && isViewKeyValid
             }
             "Solana" -> {
-                if (inputType == "xpub") SolanaManager.isValidXpub(value) else SolanaManager.isValidAddress(value)
+                isValid = if (inputType == "xpub") SolanaManager.isValidXpub(value) else SolanaManager.isValidAddress(value)
             }
-//            "USDC" -> {
-//                if (inputType == "xpub") SolanaManager.isValidXpub(value) else SolanaManager.isValidAddress(value)
-//            }
-            else -> false
+            else -> isValid = false
         }
 
-        if (!isValid) {
+        // Final UI update
+        if (!isValid && !warningShown) {
             errorTextView.text = getString(R.string.invalid_for, inputType, currency)
             submitText.isEnabled = false
             submitText.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
         } else {
-            errorTextView.text = ""
-            // Enable submit button if all inputs are valid or blank
+            if (!warningShown) errorTextView.text = "" // clear only if no warning
             submitText.isEnabled = allInputsValid()
             submitText.setTextColor(
-                ContextCompat.getColor(
-                    this,
-                    if (submitText.isEnabled) R.color.white else android.R.color.darker_gray
-                )
+                ContextCompat.getColor(this, if (submitText.isEnabled) R.color.white else android.R.color.darker_gray)
             )
         }
     }
@@ -559,7 +587,8 @@ class XpubAddress : AppCompatActivity() {
         for (i in 0 until cryptocurrencyContainer.childCount) {
             val itemView = cryptocurrencyContainer.getChildAt(i)
             val errorTextView = itemView.findViewById<TextView>(R.id.error_text)
-            if (errorTextView.text.isNotEmpty()) {
+            if (errorTextView.text.isNotEmpty() &&
+                errorTextView.text.toString() != getString(R.string.no_checksum_warning)) {
                 return false
             }
         }
