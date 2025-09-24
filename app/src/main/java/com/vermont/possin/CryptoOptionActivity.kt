@@ -393,7 +393,15 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
 
     private fun handleETHClick(price: String) {
         ethereumManager?.let { manager ->
-            val (address, index) = if (EthereumManager.isValidAddress(manager.getXpub())) Pair(manager.getXpub(), -1) else manager.getAddress()
+            val xpubOrAddress = manager.getXpub()
+            val (isValidEth, normalized, _) = EthereumManager.validateAddress(xpubOrAddress)
+
+            val (address, index) = if (isValidEth && normalized != null) {
+                Pair(normalized, -1)
+            } else {
+                manager.getAddress()
+            }
+
             val numericPrice = price.filter { it.isDigit() || it == '.' }
 
             postConversionApi(numericPrice, selectedCurrencyCode, address, "ETH", R.drawable.ethereum_logo) { feeStatus, status, formattedRate ->
