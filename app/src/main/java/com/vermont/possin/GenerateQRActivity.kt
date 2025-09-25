@@ -379,7 +379,9 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 if (!paymentReceived && ::webSocket.isInitialized) {
                     webSocket.close(1000, "Time expired without payment")
                     showRetryDialog()
-                    connectWebSocket("cancel")
+                    if (!paymentReceived) {
+                        connectWebSocket("cancel")
+                    }
                 }
             }
         }.start()
@@ -414,7 +416,9 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         dialogView.findViewById<Button>(R.id.btnTryAgain).setOnClickListener {
             dialog.dismiss()
             startTimer()
-            connectWebSocket("checkBalance")
+            if (!paymentReceived) {
+                connectWebSocket("checkBalance")
+            }
         }
 
         dialogView.findViewById<Button>(R.id.btnHome).setOnClickListener {
@@ -459,15 +463,21 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
     }
 
     private fun initializeWebSocket(address: String, amount: String, chain: String, addressIndex: Int, managerType: String) {
+        if (paymentReceived) return
         websocketParams = WebSocketParams(address, amount, chain, addressIndex, managerType, txid = null)
-        connectWebSocket("checkBalance")
+//        connectWebSocket("checkBalance")
         checkingTransactionsLayout.visibility = View.VISIBLE
         val gifDrawable = GifDrawable(resources, R.raw.rotating_arc_gradient_thick)
         checkingTransactionsGif.setImageDrawable(gifDrawable)
     }
 
     private fun connectWebSocket(type: String) {
-        // Guard against duplicate connections
+        Log.d("WS_TRACE", "Trying to open WebSocket: $type, paymentReceived=$paymentReceived")
+        if (paymentReceived) {
+            Log.d("WS", "Skipping WebSocket connection, payment already received")
+            return
+        }
+
         if (socketConnected && ::webSocket.isInitialized) {
             Log.d("WS", "WebSocket already connected, skipping new connection")
             return
@@ -504,12 +514,14 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
             webSocket.close(1000, "Closing WebSocket")
             socketConnected = false
         }
-        if (reconnect) {
+        if (reconnect && !paymentReceived) {
             cancelText.visibility = View.GONE
             timerTextView.visibility = View.GONE
             gatheringBlocksTextView.visibility = View.VISIBLE
             startGatheringBlocksAnimation()
-            connectWebSocket("cancel")
+            if (!paymentReceived) {
+                connectWebSocket("cancel")
+            }
         }
     }
 
@@ -637,6 +649,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
     }
 
     private fun connectWebSocketForRetry(address: String, amount: String, chain: String, txid: String) {
+        if (paymentReceived) return
         websocketParams = WebSocketParams(address, amount, chain, websocketParams.addressIndex, websocketParams.managerType, txid)
         connectWebSocket("checkBalance")
     }
@@ -653,6 +666,10 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         managerType: String
     ) {
         runOnUiThread {
+            if (status == "paid") {
+                paymentReceived = true
+            }
+
             if (::qrCodeImageView.isInitialized) {
                 qrCodeImageView.setImageBitmap(null)
                 closeWebSocket()
@@ -742,8 +759,6 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
             }
             if (::countDownTimer.isInitialized) countDownTimer.cancel()
 
-            paymentReceived = true
-
             if (::webSocket.isInitialized) {
                 webSocket.close(1000, "Payment received")
             }
@@ -794,6 +809,11 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
 
     override fun onPaymentError(error: String) {
         runOnUiThread {
+//            if (paymentReceived) {
+//                Log.d("PAYMENT_ERROR", "Ignoring error after payment already confirmed")
+//                return@runOnUiThread
+//            }
+
             if (::webSocket.isInitialized) {
                 webSocket.close(1000, "Payment error")
             }
@@ -1214,6 +1234,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
     }
 
     // === React to network changes from BaseNetworkActivity ===
+    // === React to network changes from BaseNetworkActivity ===
     override fun onNetworkStatusChanged(status: NetworkStatus) {
         val overlay = findViewById<View>(R.id.offlineOverlay)
         val label = findViewById<TextView?>(R.id.offlineOverlayText)
@@ -1224,8 +1245,10 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 printButton.isEnabled = true
                 printButton.alpha = 1f
                 resumeTimerIfNeeded()
-                if (!paymentReceived) {
-                    connectWebSocket(lastWebSocketType) // guarded now
+
+                // ✅ Prevent double connect at startup
+                if (!paymentReceived && lastWebSocketType.isNotEmpty()) {
+                    connectWebSocket(lastWebSocketType)
                 }
             }
             NetworkStatus.LIMITED -> {
