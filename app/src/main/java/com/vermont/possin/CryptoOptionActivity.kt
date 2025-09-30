@@ -647,9 +647,11 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
             putExtra("NUMERIC_PRICE", numericPrice)
             putExtra("SELECTED_CURRENCY_CODE", selectedCurrencyCode)
             putExtra("SHORTNAME", shortname)
+            putExtra("XPUB", isXpubCurrency(managerType))
         }
         startActivity(intent)
     }
+
 
     private fun showExpiredDialog() {
         AlertDialog.Builder(this)
@@ -658,5 +660,19 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
             .setCancelable(false)
             .setPositiveButton("OK") { d, _ -> d.dismiss() }
             .show()
+    }
+
+    private fun isXpubCurrency(currency: String): Boolean {
+        // Only these coins actually support xpub
+        val xpubCapable = setOf("Bitcoin", "Litecoin", "Dogecoin", "Dash", "Bitcoincash")
+
+        if (!xpubCapable.contains(currency)) return false
+
+        val props = Properties()
+        val file = File(filesDir, "config.properties")
+        if (file.exists()) props.load(file.inputStream())
+
+        val type = props.getProperty("${currency}_type")
+        return type.equals("xpub", ignoreCase = true)
     }
 }
