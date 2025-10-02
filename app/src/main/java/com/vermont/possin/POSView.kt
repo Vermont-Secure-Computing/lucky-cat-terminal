@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
@@ -39,7 +40,7 @@ class POSView @JvmOverloads constructor(
     private lateinit var backArrow: ImageView
     private lateinit var addNoteCheckbox: CheckBox
     private lateinit var buttons: List<Button>
-    private lateinit var btnEnter: Button               // <-- NEW: hold Enter button
+    private lateinit var btnEnter: Button
 
     // Error UI that we dynamically add/remove
     private var errorTextView: TextView? = null
@@ -235,10 +236,24 @@ class POSView @JvmOverloads constructor(
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         currencySpinner.adapter = adapter
 
+        val prefs = context.getSharedPreferences("pos_prefs", Context.MODE_PRIVATE)
+        val savedCode = prefs.getString("last_currency_code", null)
+        if (savedCode != null) {
+            val index = codes.indexOf(savedCode)
+            if (index >= 0) {
+                currencySpinner.setSelection(index)
+                currentCurrencySymbol = symbols[index]
+                currentCurrencyCode = codes[index]
+            }
+        }
+
         currencySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 currentCurrencySymbol = symbols.getOrNull(position) ?: "$"
                 currentCurrencyCode = codes.getOrNull(position) ?: ""
+
+                val prefs = context.getSharedPreferences("pos_prefs", Context.MODE_PRIVATE)
+                prefs.edit().putString("last_currency_code", currentCurrencyCode).apply()
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
@@ -269,46 +284,76 @@ class POSView @JvmOverloads constructor(
     }
 
     private fun appendToInput(value: String) {
-        val decimalPlaces = if (currentCurrencyCode in listOf("BTC","LTC","DASH","DOGE","ETH","USDT","XMR","LOG")) 6 else 2
-        if (currentInput.contains(".")) {
-            val parts = currentInput.split(".")
-            if (parts.size > 1 && parts[1].length >= decimalPlaces) return
+        val decimalPlaces = if (currentCurrencyCode in listOf("BTC","LTC","DASH","DOGE","ETH","USDT","XMR","LOG")) 8 else 2
+
+        // prevent multiple dots
+        if (value == "." && currentInput.contains(".")) return
+
+        // temporary string with new value
+        val newInput = currentInput + value
+
+        // try parse as BigDecimal for accuracy
+        try {
+            val parsed = newInput.toBigDecimalOrNull()
+            if (parsed != null && parsed > java.math.BigDecimal("999999999")) {
+                // reject if exceeds 100,000,000
+                return
+            }
+        } catch (_: Exception) {
+            return
         }
-        currentInput += value
+
+        // prevent exceeding decimal places
+        if (newInput.contains(".")) {
+            val parts = newInput.split(".")
+            if (parts.size > 1 && parts[1].length > decimalPlaces) return
+        }
+
+        currentInput = newInput
     }
+
 
     private fun updatePriceDisplay() {
         itemPriceInput.text = if (currentInput.isEmpty()) "0.00" else currentInput
     }
 
     private fun confirmPrice() {
-        val decimalPlaces = if (currentCurrencyCode in listOf("BTC","LTC","DASH","DOGE","ETH","USDT","XMR","LOG")) 6 else 2
-        if (currentInput.isNotEmpty()) {
-            if (!currentInput.contains(".")) {
-                currentInput += "." + "0".repeat(decimalPlaces)
-            } else {
-                val parts = currentInput.split(".")
-                currentInput += when {
-                    parts.size == 1 || parts[1].isEmpty() -> "0".repeat(decimalPlaces)
-                    parts[1].length < decimalPlaces -> "0".repeat(decimalPlaces - parts[1].length)
-                    else -> ""
-                }
-            }
+        if (currentInput.isEmpty()) return
 
-            val intent = if (addNoteCheckbox.isChecked) {
-                Intent(context, PriceConfirmActivity::class.java).apply {
-                    putExtra("PRICE", "$currentCurrencySymbol$currentInput")
-                    putExtra("CURRENCY_CODE", currentCurrencyCode)
-                }
-            } else {
-                Intent(context, CryptoOptionActivity::class.java).apply {
-                    putExtra("PRICE", "$currentCurrencySymbol$currentInput")
-                    putExtra("CURRENCY_CODE", currentCurrencyCode)
-                }
-            }
-            context.startActivity(intent)
+        val parsed = currentInput.toBigDecimalOrNull()
+        if (parsed == null || parsed > java.math.BigDecimal("999999999")) {
+            Toast.makeText(context, "Maximum allowed amount is 999,999,999", Toast.LENGTH_SHORT).show()
+            return
         }
+
+        // Use the same decimalPlaces rule as appendToInput
+        val decimalPlaces = if (currentCurrencyCode in listOf("BTC","LTC","DASH","DOGE","ETH","USDT","XMR","LOG")) 8 else 2
+
+        if (!currentInput.contains(".")) {
+            currentInput += "." + "0".repeat(decimalPlaces)
+        } else {
+            val parts = currentInput.split(".")
+            currentInput += when {
+                parts.size == 1 || parts[1].isEmpty() -> "0".repeat(decimalPlaces)
+                parts[1].length < decimalPlaces -> "0".repeat(decimalPlaces - parts[1].length)
+                else -> ""
+            }
+        }
+
+        val intent = if (addNoteCheckbox.isChecked) {
+            Intent(context, PriceConfirmActivity::class.java).apply {
+                putExtra("PRICE", "$currentCurrencySymbol$currentInput")
+                putExtra("CURRENCY_CODE", currentCurrencyCode)
+            }
+        } else {
+            Intent(context, CryptoOptionActivity::class.java).apply {
+                putExtra("PRICE", "$currentCurrencySymbol$currentInput")
+                putExtra("CURRENCY_CODE", currentCurrencyCode)
+            }
+        }
+        context.startActivity(intent)
     }
+
 
     private fun clearInput() {
         currentInput = ""

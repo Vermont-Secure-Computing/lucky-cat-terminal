@@ -101,6 +101,23 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="@string/choose_currency"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:paddingBottom="4dp"/>
+
+            <Spinner
+                android:id="@+id/currencySpinnerMerchant"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:background="@drawable/spinner_background_set"
+                android:spinnerMode="dropdown"/>
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:text="@string/business_name"
                 android:textSize="16sp"
                 android:textColor="#000"

@@ -181,4 +181,5 @@
     <string name="encoding_error_message">Ошибка кодировки при печати (неподдерживаемые символы).</string>
     <string name="barcode_qr_error_message">Ошибка генерации штрих-кода/QR. Проверьте данные.</string>
     <string name="no_checksum_warning">У этого адреса нет контрольной суммы. Хотите продолжить?</string>
+    <string name="choose_currency">Выберите валюту</string>
 </resources>

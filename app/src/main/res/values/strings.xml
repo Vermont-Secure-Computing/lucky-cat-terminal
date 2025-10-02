@@ -181,4 +181,5 @@
     <string name="encoding_error_message">Encoding error while printing (unsupported characters).</string>
     <string name="barcode_qr_error_message">Barcode/QR generation error. Please check the data.</string>
     <string name="no_checksum_warning">This address has no checksum. Would you like to continue?</string>
+    <string name="choose_currency">Choose Currency</string>
 </resources>
