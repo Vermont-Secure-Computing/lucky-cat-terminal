@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -28,6 +29,31 @@ class MerchantActivity : AppCompatActivity() {
     private lateinit var editTextCountry: EditText
     private lateinit var editTextMerchantPhone: EditText
     private lateinit var editTextMerchantEmail: EditText
+    private lateinit var currencySpinner: Spinner
+    private var currentCurrencyCode = ""
+    private var currentCurrencySymbol = "$"
+    private val currencyNames = mapOf(
+        "USD" to "US Dollar",
+        "EUR" to "Euro",
+        "JPY" to "Japanese Yen",
+        "GBP" to "British Pound",
+        "AUD" to "Australian Dollar",
+        "CAD" to "Canadian Dollar",
+        "CHF" to "Swiss Franc",
+        "CNY" to "Chinese Yuan",
+        "SEK" to "Swedish Krona",
+        "NZD" to "New Zealand Dollar",
+        "BTC" to "Bitcoin",
+        "LTC" to "Litecoin",
+        "DASH" to "Dash",
+        "DOGE" to "Dogecoin",
+        "ETH" to "Ethereum",
+        "USDT" to "Tether",
+        "XMR" to "Monero",
+        "LOG" to "Woodcoin"
+    )
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +85,10 @@ class MerchantActivity : AppCompatActivity() {
             val intent = Intent(this, com.vermont.possin.SetPinActivity::class.java)
             startActivity(intent)
         }
+
+        currencySpinner = findViewById(R.id.currencySpinnerMerchant)
+        setupCurrencySpinner()
+
 
         // Load the properties if they exist
         loadMerchantProperties()
@@ -131,6 +161,62 @@ class MerchantActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private fun setupCurrencySpinner() {
+        val displayList = mutableListOf<String>()
+        val codes = mutableListOf<String>()
+        val symbols = mutableListOf<String>()
+
+        try {
+            val inputStream = resources.openRawResource(R.raw.currencies)
+            val json = inputStream.bufferedReader().use { it.readText() }
+            val arr = org.json.JSONArray(json)
+            for (i in 0 until arr.length()) {
+                val obj = arr.getJSONObject(i)
+                val symbol = obj.getString("symbol")
+                val code = obj.getString("code")
+                val name = currencyNames[code] ?: code
+
+                displayList.add("$symbol $name")   // 👈 show both
+                codes.add(code)
+                symbols.add(symbol)
+            }
+        } catch (_: Exception) {}
+
+        val adapter = android.widget.ArrayAdapter(
+            this,
+            R.layout.spinner_currency_item,
+            displayList
+        )
+        adapter.setDropDownViewResource(R.layout.spinner_currency_dropdown)
+        currencySpinner.adapter = adapter
+
+        val prefs = getSharedPreferences("pos_prefs", Context.MODE_PRIVATE)
+        val savedCode = prefs.getString("last_currency_code", null)
+        if (savedCode != null) {
+            val index = codes.indexOf(savedCode)
+            if (index >= 0) {
+                currencySpinner.setSelection(index)
+                currentCurrencySymbol = symbols[index]
+                currentCurrencyCode = codes[index]
+            }
+        }
+
+        currencySpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: android.widget.AdapterView<*>,
+                view: android.view.View?,
+                position: Int,
+                id: Long
+            ) {
+                currentCurrencySymbol = symbols.getOrNull(position) ?: "$"
+                currentCurrencyCode = codes.getOrNull(position) ?: ""
+
+                prefs.edit().putString("last_currency_code", currentCurrencyCode).apply()
+            }
+
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>) {}
+        }
+    }
 
 
 
