@@ -60,14 +60,14 @@ class CustomWebSocketListener(
             put("type", type)
             optionalParam?.let { put("txid", it) }
 
-            try {
-                val xpubFlag = (callback as? android.content.Context)
-                    ?.let { (it as? android.app.Activity)?.intent?.getBooleanExtra("XPUB", false) }
-                    ?: false
-                if (xpubFlag) put("xpub", true)
-            } catch (e: Exception) {
-                Log.w("WebSocket", "XPUB check failed: ${e.message}")
-            }
+//            try {
+//                val xpubFlag = (callback as? android.content.Context)
+//                    ?.let { (it as? android.app.Activity)?.intent?.getBooleanExtra("XPUB", false) }
+//                    ?: false
+//                if (xpubFlag) put("xpub", true)
+//            } catch (e: Exception) {
+//                Log.w("WebSocket", "XPUB check failed: ${e.message}")
+//            }
         }
 
         Log.d("WebSocket", "Sending: $jsonObject")

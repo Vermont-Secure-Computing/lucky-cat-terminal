@@ -647,7 +647,7 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
             putExtra("NUMERIC_PRICE", numericPrice)
             putExtra("SELECTED_CURRENCY_CODE", selectedCurrencyCode)
             putExtra("SHORTNAME", shortname)
-            putExtra("XPUB", isXpubCurrency(managerType))
+//            putExtra("XPUB", isXpubCurrency(managerType))
         }
         startActivity(intent)
     }
