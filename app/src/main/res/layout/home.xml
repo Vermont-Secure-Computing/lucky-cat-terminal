@@ -21,6 +21,19 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.7" />
 
+        <TextView
+            android:id="@+id/versionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="v1.2"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="8dp"/>
+
         <ImageView
             android:id="@+id/logo_image"
             android:layout_width="150dp"

@@ -182,4 +182,5 @@
     <string name="barcode_qr_error_message">条码/二维码生成错误。请检查数据。</string>
     <string name="no_checksum_warning">此地址没有校验和。您要继续吗？</string>
     <string name="choose_currency">选择货币</string>
+    <string name="save">保存</string>
 </resources>
