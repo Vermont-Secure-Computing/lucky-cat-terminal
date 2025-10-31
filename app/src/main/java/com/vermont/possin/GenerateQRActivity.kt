@@ -1,6 +1,7 @@
 package com.vermont.possin
 
 import android.Manifest
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,8 +17,10 @@ import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
+import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
@@ -304,7 +307,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
 
         saveButton = findViewById(R.id.saveButton)
         saveButton.setOnClickListener {
-            saveTransactionManually()
+            saveReceiptAsImage()
         }
 
         requestBluetoothPermissions()
@@ -1069,52 +1072,81 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         }
     }
 
-    private fun saveTransactionManually() {
-        val coin = intent.getStringExtra("SHORTNAME") ?: "UnknownCoin"
-        val balance = balanceTextView.text.toString().replace(Regex("[^0-9.]"), "").toDoubleOrNull() ?: 0.0
-        val txidText = txidTextView.text.toString().replace("Transaction ID: ", "").trim()
-        val fees = feesTextView.text.toString().replace(Regex("[^0-9.]"), "").toDoubleOrNull() ?: 0.0
-        val confirmations = confirmationsTextView.text.toString().replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
-        val address = websocketParams.address
+    private fun saveReceiptAsImage() {
+        try {
+            val inflater = LayoutInflater.from(this)
+            val view = inflater.inflate(R.layout.fragment_receipt_dialog, null)
 
-        // Save transaction locally to AppDatabase
-        lifecycleScope.launch(Dispatchers.IO) {
-            val transaction = Transaction(
-                balance = balance,
-                balanceIn = null,
-                txid = txidText,
-                txidIn = "",
-                fees = fees,
-                confirmations = confirmations,
-                date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
-                time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()),
-                chain = chain,
-                coin = coin,
-                message = message,
-                numericPrice = numericPrice,
-                selectedCurrencyCode = selectedCurrencyCode,
-                address = address,
-                txtype = "manual save"
-            )
+            // ✅ Use merchant name dynamically
+            view.findViewById<TextView>(R.id.receiptTitle).text =
+                getMerchantName() ?: merchantName.text?.toString()?.ifEmpty { "Receipt" } ?: "Receipt"
 
-            db.transactionDao().insert(transaction)
+            view.findViewById<TextView>(R.id.receiptBalance).text = balanceTextView.text
+            view.findViewById<TextView>(R.id.receiptBaseCurrency).text = baseCurrencyTextView.text
+            view.findViewById<TextView>(R.id.receiptBasePrice).text = basePriceTextView.text
+            view.findViewById<TextView>(R.id.receiptTxID).text = txidTextView.text
+            view.findViewById<TextView>(R.id.receiptFees).text = feesTextView.text
+            view.findViewById<TextView>(R.id.receiptConfirmations).text = confirmationsTextView.text
+            view.findViewById<TextView>(R.id.receiptChain).text = chain
+            view.findViewById<TextView>(R.id.receiptDeviceID).text =
+                "Device ID: ${Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)}"
+            view.findViewById<TextView>(R.id.receivingAddress).text = websocketParams.address
 
-            // Show confirmation dialog on main thread
-            runOnUiThread {
-                AlertDialog.Builder(this@GenerateQRActivity)
-                    .setTitle("Transaction Saved")
-                    .setMessage("Transaction saved successfully. What would you like to do next?")
-                    .setCancelable(false)
-                    .setPositiveButton("Go Home") { _, _ ->
-                        navigateToHome()
-                    }
-                    .setNegativeButton("Stay Here") { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    .show()
-            }
+            // ✅ Extract clean txid text
+            val rawTxidText = txidTextView.text.toString()
+            val regex = Regex("([a-fA-F0-9]{20,})") // extract the hash-like string
+            val txidValue = regex.find(rawTxidText)?.groupValues?.get(1) ?: rawTxidText
+
+            // ✅ Generate QR code from the transaction ID itself
+            val qrBitmap = generateQRCode(txidValue)
+            val qrImage = ImageView(this)
+            qrImage.setImageBitmap(qrBitmap)
+
+            // Insert QR below transaction ID
+            val container = view.findViewById<LinearLayout>(R.id.receiptLayout)
+            val txidIndex = container.indexOfChild(view.findViewById(R.id.receiptTxID))
+            container.addView(qrImage, txidIndex + 1)
+
+            // ✅ Layout and render bitmap
+            view.setBackgroundColor(Color.WHITE)
+            val widthSpec = View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY)
+            val heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            view.measure(widthSpec, heightSpec)
+            view.layout(0, 0, view.measuredWidth, view.measuredHeight)
+
+            val bitmap = Bitmap.createBitmap(view.measuredWidth, view.measuredHeight, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            view.draw(canvas)
+
+            // ✅ Save image
+            val filename = "receipt_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.png"
+            saveBitmapToPictures(bitmap, filename)
+
+            Toast.makeText(this, "Receipt saved with QR code of TXID!", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Failed to save receipt: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
+
+    private fun saveBitmapToPictures(bitmap: Bitmap, filename: String) {
+        val resolver = contentResolver
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Receipts")
+        }
+
+        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        uri?.let {
+            resolver.openOutputStream(it)?.use { stream ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            }
+        }
+
+        Toast.makeText(this, "Saved to Pictures/Receipts", Toast.LENGTH_SHORT).show()
+    }
+
 
     private fun showCancelDialog() {
         val dialogView = layoutInflater.inflate(R.layout.cancel_dialog, null)
