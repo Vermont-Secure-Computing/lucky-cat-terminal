@@ -734,6 +734,35 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 feesTextView.text = getString(R.string.fees, formattedFees)
                 feesTextView.visibility = View.VISIBLE
 
+                if (timerTextView.visibility == View.VISIBLE) {
+                    timerTextView.visibility = View.GONE
+                }
+
+                // === Show "Confirming..." animation ===
+                checkingTransactionsLayout.visibility = View.VISIBLE
+                checkingTransactionsLayout.bringToFront()
+                checkingTransactionsLayout.setBackgroundColor(Color.WHITE)
+
+                checkingTransactionsText.visibility = View.VISIBLE
+                checkingTransactionsText.text = getString(R.string.confirming_transaction)
+                checkingTransactionsText.setTextColor(Color.BLACK)
+                checkingTransactionsText.textSize = 18f
+
+                // 3-dot animation for "Confirming..."
+                handler.removeCallbacksAndMessages(null)
+                val dots = listOf("", ".", "..", "...")
+                var dotIndex = 0
+                handler.post(object : Runnable {
+                    override fun run() {
+                        checkingTransactionsText.text =
+                            getString(R.string.confirming_transaction) + dots[dotIndex]
+                        dotIndex = (dotIndex + 1) % dots.size
+                        handler.postDelayed(this, 500)
+                    }
+                })
+
+                checkingTransactionsGif.visibility = View.GONE
+
                 confirmationsLayout.visibility = View.VISIBLE
                 confirmationsTextView.visibility = View.VISIBLE
                 confirmationBlocks.forEach { it.setBackgroundColor(Color.LTGRAY) }
@@ -990,6 +1019,8 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                             wakeLock?.release()
                             wakeLock = null
                             stopPollingAndMaybePromptToPrint()
+                            checkingTransactionsLayout.visibility = View.GONE
+                            handler.removeCallbacksAndMessages(null)
                         }
                     }
 
@@ -1075,39 +1106,107 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
     private fun saveReceiptAsImage() {
         try {
             val inflater = LayoutInflater.from(this)
-            val view = inflater.inflate(R.layout.fragment_receipt_dialog, null)
-
-            // ✅ Use merchant name dynamically
-            view.findViewById<TextView>(R.id.receiptTitle).text =
-                getMerchantName() ?: merchantName.text?.toString()?.ifEmpty { "Receipt" } ?: "Receipt"
-
-            view.findViewById<TextView>(R.id.receiptBalance).text = balanceTextView.text
-            view.findViewById<TextView>(R.id.receiptBaseCurrency).text = baseCurrencyTextView.text
-            view.findViewById<TextView>(R.id.receiptBasePrice).text = basePriceTextView.text
-            view.findViewById<TextView>(R.id.receiptTxID).text = txidTextView.text
-            view.findViewById<TextView>(R.id.receiptFees).text = feesTextView.text
-            view.findViewById<TextView>(R.id.receiptConfirmations).text = confirmationsTextView.text
-            view.findViewById<TextView>(R.id.receiptChain).text = chain
-            view.findViewById<TextView>(R.id.receiptDeviceID).text =
-                "Device ID: ${Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)}"
-            view.findViewById<TextView>(R.id.receivingAddress).text = websocketParams.address
-
-            // ✅ Extract clean txid text
-            val rawTxidText = txidTextView.text.toString()
-            val regex = Regex("([a-fA-F0-9]{20,})") // extract the hash-like string
-            val txidValue = regex.find(rawTxidText)?.groupValues?.get(1) ?: rawTxidText
-
-            // ✅ Generate QR code from the transaction ID itself
-            val qrBitmap = generateQRCode(txidValue)
-            val qrImage = ImageView(this)
-            qrImage.setImageBitmap(qrBitmap)
-
-            // Insert QR below transaction ID
+            val view = inflater.inflate(R.layout.receipt_layout, null)
             val container = view.findViewById<LinearLayout>(R.id.receiptLayout)
-            val txidIndex = container.indexOfChild(view.findViewById(R.id.receiptTxID))
-            container.addView(qrImage, txidIndex + 1)
+            container.removeAllViews()
 
-            // ✅ Layout and render bitmap
+            // Load merchant info from merchant.properties
+            val props = Properties()
+            val merchantFile = File(filesDir, "merchant.properties")
+            if (merchantFile.exists()) props.load(merchantFile.inputStream())
+
+            val businessName = props.getProperty("merchant_name") ?: getMerchantName() ?: "Merchant"
+            val address = props.getProperty("address", "")
+            val city = props.getProperty("city", "")
+            val state = props.getProperty("state", "")
+            val zip = props.getProperty("zip_code", "")
+            val country = props.getProperty("country", "")
+            val phone = props.getProperty("phone", "")
+            val email = props.getProperty("email", "")
+
+            // Title
+            val title = TextView(this).apply {
+                text = businessName
+                textSize = 20f
+                setTextColor(Color.BLACK)
+                setPadding(0, 8, 0, 16)
+            }
+            container.addView(title)
+
+            // Optional merchant info
+            fun addIfNotEmpty(label: String, value: String) {
+                if (value.isNotEmpty()) {
+                    val textView = TextView(this).apply {
+                        text = "$label: $value"
+                        textSize = 14f
+                        setTextColor(Color.DKGRAY)
+                        setPadding(0, 2, 0, 2)
+                    }
+                    container.addView(textView)
+                }
+            }
+            addIfNotEmpty("Address", address)
+            addIfNotEmpty("City", city)
+            addIfNotEmpty("State", state)
+            addIfNotEmpty("Zip Code", zip)
+            addIfNotEmpty("Country", country)
+            addIfNotEmpty("Phone", phone)
+            addIfNotEmpty("Email", email)
+
+            // Spacer line
+            val divider = View(this).apply {
+                setBackgroundColor(Color.LTGRAY)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 2
+                ).apply { setMargins(0, 12, 0, 12) }
+            }
+            container.addView(divider)
+
+            // Transaction details
+            val details = listOf(
+                balanceTextView.text,
+                baseCurrencyTextView.text,
+                basePriceTextView.text,
+                "Receiving Address: " + websocketParams.address,
+                txidTextView.text,
+                feesTextView.text,
+                confirmationsTextView.text,
+                chain,
+                "Device ID: ${Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)}"
+            )
+
+            details.forEach { text ->
+                val t = TextView(this)
+                t.text = text
+                t.textSize = 16f
+                t.setTextColor(Color.BLACK)
+                t.setPadding(0, 2, 0, 2)
+                container.addView(t)
+            }
+
+            // ✅ QR from TXID
+            val rawTxidText = txidTextView.text.toString()
+            val regex = Regex("([a-fA-F0-9]{20,})")
+            val txidValue = regex.find(rawTxidText)?.groupValues?.get(1) ?: rawTxidText
+            val qrBitmap = generateQRCode(txidValue)
+
+            val qrView = ImageView(this).apply {
+                setImageBitmap(qrBitmap)
+                adjustViewBounds = true
+                setPadding(0, 20, 0, 20)
+            }
+            container.addView(qrView)
+
+            // Footer
+            val footer = TextView(this).apply {
+                text = "Thank you for your payment!"
+                textSize = 14f
+                setTextColor(Color.DKGRAY)
+                setPadding(0, 16, 0, 0)
+            }
+            container.addView(footer)
+
+            // Layout & render bitmap
             view.setBackgroundColor(Color.WHITE)
             val widthSpec = View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY)
             val heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
@@ -1118,16 +1217,17 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
             val canvas = Canvas(bitmap)
             view.draw(canvas)
 
-            // ✅ Save image
+            // Save
             val filename = "receipt_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.png"
             saveBitmapToPictures(bitmap, filename)
 
-            Toast.makeText(this, "Receipt saved with QR code of TXID!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Receipt image saved with merchant info!", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(this, "Failed to save receipt: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
+
 
     private fun saveBitmapToPictures(bitmap: Bitmap, filename: String) {
         val resolver = contentResolver

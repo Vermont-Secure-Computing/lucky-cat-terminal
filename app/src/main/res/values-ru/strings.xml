@@ -183,4 +183,5 @@
     <string name="no_checksum_warning">У этого адреса нет контрольной суммы. Хотите продолжить?</string>
     <string name="choose_currency">Выберите валюту</string>
     <string name="save">Сохранить</string>
+    <string name="confirming_transaction">Подтверждение</string>
 </resources>

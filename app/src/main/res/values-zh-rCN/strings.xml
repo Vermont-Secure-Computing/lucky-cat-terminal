@@ -183,4 +183,5 @@
     <string name="no_checksum_warning">此地址没有校验和。您要继续吗？</string>
     <string name="choose_currency">选择货币</string>
     <string name="save">保存</string>
+    <string name="confirming_transaction">确认中</string>
 </resources>
