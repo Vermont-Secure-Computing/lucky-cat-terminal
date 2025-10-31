@@ -1,13 +1,26 @@
-<!-- res/layout/receipt_layout.xml -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:background="#FFFFFF">
 
-    <TextView
-        android:id="@+id/receiptContent"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/receiptLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp" />
-</LinearLayout>
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <!-- Default placeholder (optional) -->
+        <TextView
+            android:id="@+id/receiptContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Receipt Preview"
+            android:textSize="16sp"
+            android:textColor="#000000"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</ScrollView>

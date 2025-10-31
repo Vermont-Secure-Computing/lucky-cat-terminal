@@ -183,4 +183,5 @@
     <string name="no_checksum_warning">This address has no checksum. Would you like to continue?</string>
     <string name="choose_currency">Choose Currency</string>
     <string name="save">Save</string>
+    <string name="confirming_transaction">Confirming</string>
 </resources>
