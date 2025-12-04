@@ -1,15 +1,16 @@
 <resources>
     <string name="app_name">LCTerm</string>
     <string-array name="type_array">
-        <item>地址</item>
-        <item>xpub</item>
+        <item translatable="false">address</item>
+        <item translatable="false">xpub</item>
     </string-array>
     <string-array name="monero_type_array">
-        <item>地址</item>
+        <item translatable="false">address</item>
     </string-array>
+
     <string-array name="segwit_legacy_array">
-        <item>隔离见证</item>
-        <item>传统</item>
+        <item translatable="false">segwit</item>
+        <item translatable="false">legacy</item>
     </string-array>
     <string-array name="locale_array">
         <item>EN</item>
@@ -184,4 +185,6 @@
     <string name="choose_currency">选择货币</string>
     <string name="save">保存</string>
     <string name="confirming_transaction">确认中</string>
+    <string name="zcash_manager_not_initialized">Zcash 管理器未初始化。</string>
+    <string name="failed_to_derive_zcash_address">无法生成 Zcash 地址。</string>
 </resources>

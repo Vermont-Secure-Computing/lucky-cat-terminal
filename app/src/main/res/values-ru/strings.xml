@@ -184,4 +184,6 @@
     <string name="choose_currency">Выберите валюту</string>
     <string name="save">Сохранить</string>
     <string name="confirming_transaction">Подтверждение</string>
+    <string name="zcash_manager_not_initialized">Менеджер Zcash не инициализирован.</string>
+    <string name="failed_to_derive_zcash_address">Не удалось создать адрес Zcash.</string>
 </resources>

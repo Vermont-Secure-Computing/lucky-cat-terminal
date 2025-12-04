@@ -2,14 +2,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center"
     android:orientation="vertical"
     android:padding="16dp">
 
-    <pl.droidsonroids.gif.GifImageView
+    <!-- Use a NORMAL ImageView only -->
+    <ImageView
         android:id="@+id/gifImageView"
         android:layout_width="300dp"
         android:layout_height="300dp"
         android:layout_gravity="center"
+        android:adjustViewBounds="true"
         android:scaleType="centerCrop" />
 
 </LinearLayout>

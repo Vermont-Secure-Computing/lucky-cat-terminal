@@ -5,85 +5,98 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@android:color/white"
-    tools:context=".MainActivity">
+    android:background="@color/screenBackground"
+    tools:context=".XpubAddress">
 
     <!-- Header View -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:background="@color/tapeRed"
-        android:elevation="4dp">
+        android:padding="4dp"
+        android:background="@color/tapeRed">
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
+            app:layout_constraintGuide_percent="0.7" />
 
         <ImageView
             android:id="@+id/back_arrow"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:src="@drawable/ic_back_arrow"
-            android:contentDescription="Back"
+            android:clickable="true"
+            android:focusable="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:clickable="true"
-            android:focusable="true" />
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <ImageView
             android:id="@+id/logo_image"
-            android:layout_width="40dp"
+            android:layout_width="150dp"
             android:layout_height="40dp"
-            android:src="@drawable/logo"
+            android:src="@drawable/lcterm"
             app:layout_constraintEnd_toStartOf="@+id/guideline"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
-        <TextView
-            android:id="@+id/submit_text"
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Submit"
-            android:textSize="18sp"
-            android:textColor="@android:color/white"
-            android:paddingStart="16dp"
-            android:clickable="true"
-            android:focusable="true"
+            android:padding="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:id="@+id/submit_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/submit"
+                android:textSize="18sp"
+                android:textColor="@android:color/white"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingStart="16dp" />
+        </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Scrollable Content -->
-    <ScrollView
-        android:id="@+id/scroll_view"
+    <!-- Search Field -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:layout_marginBottom="2dp"
+        android:background="@color/inputFieldBackground">
+
+        <com.vermont.possin.CustomAutoCompleteTextView
+            android:id="@+id/search_field"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/search_cryptocurrencies"
+            android:padding="8dp"
+            android:textColor="@color/textPrimary"
+            android:textColorHint="@color/textSecondary"
+            android:background="@drawable/rounded_edittext"
+            android:drawablePadding="8dp" />
+    </LinearLayout>
+
+    <!-- Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp">
 
         <LinearLayout
+            android:id="@+id/cryptocurrency_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <LinearLayout
-                android:id="@+id/xpub_input_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"/>
-
-            <!-- Dummy content to ensure ScrollView can scroll -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="500dp"
-                android:background="@android:color/transparent" />
-
-        </LinearLayout>
+            android:orientation="vertical" />
     </ScrollView>
 </LinearLayout>

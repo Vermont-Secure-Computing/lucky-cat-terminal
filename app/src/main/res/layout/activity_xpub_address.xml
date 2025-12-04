@@ -82,9 +82,10 @@
             android:layout_weight="1"
             android:hint="@string/search_cryptocurrencies"
             android:padding="8dp"
-            android:background="@drawable/bordered_edit_text"
+            android:textColor="@color/textPrimary"
+            android:textColorHint="@color/textSecondary"
+            android:background="@drawable/rounded_edittext"
             android:drawablePadding="8dp" />
-
     </LinearLayout>
 
     <!-- Content -->

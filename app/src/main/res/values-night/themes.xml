@@ -1,18 +1,37 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme (Dark) -->
     <style name="Base.Theme.Possin" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">@color/tapeRed</item>
+        <item name="colorPrimaryContainer">@color/customGray</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/darkerRed</item>
+        <item name="colorSecondaryContainer">@color/grey</item>
+        <item name="android:statusBarColor">@color/darkerRed</item>
+        <item name="android:navigationBarColor">@color/customGray</item>
+        <item name="android:windowBackground">@color/customGray</item>
+        <item name="android:textColorPrimary">@color/white</item>
     </style>
 
-    <!-- Splash screen theme for Android 12+ -->
-    <style name="Theme.Possin.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Customize splash screen background color -->
-        <item name="windowSplashScreenBackground">@color/tapeRed</item>
-        <!-- Customize splash screen icon -->
+    <!-- Dark splash -->
+    <style name="Theme.Possin.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/darkerRed</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/for_splash</item>
         <item name="windowSplashScreenIconBackgroundColor">@color/tapeRed</item>
-        <!-- Transition duration for the splash screen exit -->
         <item name="windowSplashScreenAnimationDuration">300</item>
+        <item name="postSplashScreenTheme">@style/Theme.Possin</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorPrimary">#000000</item>
+        <item name="android:textColorHint">#666666</item>
+        <item name="android:textColorSecondary">@color/tapeRed</item>
     </style>
+
+    <style name="NoOverlayPopupTheme" parent="ThemeOverlay.Material3">
+        <!-- Dark mode popup appearance -->
+        <item name="colorSurface">#2C2C2C</item>
+        <item name="colorControlHighlight">@null</item>
+        <item name="colorOnSurface">@android:color/white</item>
+    </style>
+
+    <!-- Main app theme alias -->
+    <style name="Theme.Possin" parent="Base.Theme.Possin" />
 </resources>

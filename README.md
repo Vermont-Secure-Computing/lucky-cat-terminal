@@ -87,4 +87,12 @@ You can directly install the latest APK release from the [Releases](https://gith
 We welcome contributions to improve the app. Please submit a pull request with a clear description of your changes.
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+Lucky Cat Terminal (LCTerm)  
+Copyright (c) 2024–2025 Vermont Secure Computing and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this project except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0

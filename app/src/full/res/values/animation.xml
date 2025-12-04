@@ -1,0 +1,3 @@
+<resources>
+    <item name="green_check_final" type="drawable">@drawable/green_check_circle_animation_300x300</item>
+</resources>

@@ -53,6 +53,12 @@
       "shortname": "SOL",
       "chain": "Solana",
       "logo": "solana"
+    },
+    {
+      "name": "Zcash",
+      "shortname": "ZEC",
+      "chain": "Zcash",
+      "logo": "zcash_logo"
     }
   ]
 }

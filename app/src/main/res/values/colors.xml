@@ -8,4 +8,9 @@
     <color name="customGray">#f4f4f4</color>
     <color name="grey">#DEDEDE</color>
     <color name="darkerRed">#8B0000</color>
+    <color name="screenBackground">#FFFFFF</color>
+    <color name="textPrimary">#000000</color>
+    <color name="textSecondary">#666666</color>
+    <color name="cardBackground">#FFFFFF</color>
+    <color name="inputFieldBackground">#FFFFFF</color>
 </resources>

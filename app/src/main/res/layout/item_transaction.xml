@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     card_view:cardCornerRadius="8dp"
-    card_view:cardElevation="4dp">
+    card_view:cardElevation="4dp"
+    card_view:cardBackgroundColor="@color/cardBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="16sp"
-            android:textColor="#000"
+            android:textColor="@color/textPrimary"
             android:paddingEnd="8dp" />
 
         <TextView
@@ -29,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="14sp"
-            android:textColor="#000"
+            android:textColor="@color/textSecondary"
             android:paddingEnd="8dp" />
 
         <TextView
@@ -38,7 +39,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="14sp"
-            android:textColor="#000" />
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

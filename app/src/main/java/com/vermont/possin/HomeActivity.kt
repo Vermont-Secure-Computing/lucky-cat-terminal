@@ -1,3 +1,20 @@
+/*
+ * Copyright 2024–2025 Vermont Secure Computing and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *
+http://www.apache.org/licenses/LICENSE-2.0
+
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.vermont.possin
 
 import android.Manifest
@@ -37,7 +54,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.vermont.possin.adapter.TransactionDividerAdapter
 import com.vermont.possin.model.TransactionViewModel
-import pl.droidsonroids.gif.GifDrawable
+import com.vermont.possin.gif.GifHandler
 import java.io.File
 import java.io.InputStreamReader
 import java.util.Locale
@@ -115,8 +132,7 @@ class HomeActivity : BaseNetworkActivity() {
         }
 
         val nekuGifView = findViewById<ImageView>(R.id.nekuGifView)
-        val gifDrawable = GifDrawable(resources, R.raw.neku)
-        nekuGifView.setImageDrawable(gifDrawable)
+        GifHandler.loadGif(nekuGifView, R.raw.neku)
 
 //        populateCryptoContainer()
 
@@ -153,7 +169,7 @@ class HomeActivity : BaseNetworkActivity() {
 
         // Locale spinner
         val localeSpinner = findViewById<Spinner>(R.id.localeSpinner)
-        val adapter = ArrayAdapter.createFromResource(this, R.array.locale_array, R.layout.spinner_locale)
+        val adapter = ArrayAdapter.createFromResource(this, R.array.locale_array, R.layout.spinner_item_locale)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         localeSpinner.adapter = adapter
 
@@ -262,14 +278,16 @@ class HomeActivity : BaseNetworkActivity() {
         mainLayout.addView(logoImageView)
 
         val enterPinTextView = TextView(this).apply {
-            text = R.string.enter_pin.toString()
+            text = getString(R.string.enter_pin)
             textSize = 18f
             setTextColor(ContextCompat.getColor(this@HomeActivity, R.color.black))
             gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                setMargins(0, 0, 0, 16.dpToPx())
-            }
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { setMargins(0, 0, 0, 16.dpToPx()) }
         }
+
         mainLayout.addView(enterPinTextView)
 
         val pinLayout = LinearLayout(this).apply {

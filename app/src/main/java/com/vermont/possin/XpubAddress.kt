@@ -1,3 +1,20 @@
+/*
+ * Copyright 2024–2025 Vermont Secure Computing and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *
+http://www.apache.org/licenses/LICENSE-2.0
+
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.vermont.possin
 
 import android.app.Dialog
@@ -28,7 +45,7 @@ import com.vermont.possin.model.ApiResponse
 import com.vermont.possin.network.MoneroDeleteWalletRequestBody
 import com.vermont.possin.network.MoneroWalletRequestBody
 import com.vermont.possin.network.RetrofitClient
-import pl.droidsonroids.gif.GifDrawable
+import com.vermont.possin.gif.GifHandler
 import retrofit2.Call
 import java.io.File
 import java.util.Properties
@@ -67,7 +84,7 @@ class XpubAddress : AppCompatActivity() {
 
         // Set up the AutoCompleteTextView adapter
         val cryptoNames = cryptocurrencies.map { it.name }
-        cryptocurrencyAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, cryptoNames)
+        cryptocurrencyAdapter = ArrayAdapter(this, R.layout.dropdown_item, cryptoNames)
         searchField.setAdapter(cryptocurrencyAdapter)
 
         // Set up search field listener
@@ -452,8 +469,7 @@ class XpubAddress : AppCompatActivity() {
     private fun showLoadingDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_loading, null)
         val gifImageView: ImageView = dialogView.findViewById(R.id.loadingGifImageView)
-        val gifDrawable = GifDrawable(resources, R.raw.rotating_arc_gradient_thick)
-        gifImageView.setImageDrawable(gifDrawable)
+        GifHandler.loadGif(gifImageView, R.raw.rotating_arc_gradient_thick)
 
         val builder = AlertDialog.Builder(this)
         builder.setView(dialogView)
@@ -545,6 +561,10 @@ class XpubAddress : AppCompatActivity() {
             }
             "Bitcoincash" -> {
                 isValid = if (inputType == "xpub") BitcoinCashManager.isValidXpub(value) else BitcoinCashManager.isValidAddress(value)
+            }
+            "Zcash" -> {
+                isValid = if (inputType == "xpub") ZcashManager.isValidXpub(value)
+                else ZcashManager.isValidAddress(value)
             }
             "Monero" -> {
                 val itemView = cryptocurrencyContainer.getChildAt(
