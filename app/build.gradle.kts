@@ -1,133 +1,155 @@
-//import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.kapt)
-//    alias(libs.plugins.shadow)
 }
 
 android {
     namespace = "com.vermont.possin"
     compileSdk = 34
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.vermont.possin"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.2"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        setProperty("archivesBaseName", "LuckyCat-$versionName")
+        versionName = "1.3"
     }
 
-    buildTypes {
-        release {
-            isDebuggable = true
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+    // ---------- FLAVORS ----------
+    flavorDimensions += "dist"
+
+    productFlavors {
+        create("full") { dimension = "dist" }
+        create("fdroid") { dimension = "dist" }
+    }
+
+//    // ---------- SOURCE SETS ----------
+//    sourceSets {
+//        getByName("main") {
+//            java.srcDir("app/src/main/java")
+//            res.srcDir("app/src/main/res")
+//        }
+//        getByName("full") {
+//            java.srcDir("app/src/full/java")
+//            res.srcDir("app/src/full/res")
+//        }
+//        getByName("fdroid") {
+//            java.srcDir("app/src/fdroid/java")
+//            res.srcDir("app/src/fdroid/res")
+//        }
+//    }
+
+
+    // ---------- CONFIGURE FLAVOR-SPECIFIC DEPENDENCIES ----------
+    configurations.configureEach {
+        when (name) {
+            "fullDebugImplementation",
+            "fullReleaseImplementation" ->
+                extendsFrom(configurations.getByName("fullImplementation"))
+
+            "fdroidDebugImplementation",
+            "fdroidReleaseImplementation" ->
+                extendsFrom(configurations.getByName("fdroidImplementation"))
         }
     }
+
+
+    configurations.configureEach {
+        when (name) {
+            "fullDebugImplementation",
+            "fullReleaseImplementation" ->
+                extendsFrom(configurations.getByName("fullImplementation"))
+
+            "fdroidDebugImplementation",
+            "fdroidReleaseImplementation" ->
+                extendsFrom(configurations.getByName("fdroidImplementation"))
+        }
+    }
+
+    // ---------- BUILD TYPES ----------
+    buildTypes {
+        release {
+            isDebuggable = false
+            isMinifyEnabled = false
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
 
-
+    kotlinOptions { jvmTarget = "1.8" }
 }
 
 dependencies {
+    // Crypto
     implementation(libs.bouncycastle)
 
     implementation(libs.web3j) {
-        exclude(group = "org.bouncycastle", module = "bcprov-jdk15to18")
-        exclude(group = "org.bouncycastle", module = "bcprov-jdk18on")
+        exclude("org.bouncycastle", "bcprov-jdk15to18")
+        exclude("org.bouncycastle", "bcprov-jdk18on")
     }
 
     implementation(libs.bitcoinj) {
-        exclude(group = "org.bouncycastle", module = "bcprov-jdk15to18")
-        exclude(group = "org.bouncycastle", module = "bcprov-jdk18on")
+        exclude("org.bouncycastle", "bcprov-jdk15to18")
+        exclude("org.bouncycastle", "bcprov-jdk18on")
     }
+
+    // AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-
-    implementation(libs.guava)
-    implementation(libs.card.view)
-    implementation(libs.grid.layout)
-    implementation(libs.zxing)
-    implementation(libs.zxing.android)
-    implementation(libs.retrofit)
-    implementation(libs.retrofit2)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp3)
     implementation(libs.androidx.foundation.android)
-    implementation(libs.thermalPrinter)
-    implementation(libs.android.gif.drawable)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle)
+    implementation(libs.androidx.recyclerview)
+
+    // Core
+    implementation(libs.guava)
+    implementation(libs.commons.codec)
     implementation(libs.org.slf4j)
     implementation(libs.logback.classic)
-    implementation(libs.lifecycle.viewmodel)
+
+    // ZXing
+    implementation(libs.zxing)
+    implementation(libs.zxing.android)
+
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit2)
     implementation(libs.retrofit.scalars)
-    implementation(libs.commons.codec)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp3)
     implementation(libs.logging.interceptor)
-    implementation(libs.androidx.lifecycle)
+    implementation(libs.grid.layout)
 
-
+    // Room
     implementation(libs.room.runtime)
-    implementation(libs.androidx.core.splashscreen)
-    kapt(libs.room.compiler)
     implementation(libs.room.ktx)
+    kapt(libs.room.compiler)
     implementation(libs.room.testing)
-    implementation(libs.lifecycle.livedata.ktx)
-    implementation(libs.androidx.recyclerview)
-    testImplementation(libs.junit)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.test.core)
-    testImplementation(libs.test.ext.junit)
-    androidTestImplementation(libs.test.runner)
-    androidTestImplementation(libs.androidx.test.rules)
-    androidTestImplementation(libs.hamcrest)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.espresso.contrib)
-    androidTestImplementation(libs.androidx.espresso.intents)
-    androidTestImplementation(libs.androidx.espresso.accessibility)
-    androidTestImplementation(libs.androidx.espresso.web)
-    androidTestImplementation(libs.hamcrest.library)
-//    androidTestImplementation(libs.androidx.espresso.idling)
-    androidTestImplementation(libs.androidx.test.core)
-    androidTestImplementation(libs.google.truth)
-    // others
-    //    implementation(libs.web3j)
-    //    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-//    implementation(libs.kotlinStdlib)
-//    implementation(libs.trust.wallet)
-}
-//
-//tasks.register<ShadowJar>("shadowJar") {
-//    archiveClassifier.set("all")
-//
-//    // Include the JAR file explicitly
-//    from(fileTree("libs") { include("woodcoinj-core-0.14.2.jar") })
-//
-//    // Relocate org.bitcoinj classes in woodcoinj-core to avoid conflicts
-//    relocate("org.bitcoinj", "org.woodcoinj.shaded.bitcoinj")
-//}
-//
-//tasks.withType<ShadowJar> {
-//    mergeServiceFiles()
-//    manifest {
-//        attributes["Main-Class"] = "com.example.possin.MainActivity" // Adjust the main class if necessary
-//    }
-//}
 
+    // Printer
+    implementation(libs.thermalPrinter)
+
+    // ---------- GIF (FLAVOR-SPECIFIC) ----------
+    add("fullImplementation", libs.android.gif.drawable)
+    add("fdroidImplementation", "io.coil-kt:coil:2.6.0")
+    add("fdroidImplementation", "io.coil-kt:coil-gif:2.6.0")
+
+
+    // Tests
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.test.runner)
+}

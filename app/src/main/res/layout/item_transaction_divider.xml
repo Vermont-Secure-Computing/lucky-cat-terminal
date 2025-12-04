@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:text="Chain"
         android:textSize="16sp"
-        android:textColor="@android:color/black"
+        android:textColor="@color/textPrimary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:text="Amount"
         android:textSize="14sp"
-        android:textColor="@android:color/black"
+        android:textColor="@color/textPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:text="Date"
         android:textSize="14sp"
-        android:textColor="@android:color/black"
+        android:textColor="@color/textSecondary"
         app:layout_constraintStart_toEndOf="@id/chainTextView"
         app:layout_constraintEnd_toStartOf="@id/balanceTextView"
         app:layout_constraintTop_toTopOf="parent"

@@ -1,17 +1,63 @@
+# ============================================
+# Android Studio / IntelliJ
+# ============================================
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+.idea/
+!.idea/codeStyles                       # keep code style if you want
+!.idea/misc.xml
+!.idea/vcs.xml
+
+# ============================================
+# Gradle
+# ============================================
+.gradle/
+build/
+**/build/
+.cxx/
+.externalNativeBuild/
+
+# ============================================
+# Local Config Files
+# ============================================
 local.properties
+secret.properties
+*.keystore
+*.jks
+*.pem
+
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+Thumbs.db
+
+# ============================================
+# Android Generated
+# ============================================
+captures/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# ============================================
+# Logs / Debug
+# ============================================
+*.log
+crashlytics-build.properties
+
+# ============================================
+# App-specific
+# ============================================
 app/release/
-app/release/
+app/debug/
+
+# ============================================
+# Fastlane (optional)
+# ============================================
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/metadata/android/*/images/
+

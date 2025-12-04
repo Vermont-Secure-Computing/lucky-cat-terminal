@@ -1,3 +1,20 @@
+/*
+ * Copyright 2024–2025 Vermont Secure Computing and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *
+http://www.apache.org/licenses/LICENSE-2.0
+
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.vermont.possin
 
 import android.content.Intent
@@ -20,7 +37,7 @@ import com.vermont.possin.model.ConversionResponse
 import com.vermont.possin.network.ConversionRequestBody
 import com.vermont.possin.network.RetrofitClient
 import org.json.JSONObject
-import pl.droidsonroids.gif.GifDrawable
+import com.vermont.possin.gif.GifHandler
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -41,6 +58,7 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
     private var dogecoinManager: DogecoinManager? = null
     private var woodcoinManager: WoodcoinManager? = null
     private var dashManager: DashManager? = null
+    private var zcashManager: ZcashManager? = null
     private var tronManager: TronManager? = null
     private var bitcoincashManager: BitcoinCashManager? = null
     private var moneroManager: MoneroManager? = null
@@ -106,6 +124,7 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
 
         xPubs["Woodcoin"]?.let { woodcoinManager = WoodcoinManager(this, it) }
         xPubs["Dash"]?.let { dashManager = DashManager(this, it) }
+        xPubs["Zcash"]?.let { zcashManager = ZcashManager(this, it) }
         xPubs["Tether"]?.let { tronManager = TronManager(this, it) }
         xPubs["Bitcoincash"]?.let { bitcoincashManager = BitcoinCashManager(this, it) }
         xPubs["Solana"]?.let { solanaManager = SolanaManager(this, it) }
@@ -137,9 +156,8 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
         }
 
         findViewById<ImageView>(R.id.back_arrow)?.setOnClickListener { finish() }
-        findViewById<ImageView>(R.id.nekuGifImageView)?.apply {
-            val gifDrawable = GifDrawable(resources, R.raw.neku)
-            setImageDrawable(gifDrawable)
+        findViewById<ImageView>(R.id.nekuGifImageView)?.let { imageView ->
+            GifHandler.loadGif(imageView, R.raw.neku)
         }
 
         // Initial state (will be corrected again by onNetworkStatusChanged after debounce)
@@ -202,8 +220,7 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
     private fun showLoadingDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_loading, null)
         val gifImageView: ImageView = dialogView.findViewById(R.id.loadingGifImageView)
-        val gifDrawable = GifDrawable(resources, R.raw.rotating_arc_gradient_thick)
-        gifImageView.setImageDrawable(gifDrawable)
+        GifHandler.loadGif(gifImageView, R.raw.rotating_arc_gradient_thick)
 
         loadingDialog = AlertDialog.Builder(this)
             .setView(dialogView)
@@ -286,7 +303,7 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
         val nameTextView = TextView(this).apply {
             text = crypto.name
             textSize = 18f
-            setTextColor(resources.getColor(android.R.color.black))
+            setTextColor(ContextCompat.getColor(context, R.color.textPrimary))
         }
 
         val shortnameTextView = TextView(this).apply {
@@ -344,6 +361,7 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
             "DOGE" -> handleDOGEClick(price)
             "USDT" -> handleUSDTClick(price)
             "DASH" -> handleDASHlick(price)
+            "ZEC" -> handleZcashClick(price)
             "BCH" -> handleBCHlick(price)
             "XMR" -> handleMoneroClick(price)
             "SOL" -> handleSolanaClick(price)
@@ -490,6 +508,44 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
         } ?: run {
             dismissLoadingDialog()
             Toast.makeText(this, R.string.bitcoincash_manager_not_initialized, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun handleZcashClick(price: String) {
+        zcashManager?.let { manager ->
+            val addressIndexPair: Pair<String, Int>? = if (ZcashManager.isValidAddress(manager.getXpub())) {
+                Pair(manager.getXpub(), -1)
+            } else manager.getAddress()
+
+            if (addressIndexPair == null) {
+                Toast.makeText(this, R.string.failed_to_derive_zcash_address, Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val (address, index) = addressIndexPair
+            val numericPrice = price.filter { it.isDigit() || it == '.' }
+
+            postConversionApi(numericPrice, selectedCurrencyCode, address, "ZEC", R.drawable.zcash_logo) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(
+                        address,
+                        formattedRate,
+                        R.drawable.zcash_logo,
+                        "ZEC",
+                        index,
+                        feeStatus,
+                        status,
+                        "Zcash",
+                        numericPrice,
+                        selectedCurrencyCode,
+                        "ZEC"
+                    )
+                }
+            }
+        } ?: run {
+            dismissLoadingDialog()
+            Toast.makeText(this, R.string.zcash_manager_not_initialized, Toast.LENGTH_SHORT).show()
         }
     }
 

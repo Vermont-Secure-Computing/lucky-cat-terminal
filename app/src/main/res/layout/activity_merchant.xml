@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FFFFFF"
+    android:background="@color/screenBackground"
     tools:context=".MerchantActivity">
 
-    <!-- Header View -->
+    <!-- Header -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -59,12 +59,11 @@
                 android:layout_height="wrap_content"
                 android:text="@string/submit"
                 android:textSize="18sp"
-                android:textColor="#ffffff"
+                android:textColor="@android:color/white"
                 android:clickable="true"
                 android:focusable="true"
                 android:paddingStart="16dp" />
         </FrameLayout>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Content -->
@@ -77,8 +76,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"> <!-- Added padding -->
+            android:padding="16dp">
 
+            <!-- Set PIN -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -98,12 +98,13 @@
                     android:paddingEnd="16dp" />
             </LinearLayout>
 
+            <!-- Currency Spinner -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/choose_currency"
                 android:textSize="16sp"
-                android:textColor="#000"
+                android:textColor="@color/textPrimary"
                 android:paddingBottom="4dp"/>
 
             <Spinner
@@ -112,15 +113,18 @@
                 android:layout_height="wrap_content"
                 android:padding="12dp"
                 android:background="@drawable/spinner_background_set"
-                android:spinnerMode="dropdown"/>
+                android:spinnerMode="dropdown"
+                android:backgroundTint="@null"
+                android:popupBackground="@color/tapeRed"
+                android:popupTheme="@style/NoOverlayPopupTheme" />
 
-
+            <!-- Input Fields -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/business_name"
                 android:textSize="16sp"
-                android:textColor="#000"
+                android:textColor="@color/textPrimary"
                 android:paddingBottom="4dp"/>
             <EditText
                 android:id="@+id/edittext_business_name"
@@ -128,17 +132,19 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_your_business_name"
                 android:padding="8dp"
-                android:backgroundTint="@color/customGray"
+                android:textColor="@color/textPrimary"
+                android:textColorHint="@color/textSecondary"
                 android:inputType="text"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
+                android:background="@drawable/rounded_edittext"/>
 
+            <!-- Repeat for each input -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/address"
                 android:textSize="16sp"
-                android:textColor="#000"
+                android:textColor="@color/textPrimary"
                 android:paddingTop="8dp"
                 android:paddingBottom="4dp"/>
             <EditText
@@ -147,7 +153,8 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_your_address_optional"
                 android:padding="8dp"
-                android:backgroundTint="@color/customGray"
+                android:textColor="@color/textPrimary"
+                android:textColorHint="@color/textSecondary"
                 android:inputType="text"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/rounded_edittext"/>
@@ -166,10 +173,11 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_your_city_optional"
                 android:padding="8dp"
-                android:backgroundTint="@color/customGray"
+                android:textColor="@color/textPrimary"
+                android:textColorHint="@color/textSecondary"
                 android:inputType="text"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
+                android:background="@drawable/rounded_edittext" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -185,7 +193,8 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_your_state_optional"
                 android:padding="8dp"
-                android:backgroundTint="@color/customGray"
+                android:textColor="@color/textPrimary"
+                android:textColorHint="@color/textSecondary"
                 android:inputType="text"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
@@ -204,8 +213,9 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_your_zip_code_optional"
                 android:padding="8dp"
-                android:backgroundTint="@color/customGray"
-                android:inputType="textPostalAddress"
+                android:textColor="@color/textPrimary"
+                android:textColorHint="@color/textSecondary"
+                android:inputType="text"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
 
@@ -223,7 +233,8 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_your_country_optional"
                 android:padding="8dp"
-                android:backgroundTint="@color/customGray"
+                android:textColor="@color/textPrimary"
+                android:textColorHint="@color/textSecondary"
                 android:inputType="text"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
@@ -242,7 +253,8 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_your_phone_number_optional"
                 android:padding="8dp"
-                android:backgroundTint="@color/customGray"
+                android:textColor="@color/textPrimary"
+                android:textColorHint="@color/textSecondary"
                 android:inputType="phone"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->
@@ -261,7 +273,8 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_your_email_optional"
                 android:padding="8dp"
-                android:backgroundTint="@color/customGray"
+                android:textColor="@color/textPrimary"
+                android:textColorHint="@color/textSecondary"
                 android:inputType="textEmailAddress"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/rounded_edittext"/> <!-- Rounded background -->

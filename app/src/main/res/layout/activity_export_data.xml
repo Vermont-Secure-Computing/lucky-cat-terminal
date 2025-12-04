@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/customGray">
+    android:background="@color/screenBackground">
 
     <!-- Header -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -26,12 +26,11 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/ic_back_arrow"
-            android:contentDescription="Back"
+            android:clickable="true"
+            android:focusable="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:clickable="true"
-            android:focusable="true" />
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <ImageView
             android:id="@+id/logo_image"
@@ -44,46 +43,47 @@
             app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Date Selectors and Submit Button -->
+    <!-- Date Selectors -->
     <EditText
         android:id="@+id/fromDateEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="24dp"
         android:hint="@string/select_from_date"
         android:focusable="false"
         android:clickable="true"
-        android:background="@drawable/edittext_background"
         android:padding="16dp"
+        android:textColor="@color/textPrimary"
+        android:textColorHint="@color/textSecondary"
+        android:background="@drawable/rounded_edittext"
         android:drawableEnd="@drawable/ic_calendar" />
 
     <EditText
         android:id="@+id/toDateEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
         android:hint="@string/select_to_date"
         android:focusable="false"
         android:clickable="true"
-        android:background="@drawable/edittext_background"
         android:padding="16dp"
-        android:drawableEnd="@drawable/ic_calendar"
-        android:layout_marginTop="16dp" />
+        android:textColor="@color/textPrimary"
+        android:textColorHint="@color/textSecondary"
+        android:background="@drawable/rounded_edittext"
+        android:drawableEnd="@drawable/ic_calendar" />
 
+    <!-- Submit Button -->
     <Button
         android:id="@+id/submitButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:text="@string/export_csv"
+        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="24dp"
+        android:text="@string/export_csv"
         android:textColor="@android:color/white"
         android:backgroundTint="@color/darkerRed"
         android:padding="16dp"
         android:textSize="16sp" />
-
 </LinearLayout>

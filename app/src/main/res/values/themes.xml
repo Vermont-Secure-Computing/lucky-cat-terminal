@@ -1,25 +1,43 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme -->
+
+    <!-- ✅ Base DayNight theme -->
     <style name="Base.Theme.Possin" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your app's main theme here -->
-        <!-- Add any additional theme configurations -->
+        <!-- Primary brand colors -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryContainer">@color/customGray</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/tapeRed</item>
+        <item name="colorSecondaryContainer">@color/grey</item>
+
+        <!-- System UI colors -->
+        <item name="android:statusBarColor">@color/darkerRed</item>
+        <item name="android:navigationBarColor">@color/customGray</item>
+        <item name="android:windowBackground">@color/screenBackground</item>
+
+        <!-- Text colors -->
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:textColorHint">@color/textSecondary</item>
+        <item name="android:textColorPrimary">@color/textPrimary</item>
+        <item name="android:textColorSecondary">@color/textSecondary</item>
+
     </style>
 
-    <!-- Combined splash screen theme with Material3 -->
+    <!-- ✅ Splash screen -->
     <style name="Theme.Possin.Splash" parent="Theme.SplashScreen">
-        <!-- Splash screen background color -->
         <item name="windowSplashScreenBackground">@color/tapeRed</item>
-        <!-- Animated icon or logo for splash screen -->
         <item name="windowSplashScreenAnimatedIcon">@drawable/for_splash</item>
-        <!-- Background color behind the icon -->
         <item name="windowSplashScreenIconBackgroundColor">@color/tapeRed</item>
-        <!-- Animation duration for the splash screen exit -->
         <item name="windowSplashScreenAnimationDuration">300</item>
-
-        <!-- Ensures that after the splash screen, the main theme is applied -->
         <item name="postSplashScreenTheme">@style/Theme.Possin</item>
     </style>
 
-    <!-- Main app theme -->
+    <!-- Transparent popup (spinner/autocomplete dropdown) -->
+    <style name="NoOverlayPopupTheme" parent="ThemeOverlay.Material3">
+        <item name="colorSurface">@color/inputFieldBackground</item>
+        <item name="colorOnSurface">@color/textPrimary</item>
+    </style>
+
+    <!-- Theme alias -->
     <style name="Theme.Possin" parent="Base.Theme.Possin" />
+
 </resources>

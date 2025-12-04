@@ -1,3 +1,20 @@
+/*
+ * Copyright 2024–2025 Vermont Secure Computing and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *
+http://www.apache.org/licenses/LICENSE-2.0
+
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.vermont.possin
 
 import android.Manifest
@@ -10,7 +27,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
-import android.media.MediaPlayer
+import android.media.SoundPool
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -50,8 +67,7 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import org.json.JSONObject
-import pl.droidsonroids.gif.GifDrawable
-import pl.droidsonroids.gif.GifImageView
+import com.vermont.possin.gif.GifHandler
 import java.io.File
 import java.io.IOException
 import java.math.BigDecimal
@@ -61,6 +77,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.Properties
+
+
 
 class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.PaymentStatusCallback {
 
@@ -476,8 +494,12 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         websocketParams = WebSocketParams(address, amount, chain, addressIndex, managerType, txid = null)
 //        connectWebSocket("checkBalance")
         checkingTransactionsLayout.visibility = View.VISIBLE
-        val gifDrawable = GifDrawable(resources, R.raw.rotating_arc_gradient_thick)
-        checkingTransactionsGif.setImageDrawable(gifDrawable)
+        // Flavor-safe GIF loader
+        GifHandler.loadGif(
+            imageView = checkingTransactionsGif,
+            resId = R.raw.rotating_arc_gradient_thick
+        )
+
     }
 
     private fun connectWebSocket(type: String) {
@@ -770,6 +792,17 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 for (i in 0 until confirmations.coerceAtMost(6)) {
                     confirmationBlocks[i].setBackgroundColor(Color.GREEN)
                 }
+
+                val alwaysBlack = ContextCompat.getColor(this, R.color.black)
+
+                merchantAddress.setTextColor(alwaysBlack)
+                merchantName.setTextColor(alwaysBlack)
+                balanceTextView.setTextColor(alwaysBlack)
+                baseCurrencyTextView.setTextColor(alwaysBlack)
+                basePriceTextView.setTextColor(alwaysBlack)
+                txidTextView.setTextColor(alwaysBlack)
+                feesTextView.setTextColor(alwaysBlack)
+                confirmationsTextView.setTextColor(alwaysBlack)
 
                 if (status == "paid") {
                     saveLastIndex(addressIndex, managerType)
@@ -1312,35 +1345,33 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
             }
 
         paymentDialog = dialog
+        val gifImageView = dialogView.findViewById<ImageView>(R.id.gifImageView)
 
-        val gifImageView = dialogView.findViewById<GifImageView>(R.id.gifImageView)
-        val gifDrawable = GifDrawable(resources, R.raw.green_check_circle_animation_300x300)
-        gifImageView.setImageDrawable(gifDrawable)
+        dialog.show()
 
-        val mediaPlayer = MediaPlayer.create(this, R.raw.coins_received)
+        // Play the "payment received" sound
+        val soundPool = SoundPool.Builder()
+            .setMaxStreams(1)
+            .build()
+        val soundId = soundPool.load(this, R.raw.coins_received, 1)
+        soundPool.setOnLoadCompleteListener { _, _, _ ->
+            soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
+        }
+
         dialog.setOnDismissListener {
-            runCatching { mediaPlayer.release() }
+            soundPool.release()
             paymentDialog = null
         }
 
-        val animMs = (gifDrawable.duration.takeIf { it > 0 } ?: 1200)
-
-        dialog.setOnShowListener {
-            runCatching { mediaPlayer.start() }
-            gifImageView.postDelayed({
-                if (!isFinishing && !isDestroyed && dialog.isShowing) {
-                    gifImageView.setImageResource(R.drawable.green_check_circle_animation_300x300)
-                    gifImageView.postDelayed({
-                        if (!isFinishing && !isDestroyed && dialog.isShowing) {
-                            dialog.dismiss()
-                        }
-                    }, 1000L)
-                }
-            }, animMs.toLong())
+        GifHandler.loadGif(
+            gifImageView,
+            R.drawable.green_check_final // FDroid → PNG / Full → GIF
+        ) {
+            dialog.dismiss()
         }
 
-        dialog.show()
     }
+
 
     private fun printReceipt(
         receivedAmt: Double,

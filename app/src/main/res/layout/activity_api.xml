@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="@color/screenBackground">
 
-    <!-- Header with Drop Shadow -->
+    <!-- Header -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
@@ -28,12 +29,11 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/ic_back_arrow"
-            android:contentDescription="Back"
+            android:clickable="true"
+            android:focusable="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:clickable="true"
-            android:focusable="true" />
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <ImageView
             android:id="@+id/logo_image"
@@ -54,7 +54,7 @@
         android:text="@string/please_confirm_your_API_key"
         android:textSize="16sp"
         android:textAlignment="center"
-        android:textColor="#8B0000"
+        android:textColor="@color/tapeRed"
         app:layout_constraintTop_toBottomOf="@id/header"
         android:layout_marginTop="32dp"
         android:paddingStart="16dp"
@@ -67,7 +67,7 @@
         android:orientation="vertical"
         android:padding="16dp"
         app:layout_constraintTop_toBottomOf="@id/please_confirm"
-        app:layout_constraintBottom_toTopOf="@+id/poweredBySection"> <!-- Ensure content is above the Powered By section -->
+        app:layout_constraintBottom_toTopOf="@+id/poweredBySection">
 
         <EditText
             android:id="@+id/api_key_input"
@@ -75,12 +75,12 @@
             android:layout_height="wrap_content"
             android:hint="@string/enter_API_key"
             android:padding="8dp"
-            android:backgroundTint="@color/customGray"
+            android:textColor="@color/textPrimary"
+            android:textColorHint="@color/textSecondary"
+            android:background="@drawable/rounded_edittext"
             android:inputType="text"
-            android:layout_marginBottom="24dp"
-            android:background="@drawable/rounded_edittext"/>
+            android:layout_marginBottom="24dp" />
 
-        <!-- Submit Button -->
         <Button
             android:id="@+id/submit_button"
             android:layout_width="wrap_content"
@@ -89,71 +89,75 @@
             android:layout_gravity="center_horizontal"
             android:padding="12dp"
             android:backgroundTint="@color/darkerRed"
-            android:textColor="#FFFFFF" />
+            android:textColor="@android:color/white" />
 
+        <!-- API Details -->
         <LinearLayout
             android:id="@+id/api_details_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"
-            app:layout_constraintTop_toBottomOf="@id/submit_button">
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/apiKeyTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/api_key_colon"
-                android:textSize="16sp" />
-
+                android:textSize="16sp"
+                android:textColor="@color/textPrimary" />
 
             <TextView
                 android:id="@+id/subscriptionLevelTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/subscription_level"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textColor="@color/textPrimary" />
 
             <TextView
                 android:id="@+id/activeStatusTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/active_colon"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textColor="@color/textPrimary" />
 
             <TextView
                 android:id="@+id/expiresAtTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/expires_at"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textColor="@color/textPrimary" />
 
             <TextView
                 android:id="@+id/hourlyCallsTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/hourly_calls"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textColor="@color/textPrimary" />
 
             <TextView
                 android:id="@+id/dailyCallsTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/daily_calls"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textColor="@color/textPrimary" />
 
             <TextView
                 android:id="@+id/priceTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/price"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textColor="@color/textPrimary" />
         </LinearLayout>
     </LinearLayout>
 
-
-
-    <!-- Powered By Section at the Bottom -->
+    <!-- Powered By Section -->
     <LinearLayout
         android:id="@+id/poweredBySection"
         android:layout_width="wrap_content"
@@ -163,7 +167,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginBottom="16dp"> <!-- Margin for spacing at the bottom -->
+        android:layout_marginBottom="16dp">
 
         <TextView
             android:id="@+id/poweredByText"
@@ -172,7 +176,7 @@
             android:text="@string/powered_by"
             android:textStyle="italic"
             android:textSize="14sp"
-            android:textColor="@color/dark_gray"
+            android:textColor="@color/textSecondary"
             android:layout_marginEnd="8dp" />
 
         <ImageView
@@ -180,7 +184,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/vermont"
-            android:contentDescription="Vermont Image" />
+            android:contentDescription="@string/powered_by" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
