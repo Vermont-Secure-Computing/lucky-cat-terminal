@@ -29,21 +29,17 @@ android {
         create("fdroid") { dimension = "dist" }
     }
 
-//    // ---------- SOURCE SETS ----------
-//    sourceSets {
-//        getByName("main") {
-//            java.srcDir("app/src/main/java")
-//            res.srcDir("app/src/main/res")
-//        }
-//        getByName("full") {
-//            java.srcDir("app/src/full/java")
-//            res.srcDir("app/src/full/res")
-//        }
-//        getByName("fdroid") {
-//            java.srcDir("app/src/fdroid/java")
-//            res.srcDir("app/src/fdroid/res")
-//        }
-//    }
+    signingConfigs {
+        create("release") {
+            val storeFilePath = project.findProperty("RELEASE_STORE_FILE")?.toString()
+            if (storeFilePath != null) {
+                storeFile = file(storeFilePath)
+                storePassword = project.findProperty("RELEASE_STORE_PASSWORD")?.toString()
+                keyAlias = project.findProperty("RELEASE_KEY_ALIAS")?.toString()
+                keyPassword = project.findProperty("RELEASE_KEY_PASSWORD")?.toString()
+            }
+        }
+    }
 
 
     // ---------- CONFIGURE FLAVOR-SPECIFIC DEPENDENCIES ----------
@@ -60,23 +56,12 @@ android {
     }
 
 
-    configurations.configureEach {
-        when (name) {
-            "fullDebugImplementation",
-            "fullReleaseImplementation" ->
-                extendsFrom(configurations.getByName("fullImplementation"))
-
-            "fdroidDebugImplementation",
-            "fdroidReleaseImplementation" ->
-                extendsFrom(configurations.getByName("fdroidImplementation"))
-        }
-    }
-
     // ---------- BUILD TYPES ----------
     buildTypes {
         release {
             isDebuggable = false
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -142,6 +127,7 @@ dependencies {
 
     // Printer
     implementation(libs.thermalPrinter)
+    add("fdroidImplementation", libs.thermalPrinter)
 
     // ---------- GIF (FLAVOR-SPECIFIC) ----------
     add("fullImplementation", libs.android.gif.drawable)

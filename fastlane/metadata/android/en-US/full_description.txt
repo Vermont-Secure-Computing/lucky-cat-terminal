@@ -1,0 +1,9 @@
+LCTerm is a free and open-source Android Point-of-Sale application
+designed for merchants who accept cryptocurrency payments.
+
+It supports multiple assets, QR code generation, and real-time
+transaction monitoring. LCTerm runs offline after initial setup and
+protects merchant privacy by avoiding third-party analytics.
+
+This project is developed by Vermont Secure Computing and is fully open
+source for transparency and community trust.
