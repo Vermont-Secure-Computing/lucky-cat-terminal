@@ -1,9 +1,11 @@
 LCTerm is a free and open-source Android Point-of-Sale application
-designed for merchants to accept and verify cryptocurrency payments.
+designed for merchants to accept and verify cryptocurrency payments.  
+It runs on all android devices but was designed for android point-of-sale 
+devices with a thermal receipt printer.  
 
 It supports multiple assets, QR code generation, conversion at current market
-values, and receipt printing, to enable point of sale transactions.  LCTerm is 
-not a wallet and holds no funds, rather it verifies the customer payments are 
+values, local currencies, and receipt printing, to enable point of sale transactions.  
+LCTerm is not a wallet and holds no funds, rather it verifies the customer payments are 
 made to addresses specified by business owners.  
 
 To use LCTerm a merchant must have an API key available at Vericeive.com.  
