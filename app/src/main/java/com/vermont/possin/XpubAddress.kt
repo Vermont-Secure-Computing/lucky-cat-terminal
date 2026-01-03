@@ -178,7 +178,7 @@ class XpubAddress : AppCompatActivity() {
             chainTextView.text = crypto.chain
 
             // Set up type spinner
-            val typeAdapter: ArrayAdapter<CharSequence> = if (crypto.name == "Monero" || crypto.name == "Ethereum" || crypto.name == "Tether" || crypto.name == "Solana") {
+            val typeAdapter: ArrayAdapter<CharSequence> = if (crypto.name == "Monero" || crypto.name == "Ethereum" || crypto.name == "Tether" || crypto.name == "Solana" || crypto.name == "Nano") {
                 // For Monero, only show "address" option
                 ArrayAdapter.createFromResource(this, R.array.monero_type_array, android.R.layout.simple_spinner_item)
             } else {
@@ -376,6 +376,19 @@ class XpubAddress : AppCompatActivity() {
                         properties.setProperty("${cryptoName}_type", inputType)
                         properties.setProperty("${cryptoName}_value", finalValue)
                     }
+                } else {
+                    properties.remove("${cryptoName}_type")
+                    properties.remove("${cryptoName}_value")
+                }
+            } else if (cryptoName == "Nano") {
+                if (value.isNotEmpty()) {
+                    if (!NanoManager.isValidAddress(value)) {
+                        Log.e("Nano", "Attempted to save invalid Nano address: $value")
+                        return
+                    }
+
+                    properties.setProperty("${cryptoName}_type", "address")
+                    properties.setProperty("${cryptoName}_value", value)
                 } else {
                     properties.remove("${cryptoName}_type")
                     properties.remove("${cryptoName}_value")
@@ -585,6 +598,9 @@ class XpubAddress : AppCompatActivity() {
             }
             "Solana" -> {
                 isValid = if (inputType == "xpub") SolanaManager.isValidXpub(value) else SolanaManager.isValidAddress(value)
+            }
+            "Nano" -> {
+                isValid = NanoManager.isValidAddress(value)
             }
             else -> isValid = false
         }
