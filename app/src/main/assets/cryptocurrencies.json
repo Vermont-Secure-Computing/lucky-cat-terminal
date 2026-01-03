@@ -59,6 +59,12 @@
       "shortname": "ZEC",
       "chain": "Zcash",
       "logo": "zcash_logo"
+    },
+    {
+      "name": "Nano",
+      "shortname": "XNO",
+      "chain": "Nano",
+      "logo": "nano"
     }
   ]
 }

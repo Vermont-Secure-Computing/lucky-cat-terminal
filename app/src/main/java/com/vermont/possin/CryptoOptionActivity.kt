@@ -63,6 +63,7 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
     private var bitcoincashManager: BitcoinCashManager? = null
     private var moneroManager: MoneroManager? = null
     private var solanaManager: SolanaManager? = null
+    private var nanoManager: NanoManager? = null
     private lateinit var selectedCurrencyCode: String
     private lateinit var message: String
     private var loadingDialog: AlertDialog? = null
@@ -137,6 +138,20 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
             moneroManager = MoneroManager(this, privateViewKey, moneroAddress)
         } else {
             Log.e("Monero","Monero keys or address not found in config file.")
+        }
+
+        val nanoAddressesRaw = properties.getProperty("Nano_value")
+        if (!nanoAddressesRaw.isNullOrBlank()) {
+            val nanoAddresses = nanoAddressesRaw
+                .split(",")
+                .map { it.trim() }
+                .filter { NanoManager.isValidAddress(it) }
+
+            if (nanoAddresses.isNotEmpty()) {
+                nanoManager = NanoManager(this, nanoAddresses)
+            } else {
+                Log.e("Nano", "No valid Nano addresses found")
+            }
         }
 
         selectedCurrencyCode = intent.getStringExtra("CURRENCY_CODE") ?: "BTC"
@@ -366,6 +381,7 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
             "XMR" -> handleMoneroClick(price)
             "SOL" -> handleSolanaClick(price)
             "USDC" -> handleUSDCClick(price)
+            "XNO" -> handleNanoClick(price)
         }
     }
 
@@ -601,6 +617,41 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
         } ?: run {
             dismissLoadingDialog()
             Toast.makeText(this, R.string.solana_manager_not_initialized, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun handleNanoClick(price: String) {
+        nanoManager?.let { manager ->
+            val (address, index) = manager.getAddress()
+            val numericPrice = price.filter { it.isDigit() || it == '.' }
+
+            postConversionApi(
+                numericPrice,
+                selectedCurrencyCode,
+                address,
+                "NANO",
+                R.drawable.nano
+            ) { feeStatus, status, formattedRate ->
+                dismissLoadingDialog()
+                if (formattedRate.isNotEmpty()) {
+                    startGenerateQRActivity(
+                        address,
+                        formattedRate,
+                        R.drawable.nano,
+                        "XNO",
+                        index,
+                        feeStatus,
+                        status,
+                        "Nano",
+                        numericPrice,
+                        selectedCurrencyCode,
+                        "XNO"
+                    )
+                }
+            }
+        } ?: run {
+            dismissLoadingDialog()
+            Toast.makeText(this, "Nano not configured", Toast.LENGTH_SHORT).show()
         }
     }
 

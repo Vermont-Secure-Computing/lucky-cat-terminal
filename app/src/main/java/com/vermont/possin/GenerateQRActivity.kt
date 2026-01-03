@@ -93,6 +93,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         "DASH" -> "DASH"
         "ETH", "ETHEREUM" -> "ETH"
         "XMR", "MONERO" -> "XMR"
+        "XNO", "NANO" -> "NANO"
         else -> ticker.uppercase()
     }
     private fun normalizeChain(chain: String): String = when (chain.uppercase()) {
@@ -104,6 +105,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         "DOGECOIN" -> "DOGE"
         "ETHEREUM" -> "ETH"
         "MONERO" -> "XMR"
+        "XNO", "NANO" -> "NANO"
         else -> chain.uppercase()
     }
     private fun inferManagerType(networkChain: String): String = when (networkChain) {
@@ -116,11 +118,12 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         "DOGE" -> "Dogecoin"
         "DASH" -> "Dash"
         "XMR" -> "Monero"
+        "NANO" -> "Nano"
         else -> "Bitcoin"
     }
     private fun useSixDecimals(ticker: String, networkChain: String): Boolean {
         val norm = normalizeChain(networkChain)
-        return ticker.equals("USDC", true) || norm.equals("TRON", true)
+        return ticker.equals("USDC", true) || norm.equals("TRON", true ) || norm.equals("NANO", true)
     }
 
     private fun buildPaymentUri(ticker: String, address: String, amountStr: String): String {
@@ -135,6 +138,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
             "XMR", "MONERO" -> "monero:$address?amount=$amountStr"
             "SOL", "SOLANA" -> "solana:$address?amount=$amountStr"
             "USDC" -> "solana:$address?amount=$amountStr&spl-token=$USDC_SOL_MINT"
+            "XNO", "NANO" -> "nano:$address?amount=$amountStr"
             else -> "bitcoin:$address?amount=$amountStr"
         }
     }
@@ -243,6 +247,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         val logoResId = when (currency) {
             "USDC" -> R.drawable.usdc
             "SOL" -> R.drawable.solana
+            "XNO", "NANO" -> R.drawable.nano
             else -> intent.getIntExtra("LOGO_RES_ID", R.drawable.bitcoin_logo)
         }
         val addressIndex = intent.getIntExtra("ADDRESS_INDEX", -1)
@@ -429,9 +434,12 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
 
     private fun chainForSocket(input: String): String {
         val norm = normalizeChain(input)
-        return if (norm == "TRON") "TRON-NETWORK" else norm
+        return when (norm) {
+            "TRON" -> "TRON-NETWORK"
+            "NANO" -> "NANO"
+            else -> norm
+        }
     }
-
 
     private fun showRetryDialog() {
         val dialogView = layoutInflater.inflate(R.layout.retry_dialog, null)
@@ -946,6 +954,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         "Monero" -> MoneroManager.PREFS_NAME
         "Solana" -> SolanaManager.PREFS_NAME
         "USDC" -> SolanaManager.PREFS_NAME
+        "Nano" -> NanoManager.PREFS_NAME
         else -> BitcoinManager.PREFS_NAME
     }
 
@@ -960,6 +969,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         "Monero" -> MoneroManager.LAST_INDEX_KEY
         "Solana" -> SolanaManager.LAST_INDEX_KEY
         "USDC" -> SolanaManager.LAST_INDEX_KEY
+        "Nano" -> NanoManager.LAST_INDEX_KEY
         else -> BitcoinManager.LAST_INDEX_KEY
     }
 
@@ -1021,7 +1031,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 }
 
                 val responseData = response.body?.string()
-                responseData?.let {
+                responseData?.let { it ->
                     val jsonObject = JSONObject(it)
                     Log.d("JSON CONFIRMATION", jsonObject.toString())
                     val confirmations = jsonObject.optInt("confirmations", 0)
@@ -1031,7 +1041,10 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                         confirmationsTextView.visibility = View.VISIBLE
                         confirmationBlocks.forEach { block -> block.setBackgroundColor(Color.LTGRAY) }
 
-                        if (norm == "SOL" && confirmations >= 1) {
+                        if (norm == "NANO") {
+                            confirmationsTextView.text = "Finalized (Instant)"
+                            confirmationBlocks.forEach { it.setBackgroundColor(Color.GREEN) }
+                        } else if (norm == "SOL" && confirmations >= 1) {
                             confirmationsTextView.text = "Finalized (MAX confirmations)"
                             confirmationBlocks.forEach { it.setBackgroundColor(Color.GREEN) }
                         } else {
@@ -1044,7 +1057,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                         val terminal = when (norm) {
                             "SOL" -> confirmations >= 1
                             "BTC","BCH","LTC","DOGE","DASH" -> confirmations >= 6
-                            "ETH","TRON","XMR" -> confirmations >= 1
+                            "ETH","TRON","XMR", "NANO" -> confirmations >= 1
                             else -> confirmations >= 1
                         }
                         if (terminal) {
@@ -1055,6 +1068,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                             checkingTransactionsLayout.visibility = View.GONE
                             handler.removeCallbacksAndMessages(null)
                         }
+
                     }
 
                     lifecycleScope.launch(Dispatchers.IO) {
