@@ -205,6 +205,8 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
     // Dialog refs to avoid leaks
     private var paymentDialog: AlertDialog? = null
     private var postPaymentDialog: AlertDialog? = null
+    private var confirmationRunnable: Runnable? = null
+    private var confirmingTextRunnable: Runnable? = null
 
     private lateinit var websocketParams: WebSocketParams
     data class WebSocketParams(
@@ -500,7 +502,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
     private fun initializeWebSocket(address: String, amount: String, chain: String, addressIndex: Int, managerType: String) {
         if (paymentReceived) return
         websocketParams = WebSocketParams(address, amount, chain, addressIndex, managerType, txid = null)
-//        connectWebSocket("checkBalance")
+        connectWebSocket("checkBalance")
         checkingTransactionsLayout.visibility = View.VISIBLE
         // Flavor-safe GIF loader
         GifHandler.loadGif(
@@ -779,25 +781,30 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 checkingTransactionsText.textSize = 18f
 
                 // 3-dot animation for "Confirming..."
-                handler.removeCallbacksAndMessages(null)
                 val dots = listOf("", ".", "..", "...")
                 var dotIndex = 0
-                handler.post(object : Runnable {
+
+                confirmingTextRunnable?.let { handler.removeCallbacks(it) }
+
+                confirmingTextRunnable = object : Runnable {
                     override fun run() {
                         checkingTransactionsText.text =
                             getString(R.string.confirming_transaction) + dots[dotIndex]
                         dotIndex = (dotIndex + 1) % dots.size
                         handler.postDelayed(this, 500)
                     }
-                })
+                }
 
+                handler.post(confirmingTextRunnable!!)
                 checkingTransactionsGif.visibility = View.GONE
 
                 confirmationsLayout.visibility = View.VISIBLE
                 confirmationsTextView.visibility = View.VISIBLE
+                val displayConfirmations =
+                    if (this.chain == "NANO") 6 else confirmations
+                confirmationsTextView.text = getString(R.string.confirmations, displayConfirmations)
                 confirmationBlocks.forEach { it.setBackgroundColor(Color.LTGRAY) }
-                confirmationsTextView.text = getString(R.string.confirmations, confirmations)
-                for (i in 0 until confirmations.coerceAtMost(6)) {
+                for (i in 0 until displayConfirmations.coerceAtMost(6)) {
                     confirmationBlocks[i].setBackgroundColor(Color.GREEN)
                 }
 
@@ -980,12 +987,14 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
             60 * 1000L
         }
 
-        handler.post(object : Runnable {
+        confirmationRunnable = object : Runnable {
             override fun run() {
                 getConfirmations(chain, txid)
                 handler.postDelayed(this, delay)
             }
-        })
+        }
+
+        handler.post(confirmationRunnable!!)
     }
 
     private fun getConfirmations(chain: String, txid: String) {
@@ -1034,7 +1043,8 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 responseData?.let { it ->
                     val jsonObject = JSONObject(it)
                     Log.d("JSON CONFIRMATION", jsonObject.toString())
-                    val confirmations = jsonObject.optInt("confirmations", 0)
+                    val confirmations = if (norm == "NANO") 6
+                    else jsonObject.optInt("confirmations", 0)
 
                     runOnUiThread {
                         confirmationsLayout.visibility = View.VISIBLE
@@ -1055,9 +1065,10 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                         }
 
                         val terminal = when (norm) {
+                            "NANO" -> true
                             "SOL" -> confirmations >= 1
                             "BTC","BCH","LTC","DOGE","DASH" -> confirmations >= 6
-                            "ETH","TRON","XMR", "NANO" -> confirmations >= 1
+                            "ETH","TRON","XMR" -> confirmations >= 1
                             else -> confirmations >= 1
                         }
                         if (terminal) {
@@ -1066,7 +1077,8 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                             wakeLock = null
                             stopPollingAndMaybePromptToPrint()
                             checkingTransactionsLayout.visibility = View.GONE
-                            handler.removeCallbacksAndMessages(null)
+                            confirmationRunnable?.let { handler.removeCallbacks(it) }
+                            confirmingTextRunnable?.let { handler.removeCallbacks(it) }
                         }
 
                     }
@@ -1121,8 +1133,13 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         val currentBalance = balance ?: balanceTextView.text.toString().replace("Balance: ", "").toDouble()
         val currentTxid = txid ?: txidTextView.text.toString().replace("Transaction ID: ", "")
         val currentFees = fees ?: feesTextView.text.toString().replace("Fees: ", "").toDouble()
-        val confirmationsString = confirmationsTextView.text.toString()
-        val currentConfirmations = confirmationsString.replace(Regex("[^0-9]"), "").toInt()
+        val currentConfirmations = when (chain) {
+            "NANO" -> 1
+            else -> confirmationsTextView.text
+                .toString()
+                .replace(Regex("[^0-9]"), "")
+                .toIntOrNull() ?: 0
+        }
         val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
         Log.d("COIN", coin)
