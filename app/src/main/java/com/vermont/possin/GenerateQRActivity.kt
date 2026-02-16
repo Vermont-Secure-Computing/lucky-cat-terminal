@@ -489,15 +489,23 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
     }
 
     private fun overlayBitmap(qrCodeBitmap: Bitmap, logo: Bitmap, overlaySize: Int): Bitmap {
-        val combined = Bitmap.createBitmap(qrCodeBitmap.width, qrCodeBitmap.height, qrCodeBitmap.config)
+        val combined = Bitmap.createBitmap(
+            qrCodeBitmap.width,
+            qrCodeBitmap.height,
+            qrCodeBitmap.config ?: Bitmap.Config.ARGB_8888
+        )
+
         val canvas = Canvas(combined)
         canvas.drawBitmap(qrCodeBitmap, 0f, 0f, null)
+
         val left = (qrCodeBitmap.width - overlaySize) / 2
         val top = (qrCodeBitmap.height - overlaySize) / 2
         val rect = Rect(left, top, left + overlaySize, top + overlaySize)
+
         canvas.drawBitmap(logo, null, rect, null)
         return combined
     }
+
 
     private fun initializeWebSocket(address: String, amount: String, chain: String, addressIndex: Int, managerType: String) {
         if (paymentReceived) return
