@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.vermont.possin"
-    compileSdk = 34
+    compileSdk = 35
 
     buildFeatures {
         buildConfig = true
@@ -16,8 +16,8 @@ android {
     defaultConfig {
         applicationId = "com.vermont.possin"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
+        targetSdk = 35
+        versionCode = 2
         versionName = "1.4"
     }
 
