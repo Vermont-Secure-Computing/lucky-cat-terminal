@@ -46,6 +46,22 @@
             app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <TextView
+        android:id="@+id/api_key_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Don’t have an API key yet? Get one at vericeive.com"
+        android:textSize="14sp"
+        android:textColor="@color/textSecondary"
+        android:textAlignment="center"
+        android:autoLink="web"
+        android:linksClickable="true"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <!-- Confirmation Text -->
     <TextView
         android:id="@+id/please_confirm"
@@ -55,7 +71,7 @@
         android:textSize="16sp"
         android:textAlignment="center"
         android:textColor="@color/tapeRed"
-        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintTop_toBottomOf="@id/api_key_info"
         android:layout_marginTop="32dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp" />
