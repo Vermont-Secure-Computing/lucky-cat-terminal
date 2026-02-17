@@ -17,8 +17,10 @@ android {
         applicationId = "com.vermont.possin"
         minSdk = 24
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.4"
+
+        // UPDATED VERSION
+        versionCode = 3
+        versionName = "1.4.1"
     }
 
     // ---------- FLAVORS ----------
@@ -41,7 +43,6 @@ android {
         }
     }
 
-
     // ---------- CONFIGURE FLAVOR-SPECIFIC DEPENDENCIES ----------
     configurations.configureEach {
         when (name) {
@@ -55,7 +56,6 @@ android {
         }
     }
 
-
     // ---------- BUILD TYPES ----------
     buildTypes {
         release {
@@ -66,9 +66,7 @@ android {
     }
 
     dependenciesInfo {
-        // Disables dependency metadata when building APKs.
         includeInApk = false
-        // Disables dependency metadata when building Android App Bundles.
         includeInBundle = false
     }
 
@@ -140,7 +138,6 @@ dependencies {
     add("fullImplementation", libs.android.gif.drawable)
     add("fdroidImplementation", "io.coil-kt:coil:2.6.0")
     add("fdroidImplementation", "io.coil-kt:coil-gif:2.6.0")
-
 
     // Tests
     testImplementation(libs.junit)
