@@ -20,7 +20,7 @@ android {
 
         // UPDATED VERSION
         versionCode = 3
-        versionName = "1.4.1"
+        versionName = "1.4.2"
     }
 
     // ---------- FLAVORS ----------
