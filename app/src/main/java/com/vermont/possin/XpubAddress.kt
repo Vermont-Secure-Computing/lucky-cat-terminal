@@ -178,7 +178,17 @@ class XpubAddress : AppCompatActivity() {
             chainTextView.text = crypto.chain
 
             // Set up type spinner
-            val typeAdapter: ArrayAdapter<CharSequence> = if (crypto.name == "Monero" || crypto.name == "Ethereum" || crypto.name == "Tether" || crypto.name == "Solana" || crypto.name == "Nano") {
+            val typeAdapter: ArrayAdapter<CharSequence> = if (
+                crypto.name == "Monero" ||
+                crypto.name == "Ethereum" ||
+                crypto.name == "Tether" ||
+                crypto.name == "Tether (Ethereum)" ||
+                crypto.name == "USD Coin (Ethereum)" ||
+                crypto.name == "DAI (Ethereum)" ||
+                crypto.name == "Solana" ||
+                crypto.name == "Nano" ||
+                crypto.name == "Lightning"
+            ) {
                 // For Monero, only show "address" option
                 ArrayAdapter.createFromResource(this, R.array.monero_type_array, android.R.layout.simple_spinner_item)
             } else {
@@ -194,9 +204,28 @@ class XpubAddress : AppCompatActivity() {
             segwitLegacySpinner.adapter = segwitLegacyAdapter
 
             // Load saved values if they exist
-            val savedType = properties.getProperty("${crypto.name}_type")
-            val savedSegwitLegacy = properties.getProperty("${crypto.name}_segwit_legacy")
-            val savedValue = properties.getProperty("${crypto.name}_value")
+            val savedType =
+                properties.getProperty("${crypto.shortname}_type")
+                    ?: properties.getProperty("${crypto.name}_type")
+
+            val savedSegwitLegacy =
+                properties.getProperty("${crypto.shortname}_segwit_legacy")
+                    ?: properties.getProperty("${crypto.name}_segwit_legacy")
+
+            val savedValue =
+                properties.getProperty("${crypto.shortname}_value")
+                    ?: properties.getProperty("${crypto.name}_value")
+
+            // AUTO MIGRATION (old → new)
+            if (savedValue != null && properties.getProperty("${crypto.shortname}_value") == null) {
+                properties.setProperty("${crypto.shortname}_value", savedValue)
+                properties.remove("${crypto.name}_value")
+            }
+
+            if (savedType != null && properties.getProperty("${crypto.shortname}_type") == null) {
+                properties.setProperty("${crypto.shortname}_type", savedType)
+                properties.remove("${crypto.name}_type")
+            }
 
             if (savedType != null) {
                 val spinnerPosition = typeAdapter.getPosition(savedType)
@@ -331,22 +360,31 @@ class XpubAddress : AppCompatActivity() {
     private fun saveCryptocurrencyValues() {
         properties.remove("default_key")
 
-        var moneroWalletData: MoneroWalletRequestBody? = null // To store Monero data for API call
-        var moneroDeleted = false // To track if Monero needs to be deleted via API
+        var moneroWalletData: MoneroWalletRequestBody? = null
+        var moneroDeleted = false
 
         for (i in 0 until cryptocurrencyContainer.childCount) {
             val itemView = cryptocurrencyContainer.getChildAt(i)
+
             val nameTextView = itemView.findViewById<TextView>(R.id.crypto_name)
+            val shortnameTextView = itemView.findViewById<TextView>(R.id.crypto_shortname)
+            val chainTextView = itemView.findViewById<TextView>(R.id.crypto_chain)
             val typeSpinner = itemView.findViewById<Spinner>(R.id.type_spinner)
             val segwitLegacySpinner = itemView.findViewById<Spinner>(R.id.segwit_legacy_spinner)
             val inputField = itemView.findViewById<EditText>(R.id.input_field)
 
             val cryptoName = nameTextView.text.toString()
+            val shortname = shortnameTextView.text.toString() // ✅ KEY FIX
+            val chain = chainTextView.text.toString()
             val inputType = typeSpinner.selectedItem.toString()
             val segwitLegacy = segwitLegacySpinner.selectedItem.toString()
             val value = inputField.text.toString().trim()
 
-            // Handle Monero-specific logic
+            Log.d("SAVE_DEBUG", "Processing $shortname | chain=$chain | value=$value")
+
+            // =====================
+            // MONERO
+            // =====================
             if (cryptoName == "Monero") {
                 val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
                 val viewKey = viewKeyField.text.toString().trim()
@@ -355,106 +393,150 @@ class XpubAddress : AppCompatActivity() {
                 val savedViewKey = properties.getProperty("Monero_view_key")
 
                 if (value.isEmpty() && savedAddress != null) {
-                    // Monero address was removed
                     properties.remove("Monero_value")
                     properties.remove("Monero_view_key")
                     properties.remove("Monero_type")
                     moneroDeleted = true
                 } else if (value.isNotEmpty() && (savedAddress != value || savedViewKey != viewKey)) {
-                    // Monero address was modified
                     moneroWalletData = MoneroWalletRequestBody(
                         currentAddress = savedAddress,
                         newAddress = value,
                         privateViewKey = viewKey
                     )
                 }
-            } else if (cryptoName == "Ethereum") {
+
+                // =====================
+                // ETH + ERC20 (FIXED)
+                // =====================
+            } else if (chain == "Ethereum") {
+
                 if (value.isNotEmpty()) {
                     val (isValidEth, normalized, _) = EthereumManager.validateAddress(value)
-                    if (isValidEth) {
-                        val finalValue = normalized ?: value
-                        properties.setProperty("${cryptoName}_type", inputType)
-                        properties.setProperty("${cryptoName}_value", finalValue)
+
+                    if (!isValidEth) {
+                        Log.e("SAVE_DEBUG", "Invalid ETH address: $value")
+                        continue
                     }
+
+                    val finalValue = normalized ?: value
+
+                    properties.setProperty("${shortname}_type", inputType)
+                    properties.setProperty("${shortname}_value", finalValue)
+
+                    Log.d("SAVE_DEBUG", "Saved ETH/ERC20: $shortname = $finalValue")
+
                 } else {
-                    properties.remove("${cryptoName}_type")
-                    properties.remove("${cryptoName}_value")
+                    properties.remove("${shortname}_type")
+                    properties.remove("${shortname}_value")
                 }
-            } else if (cryptoName == "Nano") {
+
+                // =====================
+                // NANO
+                // =====================
+            } else if (shortname == "XNO") {
+
                 if (value.isNotEmpty()) {
                     if (!NanoManager.isValidAddress(value)) {
-                        Log.e("Nano", "Attempted to save invalid Nano address: $value")
-                        return
+                        Log.e("Nano", "Invalid Nano address: $value")
+                        continue
                     }
 
-                    properties.setProperty("${cryptoName}_type", "address")
-                    properties.setProperty("${cryptoName}_value", value)
+                    properties.setProperty("${shortname}_type", "address")
+                    properties.setProperty("${shortname}_value", value)
+
                 } else {
-                    properties.remove("${cryptoName}_type")
-                    properties.remove("${cryptoName}_value")
+                    properties.remove("${shortname}_type")
+                    properties.remove("${shortname}_value")
                 }
+
+                // =====================
+                // LIGHTNING
+                // =====================
+            } else if (shortname == "LIGHTNING") {
+
+                if (value.isNotEmpty()) {
+                    if (!LightningManager.isValidLightningAddress(value)) {
+                        Log.e("Lightning", "Invalid Lightning address: $value")
+                        continue
+                    }
+
+                    properties.setProperty("${shortname}_type", "address")
+                    properties.setProperty("${shortname}_value", value)
+
+                } else {
+                    properties.remove("${shortname}_type")
+                    properties.remove("${shortname}_value")
+                }
+
+                // =====================
+                // OTHER COINS
+                // =====================
             } else {
-                // Handle other cryptocurrencies
-                val savedValue = properties.getProperty("${cryptoName}_value")
+
+                val savedValue = properties.getProperty("${shortname}_value")
 
                 if (value.isEmpty() && savedValue != null) {
-                    // Address or xpub was removed
-                    properties.remove("${cryptoName}_type")
-                    properties.remove("${cryptoName}_segwit_legacy")
-                    properties.remove("${cryptoName}_value")
+                    properties.remove("${shortname}_type")
+                    properties.remove("${shortname}_segwit_legacy")
+                    properties.remove("${shortname}_value")
+
                 } else if (value.isNotEmpty()) {
-                    // Address or xpub was updated
-                    properties.setProperty("${cryptoName}_type", inputType)
-                    if (inputType == "xpub" && (cryptoName == "Bitcoin" || cryptoName == "Litecoin")) {
-                        properties.setProperty("${cryptoName}_segwit_legacy", segwitLegacy)
-                    } else if (inputType == "address" && (cryptoName == "Bitcoin" || cryptoName == "Litecoin")) {
-                        // Remove segwit_legacy property if the type changes from xpub to address
-                        properties.remove("${cryptoName}_segwit_legacy")
+                    properties.setProperty("${shortname}_type", inputType)
+
+                    if (inputType == "xpub" && (shortname == "BTC" || shortname == "LTC")) {
+                        properties.setProperty("${shortname}_segwit_legacy", segwitLegacy)
+                    } else if (inputType == "address" && (shortname == "BTC" || shortname == "LTC")) {
+                        properties.remove("${shortname}_segwit_legacy")
                     }
-                    properties.setProperty("${cryptoName}_value", value)
+
+                    properties.setProperty("${shortname}_value", value)
                 }
             }
         }
 
-        // Handle Monero API calls
+        // =====================
+        // MONERO API HANDLING
+        // =====================
         if (moneroDeleted) {
-            showLoadingDialog() // Show loading dialog for deletion
+            showLoadingDialog()
             val apiService = RetrofitClient.getApiService(this)
             val loadProperties = ConfigProperties.loadProperties(this)
-            Log.d("DEBUG", "Properties loaded: ${loadProperties.getProperty("Monero_value")}")
+
             val deleteRequestBody = MoneroDeleteWalletRequestBody(
                 primaryAddress = loadProperties.getProperty("Monero_value") ?: ""
             )
+
             val call = apiService.deleteMoneroWallet(deleteRequestBody)
             call.enqueue(object : retrofit2.Callback<ApiResponse> {
                 override fun onResponse(call: Call<ApiResponse>, response: retrofit2.Response<ApiResponse>) {
                     dismissLoadingDialog()
                     if (response.isSuccessful) {
-                        // Remove Monero properties from the file after successful deletion
                         properties.remove("Monero_value")
                         properties.remove("Monero_view_key")
                         properties.remove("Monero_type")
                         savePropertiesToFile()
                         showSuccessModal()
                     } else {
-                        showErrorModal("Failed to delete Monero data. Please try again.")
+                        showErrorModal("Failed to delete Monero data.")
                     }
                 }
 
                 override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                     dismissLoadingDialog()
-                    showErrorModal("Failed to delete Monero. Please check your network connection.")
+                    showErrorModal("Failed to delete Monero.")
                 }
             })
+
         } else if (moneroWalletData != null) {
-            // Make the API call for Monero save
+
             showLoadingDialog()
             val apiService = RetrofitClient.getApiService(this)
+
             val call = apiService.createMoneroWallet(moneroWalletData)
             call.enqueue(object : retrofit2.Callback<ApiResponse> {
                 override fun onResponse(call: Call<ApiResponse>, response: retrofit2.Response<ApiResponse>) {
                     dismissLoadingDialog()
-                    Log.d("MONERO_RESPONSE", response.toString() )
+
                     if (response.isSuccessful) {
                         properties.setProperty("Monero_view_key", moneroWalletData.privateViewKey)
                         properties.setProperty("Monero_value", moneroWalletData.newAddress)
@@ -462,17 +544,17 @@ class XpubAddress : AppCompatActivity() {
                         savePropertiesToFile()
                         showSuccessModal()
                     } else {
-                        showErrorModal("Failed to save Monero data. Please try again.")
+                        showErrorModal("Failed to save Monero.")
                     }
                 }
 
                 override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                     dismissLoadingDialog()
-                    showErrorModal("Failed to save Monero. Please check your network connection.")
+                    showErrorModal("Failed to save Monero.")
                 }
             })
+
         } else {
-            // Save other cryptocurrencies
             savePropertiesToFile()
             showSuccessModal()
         }
@@ -503,7 +585,7 @@ class XpubAddress : AppCompatActivity() {
         val propertiesFile = File(filesDir, "config.properties")
         propertiesFile.bufferedWriter().use { writer ->
             properties.forEach { key, value ->
-                writer.write("$key=${value.toString().replace("\\", "")}\n")
+                writer.write("$key=$value\n")
             }
         }
     }
@@ -534,13 +616,16 @@ class XpubAddress : AppCompatActivity() {
             "Bitcoin" -> {
                 isValid = if (inputType == "xpub") BitcoinManager.isValidXpub(value) else BitcoinManager.isValidAddress(value)
             }
+            "Lightning" -> {
+                isValid = LightningManager.isValidLightningAddress(value)
+            }
             "Dogecoin" -> {
                 isValid = if (inputType == "xpub") DogecoinManager.isValidXpub(value, this) else DogecoinManager.isValidAddress(value)
             }
             "Litecoin" -> {
                 isValid = if (inputType == "xpub") LitecoinManager.isValidXpub(value, this) else LitecoinManager.isValidAddress(value)
             }
-            "Ethereum" -> {
+            "Ethereum", "Tether (Ethereum)", "USD Coin (Ethereum)", "DAI (Ethereum)" -> {
                 if (inputType == "xpub") {
                     isValid = EthereumManager.isValidXpub(value)
                 } else {
