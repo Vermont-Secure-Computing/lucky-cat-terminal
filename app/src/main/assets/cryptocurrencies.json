@@ -7,6 +7,12 @@
       "logo": "bitcoin_logo"
     },
     {
+      "name": "Lightning",
+      "shortname": "LIGHTNING",
+      "chain": "Bitcoin Lightning",
+      "logo": "bitcoin_lightning_logo"
+    },
+    {
       "name": "Ethereum",
       "shortname": "ETH",
       "chain": "Ethereum",
@@ -30,12 +36,34 @@
       "chain": "Dogecoin",
       "logo": "dogecoin_logo"
     },
+
     {
       "name": "Tether",
       "shortname": "USDT",
       "chain": "Tron",
       "logo": "tether_logo"
     },
+    {
+      "name": "Tether (Ethereum)",
+      "shortname": "USDT-ETH",
+      "chain": "Ethereum",
+      "logo": "tether_eth"
+    },
+
+    {
+      "name": "USD Coin (Ethereum)",
+      "shortname": "USDC-ETH",
+      "chain": "Ethereum",
+      "logo": "usdc_eth"
+    },
+
+    {
+      "name": "DAI (Ethereum)",
+      "shortname": "DAI-ETH",
+      "chain": "Ethereum",
+      "logo": "dai_eth"
+    },
+
     {
       "name": "Dash",
       "shortname": "DASH",

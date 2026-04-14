@@ -394,7 +394,12 @@ class HomeActivity : BaseNetworkActivity() {
             val obj = jsonArray.getJSONObject(i)
             val name = obj.getString("name")
             val logo = obj.getString("logo")
-            if (cfg.containsKey("${name}_value") && cfg.containsKey("${name}_type")) {
+            val shortname = obj.getString("shortname")
+
+            if (
+                (cfg.containsKey("${shortname}_value") && cfg.containsKey("${shortname}_type")) ||
+                (cfg.containsKey("${name}_value") && cfg.containsKey("${name}_type")) // fallback
+            ) {
                 val logoView = ImageView(this).apply {
                     val resId = resources.getIdentifier(logo, "drawable", packageName)
                     setImageResource(resId)

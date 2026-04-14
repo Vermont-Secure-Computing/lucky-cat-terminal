@@ -1,3 +1,5 @@
+package com.vermont.possin
+
 /*
  * Copyright 2024–2025 Vermont Secure Computing and contributors
  *
@@ -5,7 +7,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *
+ *     
 http://www.apache.org/licenses/LICENSE-2.0
 
  *
@@ -14,12 +16,11 @@ http://www.apache.org/licenses/LICENSE-2.0
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-package com.vermont.possin.network
+ */ object LightningManager {
 
-data class ConversionRequestBody(
-    val price: String,
-    val currency: String,
-    val chain: String,
-    val address: String
-)
+    fun isValidLightningAddress(address: String): Boolean {
+        // basic lightning address format: name@domain.com
+        val regex = Regex("^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
+        return regex.matches(address)
+    }
+}

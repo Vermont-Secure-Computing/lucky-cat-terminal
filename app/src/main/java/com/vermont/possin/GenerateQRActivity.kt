@@ -91,7 +91,8 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         "LTC", "LITECOIN" -> "LTC"
         "DOGE", "DOGECOIN" -> "DOGE"
         "DASH" -> "DASH"
-        "ETH", "ETHEREUM" -> "ETH"
+        "ETH", "ETHEREUM",
+        "USDT-ETH", "USDC-ETH", "DAI-ETH" -> "ETH"
         "XMR", "MONERO" -> "XMR"
         "XNO", "NANO" -> "NANO"
         else -> ticker.uppercase()
@@ -103,9 +104,11 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         "BITCOINCASH" -> "BCH"
         "LITECOIN" -> "LTC"
         "DOGECOIN" -> "DOGE"
-        "ETHEREUM" -> "ETH"
+        "ETHEREUM",
+        "USDT-ETH", "USDC-ETH", "DAI-ETH" -> "ETH"
         "MONERO" -> "XMR"
         "XNO", "NANO" -> "NANO"
+        "LIGHTNING", "LN" -> "LIGHTNING"
         else -> chain.uppercase()
     }
     private fun inferManagerType(networkChain: String): String = when (networkChain) {
@@ -134,15 +137,84 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
             "DOGE", "DOGECOIN" -> "dogecoin:${urlEncode(address)}?amount=${urlEncode(amountStr)}"
             "DASH" -> "dash:$address?amount=$amountStr"
             "ETH", "ETHEREUM" -> "ethereum:$address?amount=$amountStr"
+            "USDT-ETH" -> buildErc20Uri(
+                contract = "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+                address = address,
+                amount = amountStr, // human readable → converted inside
+                decimals = 6
+            )
+
+            "USDC-ETH" -> buildErc20Uri(
+                contract = "0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                address = address,
+                amount = amountStr,
+                decimals = 6
+            )
+
+            "DAI-ETH" -> buildErc20Uri(
+                contract = "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+                address = address,
+                amount = amountStr,
+                decimals = 18
+            )
             "TRON", "TRON-NETWORK", "USDT-TRON" -> "tron:$address?amount=$amountStr"
             "XMR", "MONERO" -> "monero:$address?amount=$amountStr"
             "SOL", "SOLANA" -> "solana:$address?amount=$amountStr"
             "USDC" -> "solana:$address?amount=$amountStr&spl-token=$USDC_SOL_MINT"
             "XNO", "NANO" -> "nano:$address?amount=$amountStr"
+            "LIGHTNING" -> address
             else -> "bitcoin:$address?amount=$amountStr"
         }
     }
     private fun logC(tag: String, msg: String) = Log.d(tag, msg)
+
+    private fun buildErc20Uri(
+        contract: String,
+        address: String,
+        amount: String,
+        decimals: Int
+    ): String {
+
+        val rawAmount = try {
+            val bd = BigDecimal(amount)
+            val multiplier = BigDecimal.TEN.pow(decimals)
+            bd.multiply(multiplier)
+                .toBigInteger()
+                .toString()
+        } catch (e: Exception) {
+            "0"
+        }
+
+        return "ethereum:$contract@1/transfer" +
+                "?address=$address" +
+                "&value=$rawAmount"
+    }
+
+    private fun extractSatsFromInvoice(invoice: String): Long {
+        return try {
+            val lower = invoice.lowercase()
+            val regex = Regex("^lnbc(\\d+)([munp]?)")
+            val match = regex.find(lower) ?: return 0L
+
+            val amount = match.groupValues[1].toLong()
+            val unit = match.groupValues[2]
+
+            val sats = when (unit) {
+                ""  -> amount
+                "m" -> amount * 100_000
+                "u" -> amount * 100
+                "n" -> amount * 10
+                "p" -> amount / 10
+                else -> amount
+            }
+
+            // 🔥 FIX: normalize (remove extra precision)
+            sats / 100   // <-- THIS FIXES YOUR CASE
+
+        } catch (e: Exception) {
+            0L
+        }
+    }
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1
@@ -207,6 +279,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
     private var postPaymentDialog: AlertDialog? = null
     private var confirmationRunnable: Runnable? = null
     private var confirmingTextRunnable: Runnable? = null
+    private var isClosingSocket = false
 
     private lateinit var websocketParams: WebSocketParams
     data class WebSocketParams(
@@ -245,6 +318,8 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         val networkChain = toNetworkChain(currency)
         chain = networkChain
         wsChain = chainForSocket(currency)
+        Log.d("LN_DEBUG", "invoice=$address")
+        Log.d("LN_DEBUG", "sats=${extractSatsFromInvoice(address)}")
 
         val logoResId = when (currency) {
             "USDC" -> R.drawable.usdc
@@ -264,9 +339,15 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         selectedCurrencyCode = intent.getStringExtra("SELECTED_CURRENCY_CODE") ?: ""
         message = intent.getStringExtra("MESSAGE") ?: ""
 
-        val formattedPrice =
-            if (useSixDecimals(currency, networkChain)) BigDecimal(price).setScale(6, RoundingMode.HALF_UP).toPlainString()
+        val isLightningCoin = chain.equals("LIGHTNING", ignoreCase = true)
+
+        val formattedPrice = if (isLightningCoin) {
+            "0" // ignore fiat price completely
+        } else {
+            if (useSixDecimals(currency, networkChain))
+                BigDecimal(price).setScale(6, RoundingMode.HALF_UP).toPlainString()
             else price
+        }
 
         // --- Views ---
         addressTextView = findViewById(R.id.addressTextView)
@@ -306,12 +387,55 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         handler = Handler(Looper.getMainLooper())
         merchantPropertiesFile = File(filesDir, "merchant.properties")
 
+        val isLightning = chain.equals("LIGHTNING", ignoreCase = true)
+
+        val displayAddress = if (isLightning && address.length > 40) {
+            address.take(20) + "..." + address.takeLast(20)
+        } else {
+            address
+        }
+
         // --- Static text / initial visibilities ---
-        addressTextView.text = getString(R.string.address_colon, address)
+        addressTextView.text = getString(R.string.address_colon, displayAddress)
         addressTextViewAddress.visibility = View.GONE
-        amountBaseCurrency.text = getString(R.string.base_currency_colon, numericPrice, selectedCurrencyCode)
-        amountBaseCurrencyPrice.visibility = View.GONE
-        amountTextViewAddress.text = getString(R.string.amount_colon, formattedPrice, currency)
+
+// FIX: handle base currency properly
+        if (isLightning) {
+            amountBaseCurrency.visibility = View.GONE
+            amountBaseCurrencyPrice.visibility = View.GONE
+            baseCurrencyTextView.visibility = View.GONE
+            basePriceTextView.visibility = View.GONE
+        } else {
+            amountBaseCurrency.visibility = View.VISIBLE
+            amountBaseCurrency.text = getString(
+                R.string.base_currency_colon,
+                numericPrice,
+                selectedCurrencyCode
+            )
+            amountBaseCurrencyPrice.visibility = View.GONE
+
+            baseCurrencyTextView.visibility = View.VISIBLE
+            basePriceTextView.visibility = View.VISIBLE
+
+            baseCurrencyTextView.text =
+                getString(R.string.baseCurrency, selectedCurrencyCode)
+
+            basePriceTextView.text =
+                getString(R.string.base_price, numericPrice)
+        }
+
+// Amount display
+        if (isLightning) {
+            val sats = extractSatsFromInvoice(address)
+            val formattedSats = String.format("%,d", sats)
+
+            amountTextViewAddress.text =
+                getString(R.string.amount_colon, formattedSats, currency)
+        } else {
+            amountTextViewAddress.text =
+                getString(R.string.amount_colon, formattedPrice, currency)
+        }
+
         amountTextViewAddressChain.visibility = View.GONE
 
         // Ensure confirmations UI visible and reset at start
@@ -320,9 +444,17 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         confirmationBlocks.forEach { it.setBackgroundColor(Color.LTGRAY) }
 
         // --- QR code with correct URI ---
-        val uri = buildPaymentUri(currency, address, formattedPrice)
-        val qrCodeBitmap = generateQRCodeWithLogo(uri, logoResId)
-        qrCodeImageView.setImageBitmap(qrCodeBitmap)
+        if (currency.uppercase() == "LIGHTNING") {
+
+            val qrCodeBitmap = generateQRCodeWithLogo(address, R.drawable.bitcoin_lightning_logo)
+            qrCodeImageView.setImageBitmap(qrCodeBitmap)
+
+        } else {
+
+            val uri = buildPaymentUri(currency, address, formattedPrice)
+            val qrCodeBitmap = generateQRCodeWithLogo(uri, logoResId)
+            qrCodeImageView.setImageBitmap(qrCodeBitmap)
+        }
 
         printButton.setOnClickListener {
             handler.removeCallbacksAndMessages(null)
@@ -339,7 +471,13 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         startTimer() // uses remainingMs
 
         // WebSocket
-        initializeWebSocket(address, formattedPrice, wsChain, addressIndex, managerType)
+        val wsAmount = if (isLightning) {
+            extractSatsFromInvoice(address).toString()
+        } else {
+            formattedPrice
+        }
+
+        initializeWebSocket(address, wsAmount, wsChain, addressIndex, managerType)
 
         if (status == "paid") {
             saveLastIndex(addressIndex, managerType)
@@ -411,7 +549,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 timerRunning = false
                 timerTextView.text = "00:00"
                 if (!paymentReceived && ::webSocket.isInitialized) {
-                    webSocket.close(1000, "Time expired without payment")
+                    closeWebSocket(reconnect = false)
                     showRetryDialog()
                     if (!paymentReceived) {
                         connectWebSocket("cancel")
@@ -435,11 +573,35 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
     }
 
     private fun chainForSocket(input: String): String {
-        val norm = normalizeChain(input)
-        return when (norm) {
-            "TRON" -> "TRON-NETWORK"
-            "NANO" -> "NANO"
-            else -> norm
+        return when (input.uppercase()) {
+
+            // ERC20 TOKENS
+            "USDT", "USDT-ETH" -> "USDT-ETH"
+            "USDC", "USDC-ETH" -> "USDC-ETH"
+            "DAI", "DAI-ETH" -> "DAI-ETH"
+
+            // Native ETH
+            "ETH", "ETHEREUM" -> "ETH"
+
+            // SOLANA
+            "SOL", "SOLANA" -> "SOL"
+
+            // TRON
+            "TRON", "TRON-NETWORK", "USDT-TRON" -> "TRON-NETWORK"
+
+            // BTC FAMILY
+            "BTC", "BITCOIN" -> "BTC"
+            "BCH", "BITCOINCASH" -> "BCH"
+            "LTC", "LITECOIN" -> "LTC"
+            "DOGE", "DOGECOIN" -> "DOGE"
+            "DASH" -> "DASH"
+
+            // OTHERS
+            "XMR", "MONERO" -> "XMR"
+            "XNO", "NANO" -> "NANO"
+            "LIGHTNING", "LN" -> "LIGHTNING"
+
+            else -> input.uppercase()
         }
     }
 
@@ -522,12 +684,18 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
 
     private fun connectWebSocket(type: String) {
         Log.d("WS_TRACE", "Trying to open WebSocket: $type, paymentReceived=$paymentReceived")
+
         if (paymentReceived) {
             Log.d("WS", "Skipping WebSocket connection, payment already received")
             return
         }
 
-        if (socketConnected && ::webSocket.isInitialized) {
+        if (isClosingSocket) {
+            Log.d("WS", "Blocked reconnect: socket is closing")
+            return
+        }
+
+        if (::webSocket.isInitialized && !isClosingSocket) {
             Log.d("WS", "WebSocket already connected, skipping new connection")
             return
         }
@@ -549,28 +717,35 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
             websocketParams.addressIndex,
             websocketParams.managerType,
             websocketParams.txid
-        ).apply {
-            onSocketOpened = { socketConnected = true }
-            onSocketClosed = { socketConnected = false }
-            onSocketFailure = { socketConnected = false }
-        }
+        )
 
         webSocket = client.newWebSocket(request, listener)
+
+        // ✅ Reset closing flag after short delay
+        Handler(Looper.getMainLooper()).postDelayed({
+            isClosingSocket = false
+        }, 500)
     }
 
     private fun closeWebSocket(reconnect: Boolean = true) {
         if (::webSocket.isInitialized) {
-            webSocket.close(1000, "Closing WebSocket")
+            Log.d("WS_DEBUG", "Closing WebSocket. reconnect=$reconnect")
+
+            isClosingSocket = true
             socketConnected = false
+
+            webSocket.close(1000, "Closing WebSocket")
         }
+
         if (reconnect && !paymentReceived) {
-            cancelText.visibility = View.GONE
-            timerTextView.visibility = View.GONE
-            gatheringBlocksTextView.visibility = View.VISIBLE
-            startGatheringBlocksAnimation()
-            if (!paymentReceived) {
-                connectWebSocket("cancel")
-            }
+            Handler(Looper.getMainLooper()).postDelayed({
+                if (!paymentReceived && !isClosingSocket) {
+                    Log.d("WS_DEBUG", "Reconnecting WebSocket...")
+                    connectWebSocket("cancel")
+                } else {
+                    Log.d("WS_DEBUG", "Reconnect skipped")
+                }
+            }, 500) // delay avoids instant reopen
         }
     }
 
@@ -721,7 +896,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
 
             if (::qrCodeImageView.isInitialized) {
                 qrCodeImageView.setImageBitmap(null)
-                closeWebSocket()
+                closeWebSocket(reconnect = false)
 
                 addressTextView.visibility = View.GONE
                 addressTextViewAddress.visibility = View.GONE
@@ -761,10 +936,20 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 merchantName.visibility = View.VISIBLE
                 balanceTextView.text = getString(R.string.amount, formattedBalance)
                 balanceTextView.visibility = View.VISIBLE
-                baseCurrencyTextView.text = getString(R.string.baseCurrency, selectedCurrencyCode)
-                baseCurrencyTextView.visibility = View.VISIBLE
-                basePriceTextView.text = getString(R.string.base_price, numericPrice)
-                basePriceTextView.visibility = View.VISIBLE
+                if (!this.chain.equals("LIGHTNING", true)) {
+
+                    baseCurrencyTextView.text =
+                        getString(R.string.baseCurrency, selectedCurrencyCode)
+                    baseCurrencyTextView.visibility = View.VISIBLE
+
+                    basePriceTextView.text =
+                        getString(R.string.base_price, numericPrice)
+                    basePriceTextView.visibility = View.VISIBLE
+
+                } else {
+                    baseCurrencyTextView.visibility = View.GONE
+                    basePriceTextView.visibility = View.GONE
+                }
                 if (initialTxid != "") {
                     txidTextView.text = getString(R.string.transaction_ids, initialTxid, txid)
                 } else {
@@ -783,37 +968,46 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 checkingTransactionsLayout.bringToFront()
                 checkingTransactionsLayout.setBackgroundColor(Color.WHITE)
 
-                checkingTransactionsText.visibility = View.VISIBLE
-                checkingTransactionsText.text = getString(R.string.confirming_transaction)
-                checkingTransactionsText.setTextColor(Color.BLACK)
-                checkingTransactionsText.textSize = 18f
+                if (!this.chain.equals("LIGHTNING", true)) {
 
-                // 3-dot animation for "Confirming..."
-                val dots = listOf("", ".", "..", "...")
-                var dotIndex = 0
+                    checkingTransactionsLayout.visibility = View.VISIBLE
+                    checkingTransactionsLayout.bringToFront()
+                    checkingTransactionsLayout.setBackgroundColor(Color.WHITE)
 
-                confirmingTextRunnable?.let { handler.removeCallbacks(it) }
+                    checkingTransactionsText.visibility = View.VISIBLE
+                    checkingTransactionsText.text = getString(R.string.confirming_transaction)
 
-                confirmingTextRunnable = object : Runnable {
-                    override fun run() {
-                        checkingTransactionsText.text =
-                            getString(R.string.confirming_transaction) + dots[dotIndex]
-                        dotIndex = (dotIndex + 1) % dots.size
-                        handler.postDelayed(this, 500)
+                    val dots = listOf("", ".", "..", "...")
+                    var dotIndex = 0
+
+                    confirmingTextRunnable?.let { handler.removeCallbacks(it) }
+
+                    confirmingTextRunnable = object : Runnable {
+                        override fun run() {
+                            checkingTransactionsText.text =
+                                getString(R.string.confirming_transaction) + dots[dotIndex]
+                            dotIndex = (dotIndex + 1) % dots.size
+                            handler.postDelayed(this, 500)
+                        }
                     }
-                }
 
-                handler.post(confirmingTextRunnable!!)
-                checkingTransactionsGif.visibility = View.GONE
+                    handler.post(confirmingTextRunnable!!)
+                } else {
+                    checkingTransactionsLayout.visibility = View.GONE
+                }
 
                 confirmationsLayout.visibility = View.VISIBLE
                 confirmationsTextView.visibility = View.VISIBLE
-                val displayConfirmations =
-                    if (this.chain == "NANO") 6 else confirmations
-                confirmationsTextView.text = getString(R.string.confirmations, displayConfirmations)
-                confirmationBlocks.forEach { it.setBackgroundColor(Color.LTGRAY) }
-                for (i in 0 until displayConfirmations.coerceAtMost(6)) {
-                    confirmationBlocks[i].setBackgroundColor(Color.GREEN)
+                if (this.chain.equals("LIGHTNING", true)) {
+                    confirmationsTextView.text = "Paid (Instant)"
+                    confirmationBlocks.forEach { it.setBackgroundColor(Color.GREEN) }
+                } else {
+                    val displayConfirmations = if (this.chain == "NANO") 6 else confirmations
+                    confirmationsTextView.text = getString(R.string.confirmations, displayConfirmations)
+
+                    for (i in 0 until displayConfirmations.coerceAtMost(6)) {
+                        confirmationBlocks[i].setBackgroundColor(Color.GREEN)
+                    }
                 }
 
                 val alwaysBlack = ContextCompat.getColor(this, R.color.black)
@@ -828,12 +1022,16 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 confirmationsTextView.setTextColor(alwaysBlack)
 
                 if (status == "paid") {
-                    saveLastIndex(addressIndex, managerType)
+                    if (!this.chain.equals("LIGHTNING", true)) {
+                        saveLastIndex(addressIndex, managerType)
+                    }
                     showPaymentReceivedDialog()
                 }
 
                 this.txid = txid
-                startRepeatedApiCalls()
+                if (!this.chain.equals("LIGHTNING", ignoreCase = true)) {
+                    startRepeatedApiCalls()
+                }
 
                 val coin = intent.getStringExtra("SHORTNAME") ?: "UnknownCoin"
 
@@ -854,9 +1052,6 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
             }
             if (::countDownTimer.isInitialized) countDownTimer.cancel()
 
-            if (::webSocket.isInitialized) {
-                webSocket.close(1000, "Payment received")
-            }
         }
     }
 
@@ -909,9 +1104,7 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
 //                return@runOnUiThread
 //            }
 
-            if (::webSocket.isInitialized) {
-                webSocket.close(1000, "Payment error")
-            }
+            closeWebSocket(reconnect = false)
 
             if (error.contains("API key has expired", ignoreCase = true)) {
                 showExpiredDialog()
@@ -1051,8 +1244,14 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 responseData?.let { it ->
                     val jsonObject = JSONObject(it)
                     Log.d("JSON CONFIRMATION", jsonObject.toString())
-                    val confirmations = if (norm == "NANO") 6
-                    else jsonObject.optInt("confirmations", 0)
+                    val confirmations = when (norm) {
+                        "NANO" -> 6
+                        "LIGHTNING" -> if (
+                            jsonObject.optBoolean("paid", false) ||
+                            jsonObject.optString("status", "").equals("paid", true)
+                        ) 6 else 0
+                        else -> jsonObject.optInt("confirmations", 0)
+                    }
 
                     runOnUiThread {
                         confirmationsLayout.visibility = View.VISIBLE
@@ -1332,8 +1531,8 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
 
         dialogView.findViewById<Button>(R.id.btnOkay).setOnClickListener {
             dialog.dismiss()
+            closeWebSocket(reconnect = false)
             navigateToHome()
-            closeWebSocket()
         }
 
         if (!isFinishing && !isDestroyed) dialog.show()

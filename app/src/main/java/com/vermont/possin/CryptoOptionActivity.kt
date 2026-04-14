@@ -75,108 +75,333 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.crypto_option)
 
-        // Optional banner; safe even if crypto_option has no networkBanner TextView
         setupNetworkMonitoring(R.id.networkBanner)
 
-        window.statusBarColor = ContextCompat.getColor(this, R.color.darkerRed)
+        window.statusBarColor =
+            ContextCompat.getColor(this, R.color.darkerRed)
 
         val price = intent.getStringExtra("PRICE") ?: "0.00"
-        val priceTextView: TextView = findViewById(R.id.priceTextView)
-        val cleanedPrice = price.replace(Regex("[^\\d.]"), "").trim()
-        val priceValue = cleanedPrice.toDoubleOrNull() ?: 0.00
-        if (priceValue >= 10000) priceTextView.textSize = 30f
+
+        val priceTextView: TextView =
+            findViewById(R.id.priceTextView)
+
+        val cleanedPrice =
+            price.replace(Regex("[^\\d.]"), "").trim()
+
+        val priceValue =
+            cleanedPrice.toDoubleOrNull() ?: 0.00
+
+        if (priceValue >= 10000) {
+            priceTextView.textSize = 30f
+        }
+
         priceTextView.text = price
 
         message = intent.getStringExtra("MESSAGE") ?: ""
 
         val xPubs = loadXPubsFromSettings()
-        xPubs["Bitcoin"]?.let { bitcoinManager = BitcoinManager(this, it) }
+        val props = loadPropertiesFromConfigFile()
 
-        xPubs["Litecoin"]?.let { litecoinValue ->
-            val litecoinType = getCryptoTypeFromConfig("Litecoin_type")
-            if (litecoinType == "xpub") {
-                val convertedXpub = if (litecoinValue.startsWith("xpub")) {
-                    try { LitecoinManager.convertBitcoinXpubToLitecoin(litecoinValue) }
-                    catch (e: Exception) { Log.e("LitecoinManager","Error converting xPub: ${e.message}"); return@let }
-                } else litecoinValue
-                if (LitecoinManager.isValidXpub(convertedXpub, this)) {
-                    litecoinManager = LitecoinManager(this, convertedXpub)
-                } else Log.e("LitecoinManager","xPub is invalid: $convertedXpub")
+        /*
+         ==========================================
+         BTC
+         ==========================================
+        */
+        (xPubs["BTC"])?.let {
+            bitcoinManager = BitcoinManager(this, it)
+        }
+
+        /*
+         ==========================================
+         LTC
+         ==========================================
+        */
+        (xPubs["LTC"])?.let { litecoinValue ->
+
+            val litecoinType =
+                getCryptoTypeFromConfig("Litecoin_type")
+
+            if (litecoinType.equals("xpub", true)) {
+
+                val convertedXpub =
+                    if (litecoinValue.startsWith("xpub")) {
+                        try {
+                            LitecoinManager
+                                .convertBitcoinXpubToLitecoin(
+                                    litecoinValue
+                                )
+                        } catch (e: Exception) {
+                            Log.e(
+                                "LitecoinManager",
+                                e.message ?: ""
+                            )
+                            null
+                        }
+                    } else {
+                        litecoinValue
+                    }
+
+                convertedXpub?.let {
+                    litecoinManager =
+                        LitecoinManager(this, it)
+                }
+
             } else {
-                litecoinManager = LitecoinManager(this, litecoinValue)
+                litecoinManager =
+                    LitecoinManager(this, litecoinValue)
             }
         }
 
-        xPubs["Ethereum"]?.let { ethereumManager = EthereumManager(this, it) }
-        xPubs["Dogecoin"]?.let { dogecoinValue ->
-            val dogecoinType = getCryptoTypeFromConfig("Dogecoin_type")
-            if (dogecoinType == "xpub") {
-                val convertedXpub = if (dogecoinValue.startsWith("xpub")) {
-                    try { DogecoinManager.convertBitcoinXpubToDogecoin(dogecoinValue) }
-                    catch (e: Exception) { Log.e("DogecoinManager","Error converting xPub: ${e.message}"); return@let }
-                } else dogecoinValue
-                if (DogecoinManager.isValidXpub(convertedXpub, this)) {
-                    dogecoinManager = DogecoinManager(this, convertedXpub)
-                } else Log.e("DogecoinManager","xPub is invalid: $convertedXpub")
+        /*
+         ==========================================
+         ETH
+         ==========================================
+        */
+        (xPubs["ETH"])?.let {
+            ethereumManager = EthereumManager(this, it)
+        }
+
+        /*
+         ==========================================
+         DOGE
+         ==========================================
+        */
+        (xPubs["DOGE"])?.let { dogeValue ->
+
+            val dogeType =
+                getCryptoTypeFromConfig("Dogecoin_type")
+
+            if (dogeType.equals("xpub", true)) {
+
+                val converted =
+                    if (dogeValue.startsWith("xpub")) {
+                        try {
+                            DogecoinManager
+                                .convertBitcoinXpubToDogecoin(
+                                    dogeValue
+                                )
+                        } catch (e: Exception) {
+                            Log.e(
+                                "DogecoinManager",
+                                e.message ?: ""
+                            )
+                            null
+                        }
+                    } else {
+                        dogeValue
+                    }
+
+                converted?.let {
+                    dogecoinManager =
+                        DogecoinManager(this, it)
+                }
+
             } else {
-                dogecoinManager = DogecoinManager(this, dogecoinValue)
+                dogecoinManager =
+                    DogecoinManager(this, dogeValue)
             }
         }
 
-        xPubs["Woodcoin"]?.let { woodcoinManager = WoodcoinManager(this, it) }
-        xPubs["Dash"]?.let { dashManager = DashManager(this, it) }
-        xPubs["Zcash"]?.let { zcashManager = ZcashManager(this, it) }
-        xPubs["Tether"]?.let { tronManager = TronManager(this, it) }
-        xPubs["Bitcoincash"]?.let { bitcoincashManager = BitcoinCashManager(this, it) }
-        xPubs["Solana"]?.let { solanaManager = SolanaManager(this, it) }
-        xPubs["USDC"]?.let { solanaManager = SolanaManager(this, it) }
-
-        val properties = loadPropertiesFromConfigFile()
-        val privateViewKey = properties.getProperty("Monero_view_key")
-        val moneroAddress = properties.getProperty("Monero_value")
-        if (privateViewKey != null && moneroAddress != null) {
-            moneroManager = MoneroManager(this, privateViewKey, moneroAddress)
-        } else {
-            Log.e("Monero","Monero keys or address not found in config file.")
+        /*
+         ==========================================
+         DASH
+         ==========================================
+        */
+        (xPubs["DASH"])?.let {
+            try {
+                dashManager = DashManager(this, it)
+            } catch (e: Exception) {
+                Log.e("DashManager", e.message ?: "")
+            }
         }
 
-        val nanoAddressesRaw = properties.getProperty("Nano_value")
-        if (!nanoAddressesRaw.isNullOrBlank()) {
-            val nanoAddresses = nanoAddressesRaw
-                .split(",")
-                .map { it.trim() }
-                .filter { NanoManager.isValidAddress(it) }
+        /*
+         ==========================================
+         BCH
+         ==========================================
+        */
+        (xPubs["BCH"])?.let {
+            bitcoincashManager =
+                BitcoinCashManager(this, it)
+        }
+
+        /*
+         ==========================================
+         ZEC
+         ==========================================
+        */
+        (xPubs["ZEC"])?.let {
+            zcashManager = ZcashManager(this, it)
+        }
+
+        /*
+         ==========================================
+         TRON USDT
+         ==========================================
+        */
+        (xPubs["USDT"])?.let {
+            tronManager = TronManager(this, it)
+        }
+
+        /*
+         ==========================================
+         SOL
+         ==========================================
+        */
+        (xPubs["SOL"])?.let {
+            solanaManager = SolanaManager(this, it)
+        }
+
+        /*
+         ==========================================
+         MONERO
+         supports old + new keys
+         ==========================================
+        */
+        val moneroAddress =
+            props.getProperty("XMR_value")
+                ?: props.getProperty("Monero_value")
+
+        val moneroViewKey =
+            props.getProperty("Monero_view_key")
+
+        if (!moneroAddress.isNullOrBlank()
+            && !moneroViewKey.isNullOrBlank()
+        ) {
+            moneroManager =
+                MoneroManager(
+                    this,
+                    moneroViewKey,
+                    moneroAddress
+                )
+        }
+
+        /*
+         ==========================================
+         NANO
+         ==========================================
+        */
+        val nanoRaw =
+            props.getProperty("XNO_value")
+                ?: props.getProperty("Nano_value")
+
+        if (!nanoRaw.isNullOrBlank()) {
+
+            val nanoAddresses =
+                nanoRaw.split(",")
+                    .map { it.trim() }
+                    .filter {
+                        NanoManager.isValidAddress(it)
+                    }
 
             if (nanoAddresses.isNotEmpty()) {
-                nanoManager = NanoManager(this, nanoAddresses)
-            } else {
-                Log.e("Nano", "No valid Nano addresses found")
+                nanoManager =
+                    NanoManager(this, nanoAddresses)
             }
         }
 
-        selectedCurrencyCode = intent.getStringExtra("CURRENCY_CODE") ?: "BTC"
+        /*
+         ==========================================
+         SELECTED CURRENCY
+         ==========================================
+        */
+        selectedCurrencyCode =
+            intent.getStringExtra("CURRENCY_CODE")
+                ?: "BTC"
 
-        val buttonContainer: LinearLayout = findViewById(R.id.buttonContainer)
-        val cryptoCurrencies = loadCryptocurrenciesFromJson()
+        /*
+         ==========================================
+         BUILD BUTTONS
+         ==========================================
+        */
+        val buttonContainer: LinearLayout =
+            findViewById(R.id.buttonContainer)
+
+        val cryptoCurrencies =
+            loadCryptocurrenciesFromJson()
+
         cryptoCurrencies.forEach { crypto ->
-            val logoResId = resources.getIdentifier(crypto.logo, "drawable", packageName)
-            addCardView(buttonContainer, logoResId, xPubs.containsKey(crypto.name), crypto) {
-                // HARD GUARD: only handle clicks when truly CONNECTED
-                if (lastObservedNetworkStatus != NetworkStatus.CONNECTED) {
-                    Toast.makeText(this, getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show()
+
+            val logoResId =
+                resources.getIdentifier(
+                    crypto.logo,
+                    "drawable",
+                    packageName
+                )
+
+            val code =
+                crypto.shortname.trim().uppercase()
+
+            val isConfigured = when (code) {
+
+                "USDT" ->
+                    xPubs.containsKey("USDT")
+
+                "USDT-ETH" ->
+                    xPubs.containsKey("USDT-ETH")
+
+                "USDC-ETH" ->
+                    xPubs.containsKey("USDC-ETH")
+
+                "DAI-ETH" ->
+                    xPubs.containsKey("DAI-ETH")
+
+                "LIGHTNING" ->
+                    !props.getProperty("LIGHTNING_value")
+                        .isNullOrBlank()
+
+                else ->
+                    xPubs.containsKey(code)
+            }
+
+            addCardView(
+                buttonContainer,
+                logoResId,
+                isConfigured,
+                crypto
+            ) {
+
+                if (lastObservedNetworkStatus
+                    != NetworkStatus.CONNECTED
+                ) {
+                    Toast.makeText(
+                        this,
+                        getString(
+                            R.string.no_internet_connection
+                        ),
+                        Toast.LENGTH_SHORT
+                    ).show()
+
                     return@addCardView
                 }
+
                 handleCryptoClick(crypto, price)
             }
         }
 
-        findViewById<ImageView>(R.id.back_arrow)?.setOnClickListener { finish() }
-        findViewById<ImageView>(R.id.nekuGifImageView)?.let { imageView ->
-            GifHandler.loadGif(imageView, R.raw.neku)
-        }
+        /*
+         ==========================================
+         BACK BUTTON
+         ==========================================
+        */
+        findViewById<ImageView>(R.id.back_arrow)
+            ?.setOnClickListener {
+                finish()
+            }
 
-        // Initial state (will be corrected again by onNetworkStatusChanged after debounce)
-        applyNetworkStateToUi(lastObservedNetworkStatus)
+        /*
+         ==========================================
+         GIF
+         ==========================================
+        */
+        findViewById<ImageView>(R.id.nekuGifImageView)
+            ?.let {
+                GifHandler.loadGif(it, R.raw.neku)
+            }
+
+        applyNetworkStateToUi(
+            lastObservedNetworkStatus
+        )
     }
 
     override fun onResume() {
@@ -353,35 +578,117 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
     private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
 
     private fun loadXPubsFromSettings(): Map<String, String> {
-        val properties = Properties()
-        val propertiesFile = File(filesDir, "config.properties")
-        if (propertiesFile.exists()) properties.load(propertiesFile.inputStream())
 
-        val xPubs = mutableMapOf<String, String>()
-        properties.stringPropertyNames().forEach { key ->
-            if (key.endsWith("_value")) {
-                val cryptoKey = key.substringBefore("_value")
-                properties.getProperty(key)?.let { xPubs[cryptoKey] = it }
-            }
+        val props = Properties()
+        val file = File(filesDir, "config.properties")
+
+        if (file.exists()) {
+            props.load(file.inputStream())
         }
-        return xPubs
+
+        val map = mutableMapOf<String, String>()
+
+        props.stringPropertyNames().forEach { key ->
+
+            if (!key.endsWith("_value")) return@forEach
+
+            val rawKey = key.removeSuffix("_value").trim()
+
+            val normalized = when (rawKey.uppercase()) {
+
+                "BITCOIN", "BTC" -> "BTC"
+                "LITECOIN", "LTC" -> "LTC"
+                "ETHEREUM", "ETH" -> "ETH"
+                "DOGECOIN", "DOGE" -> "DOGE"
+
+                "DASH" -> "DASH"
+                "BITCOINCASH", "BCH" -> "BCH"
+                "ZCASH", "ZEC" -> "ZEC"
+
+                "MONERO", "XMR" -> "XMR"
+
+                "SOLANA", "SOL" -> "SOL"
+
+                "NANO", "XNO" -> "XNO"
+
+                "LIGHTNING" -> "LIGHTNING"
+
+                "TETHER", "USDT" -> "USDT"
+
+                "USDT-ETH", "TETHER (ETHEREUM)" -> "USDT-ETH"
+                "USDC-ETH", "USD COIN (ETHEREUM)" -> "USDC-ETH"
+                "DAI-ETH", "DAI (ETHEREUM)" -> "DAI-ETH"
+
+                else -> rawKey.uppercase()
+            }
+
+            map[normalized] = props.getProperty(key)
+        }
+
+        return map
     }
 
     private fun handleCryptoClick(crypto: CryptoCurrency, price: String) {
         showLoadingDialog()
-        when (crypto.shortname) {
+
+        when (crypto.shortname.trim().uppercase()) {
+
             "BTC" -> handleBTCClick(price)
-            "LTC" -> handleLTCClick(price)
+
+            "LIGHTNING" -> handleLightningClick(price)
+
             "ETH" -> handleETHClick(price)
-            "DOGE" -> handleDOGEClick(price)
-            "USDT" -> handleUSDTClick(price)
-            "DASH" -> handleDASHlick(price)
-            "ZEC" -> handleZcashClick(price)
-            "BCH" -> handleBCHlick(price)
+
             "XMR" -> handleMoneroClick(price)
+
+            "LTC" -> handleLTCClick(price)
+
+            "DOGE" -> handleDOGEClick(price)
+
+            "USDT" -> handleUSDTClick(price)
+
+            "USDT-ETH" -> handleERC20Click(
+                price,
+                "USDT-ETH",
+                R.drawable.tether_eth
+            )
+
+            "USDC-ETH" -> handleERC20Click(
+                price,
+                "USDC-ETH",
+                R.drawable.usdc_eth
+            )
+
+            "DAI-ETH" -> handleERC20Click(
+                price,
+                "DAI-ETH",
+                R.drawable.dai_eth
+            )
+
+            "DASH" -> handleDASHlick(price)
+
+            "BCH" -> handleBCHlick(price)
+
             "SOL" -> handleSolanaClick(price)
-            "USDC" -> handleUSDCClick(price)
+
+            "ZEC" -> handleZcashClick(price)
+
             "XNO" -> handleNanoClick(price)
+
+            else -> {
+                dismissLoadingDialog()
+
+                Toast.makeText(
+                    this,
+                    "Unsupported coin: ${crypto.shortname}",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                Log.e(
+                    "COIN_DEBUG",
+                    "No handler for shortname=${crypto.shortname}"
+                )
+            }
         }
     }
 
@@ -655,6 +962,113 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
         }
     }
 
+    private fun handleLightningClick(price: String) {
+
+        val properties = loadPropertiesFromConfigFile()
+
+        val address =
+            properties.getProperty("LIGHTNING_value")
+                ?: properties.getProperty("Lightning_value")
+
+        if (address.isNullOrBlank()) {
+            dismissLoadingDialog()
+
+            Toast.makeText(
+                this,
+                "Lightning address not set",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        val numericPrice =
+            price.filter { it.isDigit() || it == '.' }
+
+        postConversionApi(
+            numericPrice,
+            selectedCurrencyCode,
+            address.trim(),
+            "LIGHTNING",
+            R.drawable.bitcoin_lightning_logo
+        ) { feeStatus, status, response ->
+
+            dismissLoadingDialog()
+
+            if (response.isNotEmpty()) {
+
+                startGenerateQRActivity(
+                    response,
+                    numericPrice,
+                    R.drawable.bitcoin_lightning_logo,
+                    "LIGHTNING",
+                    -1,
+                    feeStatus,
+                    status,
+                    "Lightning",
+                    numericPrice,
+                    selectedCurrencyCode,
+                    "LIGHTNING"
+                )
+            }
+        }
+    }
+
+    private fun handleERC20Click(price: String, token: String, logo: Int) {
+
+        val properties = loadPropertiesFromConfigFile()
+
+        // Determine correct key (supports new + old)
+        val tokenKey = when (token) {
+            "USDT-ETH" -> "USDT-ETH"
+            "USDC-ETH" -> "USDC-ETH"
+            "DAI-ETH"  -> "DAI-ETH"
+            else -> "ETH"
+        }
+
+        val address =
+            properties.getProperty("${tokenKey}_value")
+                ?: properties.getProperty("${token.replace("-ETH", " (Ethereum)")}_value") // fallback old format
+
+        if (address.isNullOrBlank()) {
+            dismissLoadingDialog()
+            Toast.makeText(this, "$token not configured", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val numericPrice = price.filter { it.isDigit() || it == '.' }
+
+        // IMPORTANT: chain MUST identify token
+        val chain = tokenKey
+
+        postConversionApi(
+            numericPrice,
+            selectedCurrencyCode,
+            address,
+            chain,
+            logo
+        ) { feeStatus, status, formattedRate ->
+
+            dismissLoadingDialog()
+
+            if (formattedRate.isNotEmpty()) {
+                startGenerateQRActivity(
+                    address,
+                    formattedRate,
+                    logo,
+                    token,
+                    -1,
+                    feeStatus,
+                    status,
+                    token,
+                    numericPrice,
+                    selectedCurrencyCode,
+                    token
+                )
+            }
+        }
+    }
+
     private fun postConversionApi(
         price: String,
         currency: String,
@@ -664,7 +1078,7 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
         onResult: (String, String, String) -> Unit
     ) {
         val apiService = RetrofitClient.getApiService(this)
-        val call = apiService.postConversion(ConversionRequestBody(price, currency, chain))
+        val call = apiService.postConversion(ConversionRequestBody(price, currency, chain, address))
 
         call.enqueue(object : Callback<ConversionResponse> {
             override fun onResponse(call: Call<ConversionResponse>, response: Response<ConversionResponse>) {
@@ -674,11 +1088,48 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
                         val feeStatus = it.feeStatus ?: ""
                         val status = it.status ?: ""
                         if (it.success) {
-                            val formattedRate = formatConversionRate(it.conversionRate)
-                            Toast.makeText(this@CryptoOptionActivity, getString(R.string.conversion_rate, formattedRate), Toast.LENGTH_SHORT).show()
+
+                            val formattedRate = if (chain == "LIGHTNING") {
+                                it.relayInvoice ?: ""
+                            } else {
+                                it.conversionRate?.let { rate ->
+                                    formatConversionRate(rate)
+                                } ?: ""
+                            }
+
+                            Toast.makeText(
+                                this@CryptoOptionActivity,
+                                getString(R.string.conversion_rate, formattedRate),
+                                Toast.LENGTH_SHORT
+                            ).show()
+
                             onResult(feeStatus, status, formattedRate)
+
                         } else {
-                            Toast.makeText(this@CryptoOptionActivity, R.string.conversion_failed, Toast.LENGTH_SHORT).show()
+
+                            dismissLoadingDialog()
+
+                            val errorMessage = it.error ?: ""
+
+                            // ✅ HANDLE LIGHTNING LIMIT ERROR
+                            if (errorMessage.contains("over the limit", ignoreCase = true)) {
+
+                                AlertDialog.Builder(this@CryptoOptionActivity)
+                                    .setTitle("Limit Reached")
+                                    .setMessage("Lightning limit is 100k sats. Please use BTC, DOGE, or other supported currencies.")
+                                    .setCancelable(false)
+                                    .setPositiveButton("OK") { _, _ -> }
+                                    .show()
+
+                            } else {
+
+                                Toast.makeText(
+                                    this@CryptoOptionActivity,
+                                    errorMessage.ifEmpty { getString(R.string.conversion_failed) },
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
                             onResult(feeStatus, status, "")
                         }
                     } ?: run { onResult("", "", "") }
