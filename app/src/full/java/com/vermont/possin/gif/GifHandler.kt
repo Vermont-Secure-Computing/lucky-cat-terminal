@@ -1,7 +1,6 @@
 package com.vermont.possin.gif
 
 import android.widget.ImageView
-import pl.droidsonroids.gif.GifDrawable
 
 object GifHandler {
 
@@ -11,12 +10,12 @@ object GifHandler {
         onFinished: (() -> Unit)? = null
     ) {
         try {
-            val gif = GifDrawable(imageView.context.resources, resId)
-            imageView.setImageDrawable(gif)
-            gif.start()
+            imageView.setImageResource(resId)
 
-            gif.addAnimationListener {
-                onFinished?.invoke()
+            if (onFinished != null) {
+                imageView.postDelayed({
+                    onFinished.invoke()
+                }, 850)
             }
 
         } catch (e: Exception) {
