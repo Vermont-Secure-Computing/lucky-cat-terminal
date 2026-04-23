@@ -19,7 +19,7 @@ android {
         targetSdk = 35
 
         // UPDATED VERSION
-        versionCode = 4
+        versionCode = 6
         versionName = "1.5"
     }
 
@@ -135,7 +135,9 @@ dependencies {
     add("fdroidImplementation", libs.thermalPrinter)
 
     // ---------- GIF (FLAVOR-SPECIFIC) ----------
-    add("fullImplementation", libs.android.gif.drawable)
+    add("fullImplementation", "io.coil-kt:coil:2.6.0")
+    add("fullImplementation", "io.coil-kt:coil-gif:2.6.0")
+
     add("fdroidImplementation", "io.coil-kt:coil:2.6.0")
     add("fdroidImplementation", "io.coil-kt:coil-gif:2.6.0")
 
