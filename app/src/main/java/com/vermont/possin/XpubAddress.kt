@@ -36,6 +36,13 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
+import android.app.Activity
+import android.content.ContentValues
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -61,8 +68,14 @@ class XpubAddress : AppCompatActivity() {
     private lateinit var properties: Properties
     private lateinit var submitText: TextView
     private lateinit var backArrow: ImageView
+    private lateinit var exportSettingsBtn: Button
+    private lateinit var importSettingsBtn: Button
     private var currentInputField: EditText? = null
     private var loadingDialog: AlertDialog? = null
+
+    companion object {
+        const val PICK_BACKUP_FILE = 5001
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +90,26 @@ class XpubAddress : AppCompatActivity() {
         cryptocurrencyContainer = findViewById(R.id.cryptocurrency_container)
         backArrow = findViewById(R.id.back_arrow)
         submitText = findViewById(R.id.submit_text)
+
+        exportSettingsBtn = findViewById(R.id.exportSettingsBtn)
+        importSettingsBtn = findViewById(R.id.importSettingsBtn)
+
+        exportSettingsBtn.setOnClickListener {
+            exportCoinSettings()
+        }
+
+        importSettingsBtn.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle(getString(R.string.restore_coins))
+                .setMessage("Replace current coin settings?")
+                .setPositiveButton("Yes") { _, _ ->
+                    val intent = Intent(Intent.ACTION_GET_CONTENT)
+                    intent.type = "text/*"
+                    startActivityForResult(intent, PICK_BACKUP_FILE)
+                }
+                .setNegativeButton(getString(R.string.cancel), null)
+                .show()
+        }
 
         // Load cryptocurrencies from JSON
         cryptocurrencies = loadCryptocurrencies(this)
@@ -129,6 +162,128 @@ class XpubAddress : AppCompatActivity() {
         populateCryptocurrencyContainer()
     }
 
+    private fun exportCoinSettings() {
+
+        val input = EditText(this)
+        input.hint = "Enter file name"
+
+        AlertDialog.Builder(this)
+            .setTitle("Backup Coins")
+            .setView(input)
+            .setPositiveButton("Save") { _, _ ->
+
+                var fileName = input.text.toString().trim()
+
+                if (fileName.isEmpty()) {
+                    fileName = "LCTerm_Coin_Backup"
+                }
+
+                if (!fileName.endsWith(".txt")) {
+                    fileName += ".txt"
+                }
+
+                saveBackupFile(fileName)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun saveBackupFile(fileName: String) {
+
+        val configFile = File(filesDir, "config.properties")
+
+        if (!configFile.exists()) {
+            Toast.makeText(this, "No config file found", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val content = configFile.readText()
+
+        try {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+
+                val values = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                }
+
+                val uri = contentResolver.insert(
+                    MediaStore.Files.getContentUri("external"),
+                    values
+                )
+
+                uri?.let {
+                    contentResolver.openOutputStream(it)?.use { stream ->
+                        stream.write(content.toByteArray())
+                    }
+                }
+
+            } else {
+
+                val downloads = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS
+                )
+
+                if (!downloads.exists()) downloads.mkdirs()
+
+                File(downloads, fileName).writeText(content)
+            }
+
+            Toast.makeText(this, "Backup saved to Downloads", Toast.LENGTH_LONG).show()
+
+        } catch (e: Exception) {
+            Toast.makeText(this, "Backup failed", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun importCoinSettings(uri: Uri) {
+
+        try {
+
+            val text = contentResolver.openInputStream(uri)
+                ?.bufferedReader()
+                ?.use { it.readText() }
+                ?.trim()
+                ?: ""
+
+            if (text.isEmpty()) {
+                Toast.makeText(this, "Invalid backup file", Toast.LENGTH_LONG).show()
+                return
+            }
+
+            if (!text.contains("_value=") &&
+                !text.contains("_type=") &&
+                !text.contains("Monero_value=")
+            ) {
+                Toast.makeText(this, "Invalid backup file", Toast.LENGTH_LONG).show()
+                return
+            }
+
+            val configFile = File(filesDir, "config.properties")
+            configFile.writeText(text)
+
+            properties = ConfigProperties.loadProperties(this)
+
+            populateCryptocurrencyContainer()
+
+            Toast.makeText(
+                this,
+                "Coin settings restored!",
+                Toast.LENGTH_LONG
+            ).show()
+
+        } catch (e: Exception) {
+
+            Toast.makeText(
+                this,
+                "Invalid backup file",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     private fun filterCryptocurrencies(query: String) {
         filteredCryptocurrencies = if (query.isEmpty()) {
             cryptocurrencies
@@ -171,11 +326,41 @@ class XpubAddress : AppCompatActivity() {
                 viewKeyField.visibility = View.GONE
             }
 
+            chainTextView.text = crypto.chain
+
+            if (crypto.name == "Lightning") {
+
+                chainTextView.visibility = View.VISIBLE
+                chainTextView.maxLines = 3
+                chainTextView.isSingleLine = false
+
+                chainTextView.text =
+                    "${crypto.chain}\nMaximum is 100k satoshi"
+
+                chainTextView.textSize = 11f
+            }
+
             val logoId = resources.getIdentifier(crypto.logo, "drawable", packageName)
             logoImageView.setImageResource(logoId)
             nameTextView.text = crypto.name
-            shortnameTextView.text = crypto.shortname
-            chainTextView.text = crypto.chain
+
+            if (crypto.name == "Lightning") {
+
+                // remove BTC LIGHTNING text
+                shortnameTextView.text = ""
+
+                // replace chain text only
+                chainTextView.visibility = View.VISIBLE
+                chainTextView.maxLines = 2
+                chainTextView.isSingleLine = false
+                chainTextView.text = "Maximum is 100k satoshi"
+                chainTextView.textSize = 11f
+
+            } else {
+
+                shortnameTextView.text = crypto.shortname
+                chainTextView.text = crypto.chain
+            }
 
             // Set up type spinner
             val typeAdapter: ArrayAdapter<CharSequence> = if (
@@ -216,16 +401,14 @@ class XpubAddress : AppCompatActivity() {
                 properties.getProperty("${crypto.shortname}_value")
                     ?: properties.getProperty("${crypto.name}_value")
 
-            // AUTO MIGRATION (old → new)
             if (savedValue != null && properties.getProperty("${crypto.shortname}_value") == null) {
                 properties.setProperty("${crypto.shortname}_value", savedValue)
-                properties.remove("${crypto.name}_value")
             }
 
             if (savedType != null && properties.getProperty("${crypto.shortname}_type") == null) {
                 properties.setProperty("${crypto.shortname}_type", savedType)
-                properties.remove("${crypto.name}_type")
             }
+
 
             if (savedType != null) {
                 val spinnerPosition = typeAdapter.getPosition(savedType)
@@ -294,6 +477,17 @@ class XpubAddress : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == PICK_BACKUP_FILE &&
+            resultCode == Activity.RESULT_OK) {
+
+            val uri = data?.data
+            if (uri != null) {
+                importCoinSettings(uri)
+            }
+            return
+        }
+
         val result: IntentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
 
         if (result.contents != null) {

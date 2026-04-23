@@ -88,6 +88,39 @@
             android:drawablePadding="8dp" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/settingsToolsRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:background="@android:color/white">
+
+        <Button
+            android:id="@+id/exportSettingsBtn"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="@string/backup_coins"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/darkerRed"
+            android:layout_marginEnd="6dp"/>
+
+        <Button
+            android:id="@+id/importSettingsBtn"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="@string/restore_coins"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/darkerRed"
+            android:layout_marginStart="6dp"/>
+
+    </LinearLayout>
+
     <!-- Content -->
     <ScrollView
         android:layout_width="match_parent"

@@ -187,4 +187,8 @@
     <string name="confirming_transaction">确认中</string>
     <string name="zcash_manager_not_initialized">Zcash 管理器未初始化。</string>
     <string name="failed_to_derive_zcash_address">无法生成 Zcash 地址。</string>
+    <string name="enter_password">输入密码</string>
+    <string name="backup_saved_downloads">备份已保存到下载文件夹</string>
+    <string name="backup_coins">备份币种</string>
+    <string name="restore_coins">恢复币种</string>
 </resources>

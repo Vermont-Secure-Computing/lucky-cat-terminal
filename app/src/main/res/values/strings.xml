@@ -186,4 +186,8 @@
     <string name="confirming_transaction">Confirming</string>
     <string name="zcash_manager_not_initialized">Zcash manager not initialized.</string>
     <string name="failed_to_derive_zcash_address">Failed to derive Zcash address.</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="backup_saved_downloads">Backup saved to Downloads</string>
+    <string name="backup_coins">Backup Coins</string>
+    <string name="restore_coins">Restore Coins</string>
 </resources>
