@@ -19,7 +19,7 @@ android {
         targetSdk = 35
 
         // UPDATED VERSION
-        versionCode = 5
+        versionCode = 6
         versionName = "1.5"
     }
 
