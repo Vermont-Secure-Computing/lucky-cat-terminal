@@ -186,4 +186,8 @@
     <string name="confirming_transaction">Подтверждение</string>
     <string name="zcash_manager_not_initialized">Менеджер Zcash не инициализирован.</string>
     <string name="failed_to_derive_zcash_address">Не удалось создать адрес Zcash.</string>
+    <string name="enter_password">Введите пароль</string>
+    <string name="backup_saved_downloads">Резервная копия сохранена в Загрузки</string>
+    <string name="backup_coins">Резерв монет</string>
+    <string name="restore_coins">Восстановить монеты</string>
 </resources>
