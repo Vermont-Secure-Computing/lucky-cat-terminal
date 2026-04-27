@@ -490,14 +490,37 @@ class HomeActivity : BaseNetworkActivity() {
 
     private fun isCryptoConfigured(): Boolean {
         if (!configPropertiesFile.exists()) return false
-        val cfg = Properties().apply { load(configPropertiesFile.inputStream()) }
-        val onlyDefaultKey = cfg.size == 1 && cfg.containsKey("default_key")
-        if (onlyDefaultKey) return false
-        for (cryptoName in cryptocurrencyNames) {
-            val type = cfg.getProperty("${cryptoName}_type", "").trim()
-            val value = cfg.getProperty("${cryptoName}_value", "").trim()
-            if (type.isNotEmpty() && value.isNotEmpty()) return true
+
+        val cfg = Properties().apply {
+            load(configPropertiesFile.inputStream())
         }
+
+        val onlyDefaultKey =
+            cfg.size == 1 &&
+                    cfg.containsKey("default_key")
+
+        if (onlyDefaultKey) return false
+
+        for (key in cfg.stringPropertyNames()) {
+            if (key.endsWith("_type")) {
+
+                val prefix = key.removeSuffix("_type")
+                val value =
+                    cfg.getProperty("${prefix}_value", "")
+                        .trim()
+
+                val type =
+                    cfg.getProperty(key, "")
+                        .trim()
+
+                if (type.isNotEmpty() &&
+                    value.isNotEmpty()
+                ) {
+                    return true
+                }
+            }
+        }
+
         return false
     }
 

@@ -568,7 +568,9 @@ class XpubAddress : AppCompatActivity() {
             val inputField = itemView.findViewById<EditText>(R.id.input_field)
 
             val cryptoName = nameTextView.text.toString()
-            val shortname = shortnameTextView.text.toString() // ✅ KEY FIX
+            val shortname =
+                if (cryptoName == "Lightning") "LIGHTNING"
+                else shortnameTextView.text.toString().trim()
             val chain = chainTextView.text.toString()
             val inputType = typeSpinner.selectedItem.toString()
             val segwitLegacy = segwitLegacySpinner.selectedItem.toString()
@@ -648,18 +650,23 @@ class XpubAddress : AppCompatActivity() {
                 // =====================
             } else if (shortname == "LIGHTNING") {
 
+                // remove old legacy keys
+                properties.remove("_type")
+                properties.remove("_value")
+
                 if (value.isNotEmpty()) {
+
                     if (!LightningManager.isValidLightningAddress(value)) {
                         Log.e("Lightning", "Invalid Lightning address: $value")
                         continue
                     }
 
-                    properties.setProperty("${shortname}_type", "address")
-                    properties.setProperty("${shortname}_value", value)
+                    properties.setProperty("LIGHTNING_type", "address")
+                    properties.setProperty("LIGHTNING_value", value)
 
                 } else {
-                    properties.remove("${shortname}_type")
-                    properties.remove("${shortname}_value")
+                    properties.remove("LIGHTNING_type")
+                    properties.remove("LIGHTNING_value")
                 }
 
                 // =====================

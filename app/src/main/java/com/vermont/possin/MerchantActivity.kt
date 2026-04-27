@@ -50,6 +50,8 @@ class MerchantActivity : AppCompatActivity() {
     private var currentCurrencyCode = ""
     private var currentCurrencySymbol = "$"
     private val currencyNames = mapOf(
+
+        // Major Fiat
         "USD" to "US Dollar",
         "EUR" to "Euro",
         "JPY" to "Japanese Yen",
@@ -58,15 +60,99 @@ class MerchantActivity : AppCompatActivity() {
         "CAD" to "Canadian Dollar",
         "CHF" to "Swiss Franc",
         "CNY" to "Chinese Yuan",
-        "SEK" to "Swedish Krona",
+        "HKD" to "Hong Kong Dollar",
+        "SGD" to "Singapore Dollar",
         "NZD" to "New Zealand Dollar",
+        "SEK" to "Swedish Krona",
+        "NOK" to "Norwegian Krone",
+        "DKK" to "Danish Krone",
+
+        // Asia
+        "PHP" to "Philippine Peso",
+        "INR" to "Indian Rupee",
+        "KRW" to "South Korean Won",
+        "THB" to "Thai Baht",
+        "IDR" to "Indonesian Rupiah",
+        "MYR" to "Malaysian Ringgit",
+        "VND" to "Vietnamese Dong",
+        "PKR" to "Pakistani Rupee",
+        "BDT" to "Bangladeshi Taka",
+        "LKR" to "Sri Lankan Rupee",
+        "NPR" to "Nepalese Rupee",
+
+        // Latin America
+        "BRL" to "Brazilian Real",
+        "MXN" to "Mexican Peso",
+        "ARS" to "Argentine Peso",
+        "CLP" to "Chilean Peso",
+        "VES" to "Venezuelan Bolivar",
+        "COP" to "Colombian Peso",
+        "PEN" to "Peruvian Sol",
+        "UYU" to "Uruguayan Peso",
+
+        // Africa / Middle East
+        "ZAR" to "South African Rand",
+        "NGN" to "Nigerian Naira",
+        "EGP" to "Egyptian Pound",
+        "KES" to "Kenyan Shilling",
+        "GHS" to "Ghanaian Cedi",
+        "TRY" to "Turkish Lira",
+        "RUB" to "Russian Ruble",
+        "SAR" to "Saudi Riyal",
+        "AED" to "UAE Dirham",
+        "QAR" to "Qatari Riyal",
+        "KWD" to "Kuwaiti Dinar",
+        "BHD" to "Bahraini Dinar",
+        "OMR" to "Omani Rial",
+
+        // Europe
+        "ILS" to "Israeli Shekel",
+        "HUF" to "Hungarian Forint",
+        "CZK" to "Czech Koruna",
+        "PLN" to "Polish Zloty",
+        "RON" to "Romanian Leu",
+
+        // Crypto
         "BTC" to "Bitcoin",
-        "LTC" to "Litecoin",
-        "DASH" to "Dash",
-        "DOGE" to "Dogecoin",
         "ETH" to "Ethereum",
         "USDT" to "Tether",
+        "USDC" to "USD Coin",
+        "XRP" to "XRP",
+        "BNB" to "BNB",
+        "SOL" to "Solana",
+        "TRX" to "TRON",
+        "DOGE" to "Dogecoin",
+        "BCH" to "Bitcoin Cash",
+        "ADA" to "Cardano",
         "XMR" to "Monero",
+        "LINK" to "Chainlink",
+        "XLM" to "Stellar",
+        "ZEC" to "Zcash",
+        "DAI" to "Dai",
+        "LTC" to "Litecoin",
+        "AVAX" to "Avalanche",
+        "HBAR" to "Hedera",
+        "SUI" to "Sui",
+        "SHIB" to "Shiba Inu",
+        "TON" to "Toncoin",
+        "CRO" to "Cronos",
+        "DOT" to "Polkadot",
+        "UNI" to "Uniswap",
+        "NEAR" to "NEAR Protocol",
+        "ICP" to "Internet Computer",
+        "ETC" to "Ethereum Classic",
+        "AAVE" to "Aave",
+        "OKB" to "OKB",
+        "PI" to "Pi Network",
+
+        // Metals
+        "XAU" to "Gold",
+        "XAG" to "Silver",
+        "XPT" to "Platinum",
+        "XPD" to "Palladium",
+
+        // Legacy
+        "DASH" to "Dash",
         "LOG" to "Woodcoin"
     )
 
