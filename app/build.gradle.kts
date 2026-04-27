@@ -19,8 +19,8 @@ android {
         targetSdk = 35
 
         // UPDATED VERSION
-        versionCode = 6
-        versionName = "1.5"
+        versionCode = 7
+        versionName = "1.6"
     }
 
     // ---------- FLAVORS ----------
