@@ -1111,7 +1111,6 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
 
                             val errorMessage = it.error ?: ""
 
-                            // ✅ HANDLE LIGHTNING LIMIT ERROR
                             if (errorMessage.contains("over the limit", ignoreCase = true)) {
 
                                 AlertDialog.Builder(this@CryptoOptionActivity)
@@ -1120,6 +1119,20 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
                                     .setCancelable(false)
                                     .setPositiveButton("OK") { _, _ -> }
                                     .show()
+
+                            } else if (
+                                chain == "LIGHTNING" &&
+                                (
+                                        errorMessage.contains("Invalid pay service params", ignoreCase = true) ||
+                                        errorMessage.contains("Failed to fetch lnurl info", ignoreCase = true)
+                                )
+                            ) {
+
+                                Toast.makeText(
+                                    this@CryptoOptionActivity,
+                                    "Invalid Lightning Address",
+                                    Toast.LENGTH_SHORT
+                                ).show()
 
                             } else {
 
