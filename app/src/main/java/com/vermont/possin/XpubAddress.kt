@@ -306,6 +306,14 @@ class XpubAddress : AppCompatActivity() {
             val inputField = itemView.findViewById<EditText>(R.id.input_field)
             val errorTextView = itemView.findViewById<TextView>(R.id.error_text)
             val scannerButton = itemView.findViewById<ImageButton>(R.id.scanner_button)
+            val lightningHelpText =
+                itemView.findViewById<TextView>(R.id.lightning_help_text)
+
+            if (crypto.name == "Lightning") {
+                inputField.hint =
+                    "example@blink.sv, johndoe@walletofsatoshi.com"
+            }
+
 
             // Get the private view key field (initially hidden)
             val viewKeyField = itemView.findViewById<EditText>(R.id.view_key_field)
@@ -360,6 +368,12 @@ class XpubAddress : AppCompatActivity() {
 
                 shortnameTextView.text = crypto.shortname
                 chainTextView.text = crypto.chain
+            }
+
+            if (crypto.name == "Lightning") {
+                lightningHelpText.visibility = View.VISIBLE
+            } else {
+                lightningHelpText.visibility = View.GONE
             }
 
             // Set up type spinner
@@ -439,7 +453,18 @@ class XpubAddress : AppCompatActivity() {
             typeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                     val selectedType = parent.getItemAtPosition(position).toString()
-                    inputField.hint = "Enter $selectedType ${crypto.name}"
+
+//                    if (crypto.name == "Lightning") {
+//                        inputField.hint =
+//                            "name@example.com"
+//                    } else {
+//                        inputField.hint = "Enter $selectedType ${crypto.name}"
+//                    }
+                    if (crypto.name == "Lightning") {
+                        inputField.hint = "Lightning Address"
+                    } else {
+                        inputField.hint = "Enter $selectedType ${crypto.name}"
+                    }
                     if (selectedType == "xpub" && (crypto.name == "Bitcoin" || crypto.name == "Litecoin")) {
                         segwitLegacySpinner.visibility = View.VISIBLE
                     } else {
@@ -566,6 +591,7 @@ class XpubAddress : AppCompatActivity() {
             val typeSpinner = itemView.findViewById<Spinner>(R.id.type_spinner)
             val segwitLegacySpinner = itemView.findViewById<Spinner>(R.id.segwit_legacy_spinner)
             val inputField = itemView.findViewById<EditText>(R.id.input_field)
+
 
             val cryptoName = nameTextView.text.toString()
             val shortname =

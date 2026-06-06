@@ -1,0 +1,242 @@
+<resources>
+    <string name="app_name">LCTerm</string>
+    <string-array name="type_array">
+        <item>dirección</item>
+        <item>xpub</item>
+    </string-array>
+    <string-array name="monero_type_array">
+        <item>dirección</item>
+    </string-array>
+    <string-array name="segwit_legacy_array">
+        <item>segwit</item>
+        <item>legacy</item>
+    </string-array>
+    <string-array name="locale_array">
+        <item>EN</item>
+        <item>ZH</item>
+        <item>RU</item>
+        <item>ES</item>
+    </string-array>
+
+    <string name="neku_gif_description">Animación GIF de Neku</string>
+    <string name="accepted_currency">Moneda Aceptada</string>
+    <string name="accept_payment">Aceptar Pago</string>
+    <string name="settings">Configuración</string>
+    <string name="api_key">Clave API</string>
+    <string name="merchant_info">Información del Comercio</string>
+    <string name="coin_settings">Configuración de Monedas</string>
+    <string name="export">Exportar</string>
+    <string name="transactions">Transacciones</string>
+    <string name="see_all">Ver Todo</string>
+    <string name="no_transactions_yet">Aún no hay transacciones..</string>
+    <string name="powered_by">Desarrollado por</string>
+    <string name="incomplete_profile">Perfil Incompleto</string>
+    <string name="please_fill_up_your_merchant_profile_xpub_and_address.">Por favor complete el perfil del comercio, xpub y dirección.</string>
+    <string name="ok">OK</string>
+    <string name="enter_pin">Ingresar PIN</string>
+    <string name="incorrect_pin">PIN incorrecto</string>
+    <string name="cancel">Cancelar</string>
+    <string name="accepted_coins_are_not_yet_setup">Las monedas aceptadas aún no están configuradas</string>
+    <string name="is_turned_off">está desactivado</string>
+    <string name="please_enable">Por favor habilite</string>
+    <string name="to_continue_using_the_apps_features">para continuar usando las funciones de la aplicación.</string>
+    <string name="enable">Habilitar</string>
+    <string name="bluetooth_permission_denied">Permiso de Bluetooth denegado</string>
+    <string name="bluetooth_is_required_for_this_feature_please_enable_the_permission_from_settings">Bluetooth es necesario para esta función. Por favor habilite el permiso desde la configuración.</string>
+    <string name="go_to_settings">Ir a Configuración</string>
+    <string name="please_confirm_your_API_key">Por favor confirme su clave API.</string>
+    <string name="enter_API_key">Ingrese la clave API</string>
+    <string name="submit">Enviar</string>
+
+    <string name="api_key_colon">Clave API: %1$s</string>
+    <string name="subscription_level">Nivel de Suscripción: %1$s</string>
+    <string name="active_colon">Activo: %1$s</string>
+    <string name="expires_at">Expira el: %1$s</string>
+    <string name="hourly_calls">Llamadas por Hora: %1$s</string>
+    <string name="daily_calls">Llamadas Diarias: %1$s</string>
+
+    <string name="price">Precio: %1$f</string>
+    <string name="API_key_cannot_be_empty">La clave API no puede estar vacía</string>
+    <string name="failed_to_get_API_details">Error al obtener los detalles de la API</string>
+    <string name="error_colon">Error:</string>
+
+    <string name="set_pin">Configurar PIN</string>
+    <string name="business_name">Nombre del Negocio</string>
+    <string name="enter_your_business_name">Ingrese el nombre de su negocio</string>
+    <string name="address">Dirección</string>
+    <string name="enter_your_address_optional">Ingrese su dirección (opcional)</string>
+    <string name="city">Ciudad</string>
+    <string name="enter_your_city_optional">Ingrese su ciudad (opcional)</string>
+    <string name="state">Estado</string>
+    <string name="enter_your_state_optional">Ingrese su estado (opcional)</string>
+    <string name="zip_code">Código Postal</string>
+    <string name="enter_your_zip_code_optional">Ingrese su código postal (opcional)</string>
+    <string name="country">País</string>
+    <string name="enter_your_country_optional">Ingrese su país (opcional)</string>
+    <string name="phone_number">Número de Teléfono</string>
+    <string name="enter_your_phone_number_optional">Ingrese su número de teléfono (opcional)</string>
+    <string name="email">Correo Electrónico</string>
+    <string name="enter_your_email_optional">Ingrese su correo electrónico (opcional)</string>
+
+    <string name="update_pin">Actualizar PIN</string>
+    <string name="business_name_is_required">El nombre del negocio es obligatorio</string>
+    <string name="search_cryptocurrencies">Buscar criptomonedas</string>
+    <string name="scan_a_barcode_or_QR_code">Escanear un código de barras o QR</string>
+
+    <string name="invalid_monero_address">Dirección Monero inválida</string>
+    <string name="invalid_Monero_private_view_key">Clave privada de vista Monero inválida</string>
+    <string name="invalid_for">%1$s inválido para %2$s</string>
+
+    <string name="select_from_date">Seleccionar Fecha Inicial</string>
+    <string name="select_to_date">Seleccionar Fecha Final</string>
+    <string name="export_csv">Exportar CSV</string>
+    <string name="please_select_both_dates">Por favor seleccione ambas fechas</string>
+
+    <string name="transaction_details">Detalles de la Transacción</string>
+    <string name="merchantName">Nombre del Negocio: %1$s</string>
+    <string name="merchantAddress">Dirección del Negocio: %1$s</string>
+    <string name="chainText">Cadena: %1$s</string>
+    <string name="balance">Cantidad: %1$f</string>
+    <string name="baseCurrency">Moneda Base: %1$s</string>
+    <string name="basePrice">Precio Base: %1$s</string>
+    <string name="dateText">Fecha: %1$s</string>
+    <string name="txidText">TXID: %1$s</string>
+    <string name="receivingAddress">Dirección: %1$s</string>
+    <string name="feesText">Comisiones: %1$f</string>
+    <string name="txType">Tipo: %1$s</string>
+    <string name="confirmationsText">Confirmaciones: %1$d</string>
+    <string name="timeText">Hora: %1$s</string>
+    <string name="messageText">Mensaje: %1$s</string>
+
+    <string name="difference">Diferencia: %1$f</string>
+    <string name="previous_receive">Recepción Anterior: %1$f</string>
+    <string name="previousTxidIn">TXID Anterior: %1$s</string>
+
+    <string name="no_paired_Bluetooth_printer_found">No se encontró una impresora Bluetooth emparejada</string>
+    <string name="input_amount">Ingresar Cantidad</string>
+    <string name="server_is_not_available">El servidor no está disponible</string>
+    <string name="refresh">Actualizar</string>
+    <string name="enter_message_optional">Ingrese mensaje (opcional)</string>
+
+    <string name="bitcoin_manager_not_initialized">Administrador Bitcoin no inicializado</string>
+    <string name="litecoin_manager_not_initialized">Administrador Litecoin no inicializado</string>
+    <string name="ethereum_manager_not_initialized">Administrador Ethereum no inicializado</string>
+    <string name="dogecoin_manager_not_initialized">Administrador Dogecoin no inicializado</string>
+    <string name="usdt_manager_not_initialized">Administrador USDT Tron no inicializado</string>
+    <string name="solana_manager_not_initialized">Administrador Solana no inicializado</string>
+    <string name="usdc_manager_not_initialized">Administrador USDC Solana no inicializado</string>
+    <string name="dash_manager_not_initialized">Administrador Dash no inicializado</string>
+    <string name="failed_to_derive_dash_address">Error al derivar la dirección Dash</string>
+    <string name="bitcoincash_manager_not_initialized">Administrador Bitcoincash no inicializado</string>
+
+    <string name="conversion_rate">Tasa de conversión: %1$s</string>
+    <string name="conversion_failed">Conversión fallida</string>
+    <string name="response_not_successful_Please_check_your_setting_or_API_key">Respuesta no exitosa. Por favor revise su configuración o clave API</string>
+    <string name="API_call_failed">La llamada API falló</string>
+
+    <string name="home">Inicio</string>
+    <string name="transaction_already_seen_on_the_blockchain">La transacción ya fue detectada en la blockchain.</string>
+    <string name="print_receipt">Imprimir Recibo</string>
+
+    <string name="no_address_provided">No se proporcionó dirección</string>
+    <string name="no_price_provided">No se proporcionó precio</string>
+
+    <string name="bluetooth_permissions_are_required_for_this_app">Los permisos Bluetooth son necesarios para esta aplicación</string>
+    <string name="gathering_blocks">Recopilando Bloques</string>
+
+    <string name="paid_amount">Cantidad Pagada: %1$f</string>
+    <string name="required_amount">Cantidad Requerida: %1$f</string>
+    <string name="total_amount">Cantidad Total: %1$f</string>
+
+    <string name="TXID">TXID: %1$s</string>
+    <string name="received">Recibido: %1$f %2$s</string>
+
+    <string name="amount">Cantidad: %1$s</string>
+    <string name="base_currency">Moneda Base: %1$s</string>
+    <string name="base_price">Precio Base: %1$s</string>
+
+    <string name="transaction_ids">IDs de Transacción: %1$s\n%2$s</string>
+    <string name="transaction_id">ID de Transacción: %1$s</string>
+
+    <string name="fees">Comisiones: %1$s</string>
+    <string name="confirmations">Confirmaciones: %1$d</string>
+
+    <string name="payment_error">Error de Pago</string>
+    <string name="are_you_sure_you_want_to_stop_the_process">¿Está seguro de que desea detener el proceso?</string>
+    <string name="cancel_process">Cancelar Proceso</string>
+    <string name="continue_print">Continuar</string>
+    <string name="are_you_sure_you_dont_want_to_print">¿Está seguro de que no desea imprimir?</string>
+    <string name="cancel_printing">Cancelar Impresión</string>
+
+    <string name="address_colon">Dirección: \n%1$s</string>
+    <string name="base_currency_colon">Moneda Base:\n%1$s %2$s</string>
+    <string name="amount_colon">Cantidad: \n%1$s %2$s</string>
+
+    <string name="checking_transactions">Verificando Transacciones…</string>
+    <string name="print_again">Imprimir Nuevamente</string>
+    <string name="insuficient_payment">Pago Insuficiente</string>
+    <string name="retry">Reintentar</string>
+
+    <string name="transaction_details_space">Detalles de la Transacción\n</string>
+
+    <string name="enter_private_view_key">Ingrese la clave privada de vista</string>
+    <string name="restore_height">Altura de Restauración</string>
+
+    <string name="monero_manager_not_initialized">Administrador Monero no inicializado</string>
+    <string name="server_response_error_please_verify_transaction_with_merchant">Error de respuesta del servidor, por favor verifique esta transacción con el comerciante</string>
+
+    <string name="try_again">Intentar Nuevamente</string>
+    <string name="payment_timeout">Tiempo de Pago Agotado</string>
+
+    <string name="please_choose_an_option">Por favor elija una opción.</string>
+    <string name="value_successfully_added">Valor agregado exitosamente</string>
+
+    <string name="file_saved_at">Archivo guardado en: %1$s</string>
+    <string name="failed_to_save_the_CSV_file">Error al guardar el archivo CSV</string>
+
+    <string name="failed_to_derive_address">Error al derivar dirección.</string>
+
+    <string name="add_note">Agregar Nota</string>
+    <string name="payment_confirmed">Pago confirmado</string>
+    <string name="would_you_like_to_print_a_receipt">¿Desea imprimir un recibo?</string>
+
+    <string name="print">Imprimir</string>
+    <string name="stay">Permanecer</string>
+
+    <string name="no_internet_connection">Sin conexión a Internet. Verifique Wi-Fi o datos móviles.</string>
+    <string name="internet_is_unstable_try_again">La conexión a Internet parece débil o limitada. Intente nuevamente.</string>
+
+    <string name="open_bluetooth_settings">Abrir configuración Bluetooth</string>
+    <string name="printer_not_found">Impresora no encontrada</string>
+
+    <string name="no_paired_printer_message">No se encontró una impresora Bluetooth emparejada. Empareje una impresora primero, cargue papel y luego toque Reintentar.</string>
+
+    <string name="printer_issue_title">Problema de Impresora</string>
+
+    <string name="paper_or_jam_message">La impresión falló. Asegúrese de que la impresora esté ENCENDIDA, emparejada y tenga papel (sin atascos). Cierre bien la tapa y luego toque Reintentar.</string>
+
+    <string name="connection_error_message">No se puede conectar con la impresora. Asegúrese de que esté encendida, dentro del alcance y emparejada.</string>
+
+    <string name="parser_error_message">Error de formato de impresión. Verifique sus etiquetas ESC/POS (ej., &lt;font&gt;, &lt;b&gt;, &lt;qrcode&gt;).</string>
+
+    <string name="encoding_error_message">Error de codificación durante la impresión (caracteres no compatibles).</string>
+
+    <string name="barcode_qr_error_message">Error al generar código de barras/QR. Verifique los datos.</string>
+
+    <string name="no_checksum_warning">Esta dirección no tiene checksum. ¿Desea continuar?</string>
+
+    <string name="choose_currency">Elegir Moneda</string>
+    <string name="save">Guardar</string>
+
+    <string name="confirming_transaction">Confirmando</string>
+
+    <string name="zcash_manager_not_initialized">Administrador Zcash no inicializado.</string>
+    <string name="failed_to_derive_zcash_address">Error al derivar dirección Zcash.</string>
+
+    <string name="enter_password">Ingrese Contraseña</string>
+
+    <string name="backup_saved_downloads">Copia de seguridad guardada en Descargas</string>
+
+    <string name="backup_coins">Respaldar Monedas</string>
+    <string name="restore_coins">Restaurar Monedas</string>
+</resources>

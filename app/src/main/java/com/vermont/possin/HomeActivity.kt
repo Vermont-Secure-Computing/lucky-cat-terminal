@@ -174,11 +174,11 @@ class HomeActivity : BaseNetworkActivity() {
         localeSpinner.adapter = adapter
 
         val currentLocale = resources.configuration.locale.language
-        localeSpinner.setSelection(when (currentLocale) { "zh" -> 1; "ru" -> 2; else -> 0 })
+        localeSpinner.setSelection(when (currentLocale) { "zh" -> 1; "ru" -> 2; "es" -> 3; else -> 0 })
 
         localeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val selected = when (position) { 0 -> "en"; 1 -> "zh"; 2 -> "ru"; else -> Locale.getDefault().language }
+                val selected = when (position) { 0 -> "en"; 1 -> "zh"; 2 -> "ru"; 3 -> "es"; else -> Locale.getDefault().language }
                 if (resources.configuration.locale.language != selected) setLocale(selected)
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}

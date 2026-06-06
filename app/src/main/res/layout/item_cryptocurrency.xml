@@ -72,33 +72,49 @@
             android:popupTheme="@style/NoOverlayPopupTheme"
             android:background="@drawable/spinner_background_neutral" />
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/input_field"
+            <TextView
+                android:id="@+id/lightning_help_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toStartOf="@+id/scanner_button"
-                android:textColor="@color/textPrimary"
-                android:textColorHint="@color/textSecondary"
-                android:background="@drawable/rounded_edittext"
-                android:padding="8dp"
-                android:singleLine="true"
-                android:ellipsize="end" />
+                android:text="e.g. name@blink.sv"
+                android:textSize="10sp"
+                android:textColor="#888888"
+                android:visibility="gone"
+                android:paddingBottom="2dp"/>
 
-            <ImageButton
-                android:id="@+id/scanner_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_scanner" />
-        </RelativeLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/input_field"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:textColor="@color/textPrimary"
+                    android:textColorHint="@color/textSecondary"
+                    android:background="@drawable/rounded_edittext"
+                    android:padding="8dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:maxLines="1"/>
+
+                <ImageButton
+                    android:id="@+id/scanner_button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_scanner"/>
+
+            </LinearLayout>
+        </LinearLayout>
 
         <EditText
             android:id="@+id/view_key_field"

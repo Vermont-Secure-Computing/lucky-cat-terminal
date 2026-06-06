@@ -236,25 +236,38 @@ class POSView @JvmOverloads constructor(
     // ---- Currency / keypad ----
 
     private fun loadCurrencies() {
+        val items = mutableListOf<String>()
         val symbols = mutableListOf<String>()
         val codes = mutableListOf<String>()
+
         try {
             val inputStream = resources.openRawResource(R.raw.currencies)
             val json = inputStream.bufferedReader().use { it.readText() }
             val arr = JSONArray(json)
+
             for (i in 0 until arr.length()) {
                 val obj = arr.getJSONObject(i)
-                symbols.add(obj.getString("symbol"))
-                codes.add(obj.getString("code"))
+
+                val code = obj.getString("code")
+                val symbol = obj.getString("symbol")
+
+                items.add(code)
+                symbols.add(symbol)
+                codes.add(code)
             }
         } catch (_: Exception) {}
 
-        val adapter = ArrayAdapter(context, R.layout.spinner_item_selected, symbols)
+        val adapter = ArrayAdapter(
+            context,
+            R.layout.spinner_item_selected,
+            items
+        )
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         currencySpinner.adapter = adapter
 
         val prefs = context.getSharedPreferences("pos_prefs", Context.MODE_PRIVATE)
         val savedCode = prefs.getString("last_currency_code", null)
+
         if (savedCode != null) {
             val index = codes.indexOf(savedCode)
             if (index >= 0) {
@@ -265,13 +278,20 @@ class POSView @JvmOverloads constructor(
         }
 
         currencySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                currentCurrencySymbol = symbols.getOrNull(position) ?: "$"
-                currentCurrencyCode = codes.getOrNull(position) ?: ""
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                currentCurrencySymbol = symbols[position]
+                currentCurrencyCode = codes[position]
 
-                val prefs = context.getSharedPreferences("pos_prefs", Context.MODE_PRIVATE)
-                prefs.edit().putString("last_currency_code", currentCurrencyCode).apply()
+                prefs.edit()
+                    .putString("last_currency_code", currentCurrencyCode)
+                    .apply()
             }
+
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
