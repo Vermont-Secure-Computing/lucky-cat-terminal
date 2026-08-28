@@ -1,1 +1,1 @@
-LCTerm (Lucky Cat Terminal)
+Lucky Cat Terminal (LCTerm)
