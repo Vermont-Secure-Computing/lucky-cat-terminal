@@ -1,1 +1,1 @@
-Bitcoin and Crypto point of sale payment system for merchants
+Lucky Cat Terminal (LCTerm), an open-source crypto POS for merchants
