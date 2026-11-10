@@ -665,6 +665,35 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
                 R.drawable.dai_eth
             )
 
+            "USDT_BSC" -> handleBEP20Click(
+                price,
+                "USDT_BSC",
+                R.drawable.tether_bnb_logo
+            )
+
+            "USDC_BSC" -> handleBEP20Click(
+                price,
+                "USDC_BSC",
+                R.drawable.usdc_bnb
+            )
+
+            "BNB" -> handleEvmPaymentClick(
+                price,
+                "BNB",
+                R.drawable.bnb_logo
+            )
+
+            "USDC-BASE" -> handleEvmPaymentClick(
+                price,
+                "USDC-BASE",
+                R.drawable.usdc_base_logo
+            )
+
+            "SUI" -> handleSuiClick(
+                price,
+                R.drawable.sui_logo
+            )
+
             "DASH" -> handleDASHlick(price)
 
             "BCH" -> handleBCHlick(price)
@@ -1064,6 +1093,169 @@ class CryptoOptionActivity : BaseNetworkActivity() {   // <— use your network 
                     numericPrice,
                     selectedCurrencyCode,
                     token
+                )
+            }
+        }
+    }
+
+    private fun handleBEP20Click(
+        price: String,
+        token: String,
+        logo: Int
+    ) {
+        val properties = loadPropertiesFromConfigFile()
+        val address = properties.getProperty("${token}_value")
+
+        if (address.isNullOrBlank()) {
+            dismissLoadingDialog()
+            Toast.makeText(
+                this,
+                "$token not configured",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        val (isValid, normalized, _) =
+            EthereumManager.validateAddress(address)
+
+        if (!isValid) {
+            dismissLoadingDialog()
+            Toast.makeText(
+                this,
+                "Invalid BSC wallet address",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        val numericPrice = price.filter {
+            it.isDigit() || it == '.'
+        }
+
+        postConversionApi(
+            numericPrice,
+            selectedCurrencyCode,
+            normalized ?: address,
+            token,
+            logo
+        ) { feeStatus, status, formattedRate ->
+
+            dismissLoadingDialog()
+
+            if (formattedRate.isNotEmpty()) {
+                startGenerateQRActivity(
+                    normalized ?: address,
+                    formattedRate,
+                    logo,
+                    token,
+                    -1,
+                    feeStatus,
+                    status,
+                    token,
+                    numericPrice,
+                    selectedCurrencyCode,
+                    token
+                )
+            }
+        }
+    }
+
+    private fun handleEvmPaymentClick(
+        price: String,
+        token: String,
+        logo: Int
+    ) {
+        val properties = loadPropertiesFromConfigFile()
+        val address = properties.getProperty("${token}_value")
+
+        if (address.isNullOrBlank()) {
+            dismissLoadingDialog()
+            Toast.makeText(this, "$token not configured", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val (isValid, normalized, _) =
+            EthereumManager.validateAddress(address)
+
+        if (!isValid) {
+            dismissLoadingDialog()
+            Toast.makeText(this, "Invalid wallet address", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val numericPrice = price.filter { it.isDigit() || it == '.' }
+        val walletAddress = normalized ?: address
+
+        postConversionApi(
+            numericPrice,
+            selectedCurrencyCode,
+            walletAddress,
+            token,
+            logo
+        ) { feeStatus, status, formattedRate ->
+
+            dismissLoadingDialog()
+
+            if (formattedRate.isNotEmpty()) {
+                startGenerateQRActivity(
+                    walletAddress,
+                    formattedRate,
+                    logo,
+                    token,
+                    -1,
+                    feeStatus,
+                    status,
+                    token,
+                    numericPrice,
+                    selectedCurrencyCode,
+                    token
+                )
+            }
+        }
+    }
+
+    private fun handleSuiClick(price: String, logo: Int) {
+        val properties = loadPropertiesFromConfigFile()
+        val address = properties.getProperty("SUI_value")?.trim()
+
+        if (address.isNullOrBlank()) {
+            dismissLoadingDialog()
+            Toast.makeText(this, "SUI not configured", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!Regex("^0x[0-9a-fA-F]{64}$").matches(address)) {
+            dismissLoadingDialog()
+            Toast.makeText(this, "Invalid SUI address", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val numericPrice = price.filter { it.isDigit() || it == '.' }
+
+        postConversionApi(
+            numericPrice,
+            selectedCurrencyCode,
+            address,
+            "SUI",
+            logo
+        ) { feeStatus, status, formattedRate ->
+
+            dismissLoadingDialog()
+
+            if (formattedRate.isNotEmpty()) {
+                startGenerateQRActivity(
+                    address,
+                    formattedRate,
+                    logo,
+                    "SUI",
+                    -1,
+                    feeStatus,
+                    status,
+                    "Sui",
+                    numericPrice,
+                    selectedCurrencyCode,
+                    "SUI"
                 )
             }
         }

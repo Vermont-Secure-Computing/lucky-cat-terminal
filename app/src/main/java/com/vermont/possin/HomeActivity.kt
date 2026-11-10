@@ -101,6 +101,9 @@ class HomeActivity : BaseNetworkActivity() {
 
         setupButtons()
         applyNetworkStateToButtons(currentNetStatusNow())
+        findViewById<TextView>(R.id.helpTextView).setOnClickListener {
+            showTutorialMenu()
+        }
 
         val transactionsRecyclerView = findViewById<RecyclerView>(R.id.transactionsRecyclerView)
         val noTransactionsTextView = findViewById<TextView>(R.id.noTransactionsTextView)
@@ -174,14 +177,23 @@ class HomeActivity : BaseNetworkActivity() {
         localeSpinner.adapter = adapter
 
         val currentLocale = resources.configuration.locale.language
-        localeSpinner.setSelection(when (currentLocale) { "zh" -> 1; "ru" -> 2; "es" -> 3; else -> 0 })
+        localeSpinner.setSelection(when (currentLocale) { "zh" -> 1; "ru" -> 2; "es" -> 3; "ar" -> 4; else -> 0 })
 
         localeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val selected = when (position) { 0 -> "en"; 1 -> "zh"; 2 -> "ru"; 3 -> "es"; else -> Locale.getDefault().language }
+                val selected = when (position) { 0 -> "en"; 1 -> "zh"; 2 -> "ru"; 3 -> "es"; 4 -> "ar"; else -> Locale.getDefault().language }
                 if (resources.configuration.locale.language != selected) setLocale(selected)
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+
+        // Show spotlight tutorial only once
+        val tutorialPrefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+
+        if (!tutorialPrefs.getBoolean("SPOTLIGHT_TUTORIAL_SEEN", false)) {
+            window.decorView.post {
+                SpotlightTutorial(this).show()
+            }
         }
     }
 
@@ -197,6 +209,54 @@ class HomeActivity : BaseNetworkActivity() {
     override fun onNetworkStatusChanged(status: NetworkStatus) {
         applyNetworkStateToButtons(status)
         populateCryptoContainer(status)
+    }
+
+    private fun showTutorialMenu() {
+        val options = arrayOf(
+            getString(R.string.home_screen_tutorial),
+            getString(R.string.coin_setup_tutorial)
+        )
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.help_tutorials)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        window.decorView.post {
+                            SpotlightTutorial(this).show()
+                        }
+                    }
+
+                    1 -> {
+                        val openTutorial = {
+                            val intent = Intent(
+                                this,
+                                XpubAddress::class.java
+                            )
+                            intent.putExtra(
+                                "START_COIN_TUTORIAL",
+                                true
+                            )
+                            startActivity(intent)
+                        }
+
+                        val userPin = getSharedPreferences(
+                            "AppPrefs",
+                            MODE_PRIVATE
+                        ).getString("USER_PIN", null)
+
+                        if (userPin.isNullOrEmpty()) {
+                            openTutorial()
+                        } else {
+                            promptForPin(userPin) {
+                                openTutorial()
+                            }
+                        }
+                    }
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun setupButtons() {

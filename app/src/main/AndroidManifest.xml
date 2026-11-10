@@ -61,6 +61,9 @@
         <activity android:name=".SetPinActivity"
             android:exported="true" />
         <activity
+            android:name=".OnboardingActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:theme="@style/Theme.Possin.Splash"
             android:exported="true">

@@ -239,4 +239,51 @@
 
     <string name="backup_coins">Respaldar Monedas</string>
     <string name="restore_coins">Restaurar Monedas</string>
+
+    <!-- Home Spotlight Tutorial -->
+    <string name="tutorial_accept_payment_title">Aceptar pagos</string>
+    <string name="tutorial_accept_payment_message">Toca aquí para iniciar un pago.</string>
+
+    <string name="tutorial_api_key_title">Clave API</string>
+    <string name="tutorial_api_key_message">Introduce tu clave API para conectar los servicios de pago compatibles.</string>
+
+    <string name="tutorial_merchant_title">Información del comercio</string>
+    <string name="tutorial_merchant_message">Configura el nombre de tu negocio y la moneda preferida.</string>
+
+    <string name="tutorial_coin_title">Configuración de monedas</string>
+    <string name="tutorial_coin_message">Configura las direcciones de recepción de tus billeteras o las claves XPUB. Nunca introduzcas claves privadas.</string>
+
+    <string name="tutorial_export_title">Exportar</string>
+    <string name="tutorial_export_message">Exporta tus registros de transacciones a un archivo CSV.</string>
+
+    <string name="tutorial_back">Atrás</string>
+    <string name="tutorial_next">Siguiente</string>
+    <string name="tutorial_skip">Omitir</string>
+    <string name="tutorial_finish">Finalizar</string>
+    <string name="tutorial_step_heading">%1$d/%2$d • %3$s</string>
+
+    <string name="help">Ayuda</string>
+
+    <!-- Coin Setup Tutorial -->
+    <string name="coin_tour_search_title">Buscar una criptomoneda</string>
+    <string name="coin_tour_search_message">Busca aquí una criptomoneda. Este tutorial utiliza la primera tarjeta disponible como ejemplo.</string>
+
+    <string name="coin_tour_card_title">Tarjeta de criptomoneda</string>
+    <string name="coin_tour_card_message">Cada tarjeta muestra la criptomoneda y su red. Verifica siempre que la red sea correcta antes de recibir fondos.</string>
+
+    <string name="coin_tour_type_title">Dirección o XPUB</string>
+    <string name="coin_tour_type_message">Selecciona Address para utilizar una dirección de recepción. Algunas criptomonedas también permiten XPUB. Nunca introduzcas tu frase semilla ni tu clave privada.</string>
+
+    <string name="coin_tour_wallet_title">Billetera receptora</string>
+    <string name="coin_tour_wallet_message">Pega aquí tu dirección pública de recepción. Este tutorial no introducirá ni guardará ningún dato.</string>
+
+    <string name="coin_tour_scanner_title">Escáner QR</string>
+    <string name="coin_tour_scanner_message">Puedes escanear el código QR de recepción de tu billetera en lugar de escribir la dirección.</string>
+
+    <string name="coin_tour_save_title">Guardar configuración</string>
+    <string name="coin_tour_save_message">Después de introducir y verificar la dirección, pulsa Save. Este tutorial no guarda ningún cambio.</string>
+
+    <string name="coin_tour_backup_title">Copia de seguridad</string>
+    <string name="coin_tour_backup_message">Puedes crear una copia de seguridad de las criptomonedas configuradas. Guarda los archivos en un lugar seguro porque pueden contener datos confidenciales de configuración de billeteras.</string>
+
 </resources>

@@ -95,6 +95,9 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         "USDT-ETH", "USDC-ETH", "DAI-ETH" -> "ETH"
         "XMR", "MONERO" -> "XMR"
         "XNO", "NANO" -> "NANO"
+        "BNB", "USDT_BSC", "USDC_BSC" -> "BSC"
+        "USDC-BASE" -> "BASE"
+        "SUI" -> "SUI"
         else -> ticker.uppercase()
     }
     private fun normalizeChain(chain: String): String = when (chain.uppercase()) {
@@ -109,6 +112,10 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         "MONERO" -> "XMR"
         "XNO", "NANO" -> "NANO"
         "LIGHTNING", "LN" -> "LIGHTNING"
+        "BNB", "USDT_BSC", "USDC_BSC",
+        "BNB SMART CHAIN", "BSC" -> "BSC"
+        "USDC-BASE", "BASE" -> "BASE"
+        "SUI", "SUI NETWORK" -> "SUI"
         else -> chain.uppercase()
     }
     private fun inferManagerType(networkChain: String): String = when (networkChain) {
@@ -122,11 +129,18 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         "DASH" -> "Dash"
         "XMR" -> "Monero"
         "NANO" -> "Nano"
+        "BSC" -> "BNB Smart Chain"
+        "BASE" -> "Base"
+        "SUI" -> "Sui"
         else -> "Bitcoin"
     }
     private fun useSixDecimals(ticker: String, networkChain: String): Boolean {
         val norm = normalizeChain(networkChain)
-        return ticker.equals("USDC", true) || norm.equals("TRON", true ) || norm.equals("NANO", true)
+
+        return ticker.equals("USDC", true) ||
+                ticker.equals("USDC-BASE", true) ||
+                norm.equals("TRON", true) ||
+                norm.equals("NANO", true)
     }
 
     private fun buildPaymentUri(ticker: String, address: String, amountStr: String): String {
@@ -157,6 +171,44 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
                 amount = amountStr,
                 decimals = 18
             )
+            "BNB" -> {
+                val amountWei = try {
+                    BigDecimal(amountStr)
+                        .movePointRight(18)
+                        .toBigIntegerExact()
+                        .toString()
+                } catch (e: Exception) {
+                    return ""
+                }
+
+                "ethereum:$address@56?value=$amountWei"
+            }
+
+            "USDT_BSC" -> buildErc20Uri(
+                contract = "0x55d398326f99059fF775485246999027B3197955",
+                address = address,
+                amount = amountStr,
+                decimals = 18,
+                chainId = 56
+            )
+
+            "USDC_BSC" -> buildErc20Uri(
+                contract = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+                address = address,
+                amount = amountStr,
+                decimals = 18,
+                chainId = 56
+            )
+
+            "USDC-BASE" -> buildErc20Uri(
+                contract = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                address = address,
+                amount = amountStr,
+                decimals = 6,
+                chainId = 8453
+            )
+
+            "SUI" -> address
             "TRON", "TRON-NETWORK", "USDT-TRON" -> "tron:$address?amount=$amountStr"
             "XMR", "MONERO" -> "monero:$address?amount=$amountStr"
             "SOL", "SOLANA" -> "solana:$address?amount=$amountStr"
@@ -172,22 +224,22 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
         contract: String,
         address: String,
         amount: String,
-        decimals: Int
+        decimals: Int,
+        chainId: Int = 1
     ): String {
-
         val rawAmount = try {
-            val bd = BigDecimal(amount)
-            val multiplier = BigDecimal.TEN.pow(decimals)
-            bd.multiply(multiplier)
-                .toBigInteger()
+            BigDecimal(amount)
+                .movePointRight(decimals)
+                .toBigIntegerExact()
                 .toString()
         } catch (e: Exception) {
-            "0"
+            Log.e("QR_URI", "Invalid token amount: $amount", e)
+            return ""
         }
 
-        return "ethereum:$contract@1/transfer" +
+        return "ethereum:$contract@$chainId/transfer" +
                 "?address=$address" +
-                "&value=$rawAmount"
+                "&uint256=$rawAmount"
     }
 
     private fun extractSatsFromInvoice(invoice: String): Long {
@@ -600,7 +652,11 @@ class GenerateQRActivity : BaseNetworkActivity(), CustomWebSocketListener.Paymen
             "XMR", "MONERO" -> "XMR"
             "XNO", "NANO" -> "NANO"
             "LIGHTNING", "LN" -> "LIGHTNING"
-
+            "BNB" -> "BNB"
+            "USDT_BSC" -> "USDT_BSC"
+            "USDC_BSC" -> "USDC_BSC"
+            "USDC-BASE" -> "USDC-BASE"
+            "SUI" -> "SUI"
             else -> input.uppercase()
         }
     }

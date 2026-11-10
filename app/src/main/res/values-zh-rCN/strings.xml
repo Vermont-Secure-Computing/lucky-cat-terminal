@@ -192,4 +192,50 @@
     <string name="backup_saved_downloads">备份已保存到下载文件夹</string>
     <string name="backup_coins">备份币种</string>
     <string name="restore_coins">恢复币种</string>
+    <string name="help">帮助</string>
+
+    <!-- Home Spotlight Tutorial -->
+    <string name="tutorial_accept_payment_title">收款</string>
+    <string name="tutorial_accept_payment_message">点击此处开始收款。</string>
+
+    <string name="tutorial_api_key_title">API 密钥</string>
+    <string name="tutorial_api_key_message">输入您的 API 密钥以连接受支持的支付服务。</string>
+
+    <string name="tutorial_merchant_title">商家信息</string>
+    <string name="tutorial_merchant_message">设置您的商家名称和首选货币。</string>
+
+    <string name="tutorial_coin_title">币种设置</string>
+    <string name="tutorial_coin_message">配置收款钱包地址或 XPUB。切勿输入私钥。</string>
+
+    <string name="tutorial_export_title">导出</string>
+    <string name="tutorial_export_message">将交易记录导出为 CSV 文件。</string>
+
+    <string name="tutorial_back">返回</string>
+    <string name="tutorial_next">下一步</string>
+    <string name="tutorial_skip">跳过</string>
+    <string name="tutorial_finish">完成</string>
+    <string name="tutorial_step_heading">%1$d/%2$d • %3$s</string>
+
+    <!-- Coin Setup Tutorial -->
+    <string name="coin_tour_search_title">搜索币种</string>
+    <string name="coin_tour_search_message">在此搜索加密货币。本教程使用第一个可用的币种卡片作为示例。</string>
+
+    <string name="coin_tour_card_title">币种卡片</string>
+    <string name="coin_tour_card_message">每张卡片都会显示加密货币及其网络。接收资金前，请务必确认网络正确。</string>
+
+    <string name="coin_tour_type_title">地址或 XPUB</string>
+    <string name="coin_tour_type_message">选择 Address 以使用收款地址。部分币种也支持 XPUB。切勿输入助记词或私钥。</string>
+
+    <string name="coin_tour_wallet_title">收款钱包</string>
+    <string name="coin_tour_wallet_message">在此粘贴您的公开收款地址。本教程不会输入或保存任何数据。</string>
+
+    <string name="coin_tour_scanner_title">二维码扫描器</string>
+    <string name="coin_tour_scanner_message">您可以扫描钱包的收款二维码，无需手动输入地址。</string>
+
+    <string name="coin_tour_save_title">保存币种设置</string>
+    <string name="coin_tour_save_message">输入并检查地址后，点击 Save。本教程不会保存任何更改。</string>
+
+    <string name="coin_tour_backup_title">备份设置</string>
+    <string name="coin_tour_backup_message">您可以备份已配置的币种。请安全保管备份文件，因为其中可能包含敏感的钱包配置信息。</string>
+
 </resources>

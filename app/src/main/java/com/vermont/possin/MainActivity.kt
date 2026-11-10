@@ -36,41 +36,15 @@ class MainActivity : AppCompatActivity() {
 //    private lateinit var merchantPropertiesFile: File
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        // Install the splash screen
-        installSplashScreen()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        // Directly start HomeActivity without delay to see what's happening
         startActivity(Intent(this, HomeActivity::class.java))
-        finish() // Close MainActivity
-
-
-
-//        // Check if .properties file is empty or doesn't exist
-//        propertiesFile = File(filesDir, "config.properties")
-//        merchantPropertiesFile = File(filesDir, "merchant.properties")
-//
-//        // Check if cryptocurrencies were passed in the intent
-//        val addedCryptocurrencies: ArrayList<Cryptocurrency>? = intent.getParcelableArrayListExtra("added_cryptocurrencies")
-//        if (addedCryptocurrencies != null) {
-//            // Continue with onboarding if cryptocurrencies were passed
-//            setContentView(R.layout.activity_onboarding)
-//            selectedCryptocurrencies = addedCryptocurrencies.toMutableList()
-//            setupOnboardingView()
-//        } else {
-//            // Otherwise, check the properties file
-//            val existingCryptocurrencies = getAddedCryptocurrencies()
-//            if (existingCryptocurrencies.isEmpty()) {
-//                setContentView(R.layout.activity_onboarding)
-//                setupOnboardingView()
-//            } else {
-//                startActivity(Intent(this, HomeActivity::class.java))
-//                finish()
-//            }
-//        }
+        finish()
     }
+
 
 //    private fun getAddedCryptocurrencies(): List<Cryptocurrency> {
 //        val addedCryptocurrencies = mutableListOf<Cryptocurrency>()
