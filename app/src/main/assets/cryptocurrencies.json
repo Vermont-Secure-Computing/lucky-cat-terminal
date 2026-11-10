@@ -93,6 +93,36 @@
       "shortname": "XNO",
       "chain": "Nano",
       "logo": "nano"
+    },
+    {
+      "name": "Tether (BNB Smart Chain)",
+      "shortname": "USDT_BSC",
+      "chain": "BNB Smart Chain",
+      "logo": "tether_bnb_logo"
+    },
+    {
+      "name": "USD Coin (BNB Smart Chain)",
+      "shortname": "USDC_BSC",
+      "chain": "BNB Smart Chain",
+      "logo": "usdc_bnb"
+    },
+    {
+      "name": "BNB",
+      "shortname": "BNB",
+      "chain": "BNB Smart Chain",
+      "logo": "bnb_logo"
+    },
+    {
+      "name": "USD Coin (Base)",
+      "shortname": "USDC-BASE",
+      "chain": "Base",
+      "logo": "usdc_base_logo"
+    },
+    {
+      "name": "Sui",
+      "shortname": "SUI",
+      "chain": "Sui",
+      "logo": "sui_logo"
     }
   ]
 }

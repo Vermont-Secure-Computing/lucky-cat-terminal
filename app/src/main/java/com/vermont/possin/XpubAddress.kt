@@ -160,6 +160,20 @@ class XpubAddress : AppCompatActivity() {
 
         // Populate the container with cryptocurrency items
         populateCryptocurrencyContainer()
+
+        // Show Coin Setup Tutorial
+        val tutorialPrefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+
+        val replayTutorial =
+            intent.getBooleanExtra("START_COIN_TUTORIAL", false)
+
+        if (replayTutorial ||
+            !tutorialPrefs.getBoolean("COIN_TUTORIAL_SEEN", false)
+        ) {
+            window.decorView.post {
+                CoinSetupTutorial(this).show()
+            }
+        }
     }
 
     private fun exportCoinSettings() {
@@ -384,9 +398,14 @@ class XpubAddress : AppCompatActivity() {
                 crypto.name == "Tether (Ethereum)" ||
                 crypto.name == "USD Coin (Ethereum)" ||
                 crypto.name == "DAI (Ethereum)" ||
+                crypto.name == "Tether (BNB Smart Chain)" ||
+                crypto.name == "USD Coin (BNB Smart Chain)" ||
                 crypto.name == "Solana" ||
                 crypto.name == "Nano" ||
-                crypto.name == "Lightning"
+                crypto.name == "Lightning" ||
+                crypto.name == "BNB" ||
+                crypto.name == "USD Coin (Base)" ||
+                crypto.name == "Sui"
             ) {
                 // For Monero, only show "address" option
                 ArrayAdapter.createFromResource(this, R.array.monero_type_array, android.R.layout.simple_spinner_item)
@@ -630,7 +649,11 @@ class XpubAddress : AppCompatActivity() {
                 // =====================
                 // ETH + ERC20 (FIXED)
                 // =====================
-            } else if (chain == "Ethereum") {
+            } else if (
+                chain == "Ethereum" ||
+                chain == "BNB Smart Chain" ||
+                chain == "Base"
+            ) {
 
                 if (value.isNotEmpty()) {
                     val (isValidEth, normalized, _) = EthereumManager.validateAddress(value)
@@ -647,6 +670,20 @@ class XpubAddress : AppCompatActivity() {
 
                     Log.d("SAVE_DEBUG", "Saved ETH/ERC20: $shortname = $finalValue")
 
+                } else {
+                    properties.remove("${shortname}_type")
+                    properties.remove("${shortname}_value")
+                }
+
+            } else if (chain == "Sui") {
+                if (value.isNotEmpty()) {
+                    if (!isValidSuiAddress(value)) {
+                        Log.e("SAVE_DEBUG", "Invalid SUI address: $value")
+                        continue
+                    }
+
+                    properties.setProperty("${shortname}_type", "address")
+                    properties.setProperty("${shortname}_value", value)
                 } else {
                     properties.remove("${shortname}_type")
                     properties.remove("${shortname}_value")
@@ -852,7 +889,14 @@ class XpubAddress : AppCompatActivity() {
             "Litecoin" -> {
                 isValid = if (inputType == "xpub") LitecoinManager.isValidXpub(value, this) else LitecoinManager.isValidAddress(value)
             }
-            "Ethereum", "Tether (Ethereum)", "USD Coin (Ethereum)", "DAI (Ethereum)" -> {
+            "Ethereum",
+            "Tether (Ethereum)",
+            "USD Coin (Ethereum)",
+            "DAI (Ethereum)",
+            "BNB",
+            "Tether (BNB Smart Chain)",
+            "USD Coin (BNB Smart Chain)",
+            "USD Coin (Base)" -> {
                 if (inputType == "xpub") {
                     isValid = EthereumManager.isValidXpub(value)
                 } else {
@@ -914,6 +958,9 @@ class XpubAddress : AppCompatActivity() {
             "Nano" -> {
                 isValid = NanoManager.isValidAddress(value)
             }
+            "Sui" -> {
+                isValid = isValidSuiAddress(value)
+            }
             else -> isValid = false
         }
 
@@ -929,6 +976,11 @@ class XpubAddress : AppCompatActivity() {
                 ContextCompat.getColor(this, if (submitText.isEnabled) R.color.white else android.R.color.darker_gray)
             )
         }
+    }
+
+    private fun isValidSuiAddress(address: String): Boolean {
+        return Regex("^0x[0-9a-fA-F]{64}$")
+            .matches(address.trim())
     }
 
     private fun allInputsValid(): Boolean {

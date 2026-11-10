@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:padding="4dp"
         android:background="@color/tapeRed"
+        android:layoutDirection="ltr"
         android:elevation="4dp">
 
         <androidx.constraintlayout.widget.Guideline
@@ -26,7 +27,7 @@
             android:id="@+id/versionText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="v1.8"
+            android:text="v1.9"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
@@ -42,6 +43,22 @@
             android:src="@drawable/lcterm"
             app:layout_constraintEnd_toStartOf="@+id/guideline"
             app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/helpTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:text="@string/help"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintEnd_toStartOf="@id/localeSpinner"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 

@@ -16,6 +16,7 @@
         <item>ZH</item>
         <item>RU</item>
         <item>ES</item>
+        <item>AR</item>
     </string-array>
     <string name="neku_gif_description">Neku GIF animation</string>
     <string name="accepted_currency">Accepted Currency</string>
@@ -191,4 +192,53 @@
     <string name="backup_saved_downloads">Backup saved to Downloads</string>
     <string name="backup_coins">Backup Coins</string>
     <string name="restore_coins">Restore Coins</string>
+    <string name="help">Help</string>
+    <string name="help_tutorials">Help &amp; Tutorials</string>
+    <string name="home_screen_tutorial">Home Screen Tutorial</string>
+    <string name="coin_setup_tutorial">Coin Setup Tutorial</string>
+
+    <!-- Home Spotlight Tutorial -->
+    <string name="tutorial_accept_payment_title">Accept Payment</string>
+    <string name="tutorial_accept_payment_message">Tap here to start a payment.</string>
+
+    <string name="tutorial_api_key_title">API Key</string>
+    <string name="tutorial_api_key_message">Enter your API key to connect supported payment services.</string>
+
+    <string name="tutorial_merchant_title">Merchant Info</string>
+    <string name="tutorial_merchant_message">Set your business name and preferred currency.</string>
+
+    <string name="tutorial_coin_title">Coin Settings</string>
+    <string name="tutorial_coin_message">Configure receiving wallet addresses or XPUBs. Never enter private keys.</string>
+
+    <string name="tutorial_export_title">Export</string>
+    <string name="tutorial_export_message">Export your transaction records to a CSV file.</string>
+
+    <string name="tutorial_back">Back</string>
+    <string name="tutorial_next">Next</string>
+    <string name="tutorial_skip">Skip</string>
+    <string name="tutorial_finish">Finish</string>
+    <string name="tutorial_step_heading">%1$d/%2$d • %3$s</string>
+
+    <!-- Coin Setup Tutorial -->
+    <string name="coin_tour_search_title">Search for a coin</string>
+    <string name="coin_tour_search_message">Search for a cryptocurrency here. This tour uses the first available coin card as an example.</string>
+
+    <string name="coin_tour_card_title">Coin card</string>
+    <string name="coin_tour_card_message">Each card shows the cryptocurrency and its network. Always check the correct network before receiving funds.</string>
+
+    <string name="coin_tour_type_title">Address or XPUB</string>
+    <string name="coin_tour_type_message">Choose Address for a receiving address. Supported coins may also offer XPUB. Never enter a seed phrase or private key.</string>
+
+    <string name="coin_tour_wallet_title">Receiving wallet</string>
+    <string name="coin_tour_wallet_message">Paste your public receiving address here. The tutorial will not enter or save anything.</string>
+
+    <string name="coin_tour_scanner_title">QR scanner</string>
+    <string name="coin_tour_scanner_message">You can scan your wallet\'s receiving QR code instead of typing an address.</string>
+
+    <string name="coin_tour_save_title">Save coin settings</string>
+    <string name="coin_tour_save_message">After entering and checking your address, tap Save. This tour does not save any changes.</string>
+
+    <string name="coin_tour_backup_title">Backup settings</string>
+    <string name="coin_tour_backup_message">You can back up configured coins. Store backup files securely because they can contain sensitive wallet configuration data.</string>
+
 </resources>

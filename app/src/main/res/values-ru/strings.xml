@@ -191,4 +191,50 @@
     <string name="backup_saved_downloads">Резервная копия сохранена в Загрузки</string>
     <string name="backup_coins">Резерв монет</string>
     <string name="restore_coins">Восстановить монеты</string>
+    <string name="help">Помощь</string>
+
+    <!-- Home Spotlight Tutorial -->
+    <string name="tutorial_accept_payment_title">Приём платежей</string>
+    <string name="tutorial_accept_payment_message">Нажмите здесь, чтобы начать приём платежа.</string>
+
+    <string name="tutorial_api_key_title">API-ключ</string>
+    <string name="tutorial_api_key_message">Введите API-ключ для подключения поддерживаемых платёжных сервисов.</string>
+
+    <string name="tutorial_merchant_title">Данные продавца</string>
+    <string name="tutorial_merchant_message">Укажите название компании и предпочтительную валюту.</string>
+
+    <string name="tutorial_coin_title">Настройки криптовалют</string>
+    <string name="tutorial_coin_message">Настройте адреса кошельков для получения платежей или XPUB. Никогда не вводите приватные ключи.</string>
+
+    <string name="tutorial_export_title">Экспорт</string>
+    <string name="tutorial_export_message">Экспортируйте записи транзакций в CSV-файл.</string>
+
+    <string name="tutorial_back">Назад</string>
+    <string name="tutorial_next">Далее</string>
+    <string name="tutorial_skip">Пропустить</string>
+    <string name="tutorial_finish">Готово</string>
+    <string name="tutorial_step_heading">%1$d/%2$d • %3$s</string>
+
+    <!-- Coin Setup Tutorial -->
+    <string name="coin_tour_search_title">Поиск криптовалюты</string>
+    <string name="coin_tour_search_message">Найдите здесь нужную криптовалюту. В качестве примера используется первая доступная карточка.</string>
+
+    <string name="coin_tour_card_title">Карточка криптовалюты</string>
+    <string name="coin_tour_card_message">Каждая карточка показывает криптовалюту и её сеть. Перед получением средств всегда проверяйте правильность сети.</string>
+
+    <string name="coin_tour_type_title">Адрес или XPUB</string>
+    <string name="coin_tour_type_message">Выберите Address для ввода адреса получения. Некоторые криптовалюты также поддерживают XPUB. Никогда не вводите сид-фразу или приватный ключ.</string>
+
+    <string name="coin_tour_wallet_title">Кошелёк для получения</string>
+    <string name="coin_tour_wallet_message">Вставьте сюда публичный адрес для получения средств. Обучение ничего не вводит и не сохраняет.</string>
+
+    <string name="coin_tour_scanner_title">QR-сканер</string>
+    <string name="coin_tour_scanner_message">Вместо ручного ввода адреса можно отсканировать QR-код для получения средств.</string>
+
+    <string name="coin_tour_save_title">Сохранение настроек</string>
+    <string name="coin_tour_save_message">После ввода и проверки адреса нажмите Save. Обучение не сохраняет изменения.</string>
+
+    <string name="coin_tour_backup_title">Резервная копия настроек</string>
+    <string name="coin_tour_backup_message">Вы можете создать резервную копию настроенных криптовалют. Храните файлы резервных копий в безопасном месте, поскольку они могут содержать конфиденциальные данные кошельков.</string>
+
 </resources>
